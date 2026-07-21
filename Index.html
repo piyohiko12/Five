@@ -1,0 +1,4015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#173a63">
+<title>FIVE READERS ― 漢字読破の航路</title>
+<style>
+/* ============================================================
+   FIVE READERS — 漢字読破の航路
+   配色・書体・図形はすべてこのファイル内で生成しています。
+   外部画像・外部音源・外部フォントは一切使用しません。
+   ============================================================ */
+:root{
+  --sumi:#173a63;        /* 明るい紺碧 */
+  --kon:#245684;         /* 青 */
+  --gunjo:#4b8fd0;       /* 空色 */
+  --shironeri:#f8fbff;   /* 白 */
+  --haiiro:#c5d8eb;      /* 淡青灰 */
+  --kin:#ffd166;         /* 明るい金 */
+  --shu:#ff6b5f;         /* 珊瑚色 */
+  --midori:#55e6bd;      /* 明るい碧 */
+  --stage-accent:#ffd166;
+  --stage-fog:#b9852e;
+  --mincho:"Yu Mincho","YuMincho","Hiragino Mincho ProN","Hiragino Mincho Pro","MS PMincho",serif;
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",system-ui,sans-serif;
+  --latin:"Avenir Next","Futura","Segoe UI",var(--gothic);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;min-height:100dvh}
+body{
+  background:var(--sumi);color:var(--shironeri);font-family:var(--gothic);
+  overflow:hidden;overscroll-behavior:none;
+}
+#bg{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;filter:brightness(1.32) saturate(1.12)}
+#vignette{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.08) 15%,transparent 52%,rgba(12,42,76,.25) 100%);
+}
+#flash{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:0;background:#fff}
+#flash.fire{animation:fl .5s ease-out}
+#flash.hit{animation:flg .45s ease-out}
+#flash.beam{animation:flr .7s ease-out}
+#flash.kill{animation:flk .6s ease-out}
+@keyframes flk{
+  0%{opacity:.92;background:#fff}
+  30%{opacity:.42;background:var(--stage-accent)}
+  100%{opacity:0;background:var(--stage-accent)}
+}
+@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+@keyframes flg{0%{opacity:.55;background:var(--midori)}100%{opacity:0;background:var(--midori)}}
+@keyframes flr{0%{opacity:.75;background:var(--shu)}60%{opacity:.25;background:var(--shu)}100%{opacity:0;background:var(--shu)}}
+
+.wrap{position:relative;z-index:5;width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;padding:12px}
+.screen{display:none;width:100%;max-width:1080px}
+.screen.on{display:block}
+
+#fullscreenBtn{
+  position:fixed;z-index:70;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));
+  border:1px solid rgba(255,255,255,.48);background:rgba(30,78,124,.82);color:var(--shironeri);
+  padding:8px 11px;font-size:11px;letter-spacing:.12em;backdrop-filter:blur(8px);
+}
+#fullscreenBtn:hover,#fullscreenBtn:focus-visible{border-color:var(--kin);color:var(--kin);outline:none}
+#fullscreenBtn .exit{display:none}
+:fullscreen #fullscreenBtn .enter{display:none}
+:fullscreen #fullscreenBtn .exit{display:inline}
+
+/* ---------- 共通パーツ ---------- */
+.eyebrow{
+  font-family:var(--latin);font-size:11px;letter-spacing:.42em;text-transform:uppercase;
+  color:var(--haiiro);font-weight:600;
+}
+.rule{height:1px;background:linear-gradient(90deg,transparent,rgba(240,236,225,.28),transparent);margin:14px 0}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.btn{
+  border:1px solid rgba(255,255,255,.38);background:rgba(37,87,137,.72);
+  padding:12px 24px;letter-spacing:.16em;font-size:14px;transition:.16s;
+  backdrop-filter:blur(6px);
+}
+.btn:hover,.btn:focus-visible{border-color:var(--kin);color:var(--kin);outline:none}
+.btn.primary{
+  border-color:var(--kin);color:#1a1408;background:var(--kin);font-weight:700;
+}
+.btn.primary:hover,.btn.primary:focus-visible{background:#ffe08a;color:#1a2940}
+.btn:disabled{opacity:.32;cursor:default}
+
+/* ---------- 設定画面 ---------- */
+#setup{max-width:940px}
+.title{text-align:center;margin-bottom:26px}
+.title h1{
+  font-family:var(--latin);font-size:clamp(30px,6vw,58px);font-weight:200;
+  letter-spacing:.28em;text-indent:.28em;line-height:1;
+}
+.title .jp{
+  font-family:var(--mincho);font-size:clamp(13px,2.2vw,17px);letter-spacing:.7em;
+  text-indent:.7em;color:var(--kin);margin-top:14px;
+}
+.panel{
+  border:1px solid rgba(255,255,255,.34);background:rgba(27,72,116,.72);
+  box-shadow:0 18px 60px rgba(5,31,58,.24),inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter:blur(12px);padding:22px 24px;
+}
+.stages{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-top:12px}
+.stage-chip{
+  border:1px solid rgba(240,236,225,.18);padding:12px 4px 10px;text-align:center;
+  transition:.16s;position:relative;overflow:hidden;
+}
+.stage-chip .n{font-family:var(--latin);font-size:20px;font-weight:300;letter-spacing:.1em}
+.stage-chip .nm{font-family:var(--mincho);font-size:11px;color:var(--haiiro);margin-top:5px;letter-spacing:.1em}
+.stage-chip .df{font-family:var(--mincho);font-size:9px;color:var(--stage-accent);margin-top:4px;letter-spacing:.08em;white-space:nowrap}
+.stage-chip:hover{border-color:rgba(240,236,225,.5)}
+.stage-chip.sel{border-color:var(--kin);background:rgba(224,179,74,.12)}
+.stage-chip.sel .n{color:var(--kin)}
+.stage-chip.sel .nm{color:var(--shironeri)}
+.stage-chip.sel .df{color:var(--kin)}
+
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px 22px;margin-top:14px}
+.opt>span{font-size:11px;letter-spacing:.24em;color:var(--haiiro);display:block;margin-bottom:7px}
+.seg{display:flex;border:1px solid rgba(240,236,225,.18)}
+.seg button{
+  flex:1;padding:9px 2px;font-size:13px;letter-spacing:.08em;color:var(--haiiro);transition:.14s;
+  border-right:1px solid rgba(240,236,225,.12);
+}
+.seg button:last-child{border-right:none}
+.seg button.sel{background:var(--kin);color:#1a1408;font-weight:700}
+.seg button:hover:not(.sel){color:var(--shironeri)}
+
+.setup-foot{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap}
+.hintline{font-size:12px;color:var(--haiiro);letter-spacing:.06em}
+
+/* ---------- 出撃 ---------- */
+#launch{text-align:center}
+#launch .cd{
+  font-family:var(--latin);font-size:clamp(90px,22vw,190px);font-weight:100;line-height:1;
+  letter-spacing:.05em;color:var(--kin);text-shadow:0 0 60px rgba(224,179,74,.5);
+}
+#launch .cd.go{font-size:clamp(40px,10vw,84px);letter-spacing:.34em;text-indent:.34em;color:var(--shironeri)}
+.pulse{animation:pl .82s cubic-bezier(.2,.7,.3,1)}
+@keyframes pl{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(.86);opacity:0}}
+
+/* ---------- ゲーム画面 ---------- */
+#play{max-width:1080px;height:100%;display:none;flex-direction:column;justify-content:space-between;padding:6px 0;overflow:hidden}
+#play.on{display:flex}
+.hud{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.hud .stg{font-family:var(--mincho);letter-spacing:.34em;font-size:13px;color:var(--stage-accent)}
+.hud .lv{font-family:var(--latin);font-size:10px;letter-spacing:.34em;color:var(--haiiro);margin-top:4px}
+.game-actions{display:flex;gap:6px;margin-top:8px}
+.game-actions button{
+  border:1px solid rgba(255,255,255,.34);background:rgba(26,69,112,.76);
+  padding:6px 9px;font-size:10px;letter-spacing:.08em;color:var(--shironeri);
+}
+.game-actions button:hover,.game-actions button:focus-visible{border-color:var(--kin);color:var(--kin);outline:none}
+#quitBtn{border-color:rgba(255,107,95,.58);color:#ffd1cc}
+.pips{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:46%}
+.pip{width:15px;height:15px;border:1px solid rgba(240,236,225,.3);position:relative;transform:rotate(45deg)}
+.pip.done{background:var(--stage-accent);border-color:var(--stage-accent);box-shadow:0 0 10px var(--stage-accent)}
+.pip.final{border-color:var(--kin);width:19px;height:19px}
+.pip.bonus::after{
+  content:"";position:absolute;inset:3px;background:var(--midori);
+}
+.crew{display:flex;gap:6px;align-items:center}
+.crew i{
+  width:11px;height:24px;display:block;background:var(--midori);
+  clip-path:polygon(50% 0,100% 28%,100% 100%,0 100%,0 28%);
+  transition:.3s;box-shadow:0 0 10px rgba(63,214,176,.45);
+}
+.crew i.lost{background:#2c333d;box-shadow:none;transform:translateY(4px) rotate(12deg);opacity:.5}
+.crew i.now{background:var(--kin);box-shadow:0 0 14px var(--kin)}
+
+/* 封印円（シグネチャ） */
+.stagearea{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
+.seal{position:relative;width:min(46vh,300px);aspect-ratio:1;display:grid;place-items:center;transition:transform .35s}
+.seal svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.seal .ring-bg{fill:none;stroke:rgba(240,236,225,.13);stroke-width:2}
+.seal .ring-fg{
+  fill:none;stroke:var(--stage-accent);stroke-width:3;stroke-linecap:round;
+  transform:rotate(-90deg);transform-origin:50% 50%;
+  filter:drop-shadow(0 0 6px var(--stage-accent));
+}
+.seal .glyphring{fill:none;stroke:rgba(240,236,225,.1);stroke-width:1;stroke-dasharray:2 9}
+.seal.warn .ring-fg{stroke:var(--shu);filter:drop-shadow(0 0 12px var(--shu))}
+.seal.warn{animation:sh .28s infinite}
+@keyframes sh{0%,100%{transform:translate(0,0)}25%{transform:translate(2px,-2px)}75%{transform:translate(-2px,2px)}}
+.seal .core{
+  position:relative;z-index:2;text-align:center;padding:0 10px;max-width:80%;
+}
+.seal .kanji{
+  font-family:var(--mincho);font-weight:600;line-height:1.12;
+  font-size:clamp(28px,8.5vh,64px);letter-spacing:.06em;
+  text-shadow:0 0 26px rgba(0,0,0,.9),0 2px 0 rgba(0,0,0,.5);
+}
+.seal .kanji.small{font-size:clamp(17px,4.4vh,30px);letter-spacing:.02em;line-height:1.5}
+.seal .lead{font-size:11px;letter-spacing:.3em;color:var(--haiiro);margin-bottom:10px}
+.seal .qsub{font-size:12px;letter-spacing:.14em;color:var(--haiiro);margin-top:12px;min-height:1em}
+.seal.correct{animation:pop .5s cubic-bezier(.2,.8,.3,1)}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
+/* 撃破：封印円が砕け散る */
+.shock{
+  position:absolute;inset:0;border-radius:50%;
+  border:3px solid var(--stage-accent);opacity:0;pointer-events:none;z-index:1;
+}
+.shock.on{animation:shockA .75s cubic-bezier(.1,.7,.2,1)}
+@keyframes shockA{
+  0%{transform:scale(.5);opacity:1;border-width:10px;box-shadow:0 0 60px var(--stage-accent)}
+  100%{transform:scale(2.3);opacity:0;border-width:1px}
+}
+/* 弾かれた瞬間に走る防壁の輪 */
+.guard{
+  position:absolute;inset:-5%;border-radius:50%;
+  border:2px solid #cfd6e0;opacity:0;pointer-events:none;z-index:1;
+}
+.guard.on{animation:guardA .52s cubic-bezier(.15,.85,.25,1)}
+@keyframes guardA{
+  0%{transform:scale(1.16);opacity:0;border-width:1px}
+  11%{transform:scale(1);opacity:1;border-width:8px;
+      box-shadow:0 0 44px rgba(207,214,224,.9),inset 0 0 44px rgba(207,214,224,.5)}
+  100%{transform:scale(1.03);opacity:0;border-width:1px}
+}
+.seal.burst svg{animation:sealBreak .85s cubic-bezier(.2,.75,.2,1) forwards}
+@keyframes sealBreak{
+  0%{transform:scale(1) rotate(0);opacity:1}
+  14%{transform:scale(1.08) rotate(-3deg);opacity:1}
+  100%{transform:scale(1.75) rotate(16deg);opacity:0}
+}
+.seal.burst .ring-fg{stroke:#fff;stroke-width:5;filter:drop-shadow(0 0 26px #fff)}
+.seal.burst .glyphring{stroke:#fff;stroke-dasharray:1 5}
+.seal.burst .lead{opacity:0;transition:opacity .18s}
+.shake{animation:scShake .5s cubic-bezier(.3,.1,.3,1)}
+.shake-s{animation:scShakeS .26s cubic-bezier(.3,.1,.3,1)}
+@keyframes scShakeS{
+  0%,100%{transform:translate(0,0)}
+  22%{transform:translate(-4px,2px)}
+  50%{transform:translate(3px,-2px)}
+  78%{transform:translate(-2px,1px)}
+}
+@keyframes scShake{
+  0%,100%{transform:translate(0,0)}
+  12%{transform:translate(-9px,5px)}
+  28%{transform:translate(8px,-6px)}
+  44%{transform:translate(-6px,-3px)}
+  62%{transform:translate(5px,4px)}
+  80%{transform:translate(-3px,-2px)}
+}
+.seal.reject{animation:rj .34s}
+@keyframes rj{
+  0%,100%{transform:translate(0,0)}
+  16%{transform:translate(-9px,-8px)}
+  34%{transform:translate(8px,5px)}
+  52%{transform:translate(-6px,-3px)}
+  70%{transform:translate(4px,2px)}
+  86%{transform:translate(-2px,-1px)}
+}
+
+.bonustag{
+  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  font-family:var(--latin);font-size:11px;letter-spacing:.34em;text-indent:.34em;font-weight:700;
+  color:#08120f;background:var(--midori);padding:5px 12px;white-space:nowrap;
+  box-shadow:0 0 22px rgba(63,214,176,.7);animation:bt 1.1s ease-in-out infinite;
+}
+@keyframes bt{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07)}}
+
+.hintbox{
+  position:absolute;right:0;top:6px;text-align:right;font-size:12px;color:var(--kin);
+  letter-spacing:.14em;border-right:2px solid var(--kin);padding-right:9px;line-height:1.7;
+}
+.hintbox b{font-family:var(--mincho);font-size:19px;display:block}
+
+.reveal{
+  position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  font-family:var(--mincho);font-size:clamp(19px,4.2vh,30px);letter-spacing:.22em;text-indent:.22em;
+  color:var(--kin);white-space:nowrap;text-shadow:0 0 18px rgba(0,0,0,.9);
+  opacity:0;transition:opacity .3s;
+}
+.reveal.on{opacity:1;animation:revIn .55s cubic-bezier(.2,.9,.3,1)}
+@keyframes revIn{
+  0%{transform:translateX(-50%) translateY(16px) scale(.82);opacity:0;letter-spacing:.6em}
+  100%{transform:translateX(-50%) translateY(0) scale(1);opacity:1;letter-spacing:.22em}
+}
+/* 正解時：吹き飛んだ漢字の跡に読みが浮かぶ */
+.reveal.mid{bottom:auto;top:50%;transform:translate(-50%,-50%);z-index:3}
+.reveal.mid.on{animation:revMid .6s cubic-bezier(.2,.9,.3,1)}
+@keyframes revMid{
+  0%{transform:translate(-50%,-50%) scale(1.5);opacity:0;filter:blur(6px);letter-spacing:.8em}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:blur(0);letter-spacing:.22em}
+}
+
+/* ---------- 入力欄 ---------- */
+.slots{display:flex;gap:5px;justify-content:center;min-height:44px;align-items:center;margin:6px 0 2px}
+.slot{
+  --dx:0px;--spin:0deg;
+  width:34px;height:42px;border:1px solid rgba(240,236,225,.22);display:grid;place-items:center;
+  font-family:var(--mincho);font-size:22px;background:rgba(34,82,129,.78);
+  animation:si .16s cubic-bezier(.2,.9,.3,1);
+}
+@keyframes si{from{transform:translateY(9px);opacity:0}to{transform:none;opacity:1}}
+.slot.ghost{border-style:dashed;border-color:rgba(240,236,225,.13);background:none}
+/* 発射（transform の関数列は全キーフレームで揃える） */
+.slots.fly .slot{animation:sf .3s cubic-bezier(.35,.05,.5,1) forwards}
+@keyframes sf{
+  from{transform:translate(0,0) scale(1,1) rotate(0deg);opacity:1}
+  to{transform:translate(0,-150px) scale(.55,.55) rotate(0deg);opacity:1}
+}
+/* 正解：爆発に飲まれて消える */
+.slots.gone .slot{animation:sg .3s ease-out forwards}
+@keyframes sg{
+  from{transform:translate(0,-150px) scale(.55,.55) rotate(0deg);opacity:1}
+  to{transform:translate(0,-168px) scale(.15,.15) rotate(0deg);opacity:0}
+}
+/* 不正解：封印に当たってつぶれ、回転しながら落ちる */
+.slots.rej .slot{animation:sr .6s cubic-bezier(.2,.75,.3,1) forwards}
+@keyframes sr{
+  0%{transform:translate(0,-150px) scale(.55,.55) rotate(0deg);opacity:1;filter:brightness(1)}
+  9%{transform:translate(0,-141px) scale(.80,.40) rotate(0deg);opacity:1;filter:brightness(4)}
+  20%{transform:translate(0,-120px) scale(.60,.60) rotate(calc(var(--spin) * .12));opacity:1;filter:brightness(1)}
+  100%{transform:translate(var(--dx),84px) scale(.40,.40) rotate(var(--spin));opacity:0;filter:brightness(1)}
+}
+
+/* ---------- キーボード ---------- */
+.kbd{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:0 auto;max-width:640px}
+.kbd button{
+  border:1px solid rgba(255,255,255,.3);background:rgba(42,96,148,.82);
+  font-family:var(--mincho);font-size:clamp(14px,2.6vh,19px);padding:8px 0;transition:.1s;
+}
+.kbd button:hover{background:rgba(74,143,208,.92);border-color:rgba(255,255,255,.65)}
+.kbd button:active{transform:scale(.93)}
+.kbd button.void{visibility:hidden}
+.kbd button.mod{color:var(--kin);border-color:rgba(224,179,74,.4)}
+.alpha-kbd{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin:0 auto;max-width:640px}
+.alpha-kbd button{
+  border:1px solid rgba(255,255,255,.3);background:rgba(42,96,148,.82);color:var(--shironeri);
+  font-family:var(--latin);font-size:clamp(13px,2.5vh,18px);font-weight:700;padding:9px 0;transition:.1s;
+}
+.alpha-kbd button:hover{background:rgba(74,143,208,.92);border-color:rgba(255,255,255,.65)}
+.alpha-kbd button:active{transform:scale(.93)}
+.slots.english{gap:3px}
+.slots.english .slot{width:30px;font-family:var(--latin);font-weight:700;text-transform:uppercase}
+.seal .kanji.english-prompt{
+  font-family:var(--latin);font-weight:700;letter-spacing:.07em;line-height:1.15;
+  font-size:clamp(22px,5.2vh,40px);white-space:nowrap;
+}
+.romaji-note{
+  text-align:center;font-size:12px;color:var(--haiiro);letter-spacing:.16em;padding:16px 0 4px;
+}
+.romaji-note b{color:var(--shironeri);font-family:var(--mincho);letter-spacing:.3em}
+
+/* ---------- 数学モード ---------- */
+.seal .kanji.math{
+  font-family:"Georgia","Cambria",var(--mincho);font-weight:500;
+  font-size:clamp(23px,5.4vh,42px);letter-spacing:.01em;line-height:1.2;
+  white-space:nowrap;
+}
+.fr{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.02;margin:0 .12em}
+.fr>span{padding:0 .28em}
+.fr>span:first-child{border-bottom:1.6px solid currentColor}
+.root-expr{display:inline-flex;align-items:flex-start;vertical-align:middle;white-space:nowrap;line-height:1;margin:0 .05em}
+.root-symbol{display:inline-block;font-size:1.24em;line-height:.86;transform:translateY(.12em);margin-right:-.05em}
+.root-radicand{display:inline-block;min-width:.62em;border-top:1.6px solid currentColor;padding:.08em .12em 0 .09em;line-height:1;text-align:center}
+.power{display:inline-block;font-size:.6em;line-height:1;font-weight:600;vertical-align:baseline;position:relative;top:-.58em;margin-left:.04em}
+.eqpre{font-family:"Georgia","Cambria",var(--mincho);font-size:22px;color:var(--haiiro);padding:0 3px 0 1px;align-self:center;letter-spacing:.02em}
+.mathpad{display:flex;gap:9px;justify-content:center;max-width:560px;margin:0 auto;flex-wrap:wrap}
+.mkeys{display:grid;gap:5px}
+.mkeys.num{grid-template-columns:repeat(3,minmax(52px,1fr))}
+.mkeys.sym{grid-template-columns:repeat(2,minmax(52px,1fr));align-content:start}
+.mkeys button{
+  border:1px solid rgba(255,255,255,.3);background:rgba(42,96,148,.82);
+  font-family:"Georgia","Cambria",var(--mincho);font-size:clamp(15px,2.7vh,20px);
+  padding:11px 0;transition:.1s;color:var(--shironeri);
+}
+.mkeys button:hover{background:rgba(74,143,208,.92);border-color:rgba(255,255,255,.65)}
+.mkeys button:active{transform:scale(.93)}
+.mkeys button.op{color:var(--kin);border-color:rgba(224,179,74,.32)}
+.mkeys button.icon{line-height:1;padding:9px 0}
+.mkeys button.icon .fr{font-size:.8em}
+.mkeys button.icon sup{font-size:.64em;vertical-align:.5em}
+.ph{
+  display:inline-block;width:.5em;height:.62em;border:1px dashed currentColor;
+  opacity:.5;border-radius:1px;
+}
+/* 数学の回答欄：問題文と同じ数式書体・分数線・上付き位置を使う */
+.slot.math{
+  font-family:"Georgia","Cambria",var(--mincho);font-weight:500;
+  font-size:22px;line-height:1.2;display:flex;align-items:center;justify-content:center;
+}
+.slot.math .math-inline{display:flex;align-items:center;justify-content:center;line-height:1;white-space:nowrap}
+.answer-root{display:inline-block;white-space:nowrap;line-height:1}
+.answer-power{display:inline-block;white-space:nowrap;line-height:1;margin-left:.04em}
+.slot.math.wide{width:auto;min-width:42px;height:50px;padding:2px 7px}
+.slot.math.root{width:auto;min-width:40px;padding:0 5px}
+.slot.math.power-unit{width:auto;min-width:42px;padding:0 5px}
+.slot.math .ph{opacity:.45}
+
+.ctrls{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ctrls .btn{padding:11px 20px;font-size:13px}
+.fire{border-color:var(--stage-accent);color:var(--stage-accent);font-weight:700;letter-spacing:.3em;text-indent:.3em}
+.fire:not(:disabled):hover{background:var(--stage-accent);color:#0a0d13}
+.swap{border-color:var(--midori);color:var(--midori)}
+.swap:hover{background:var(--midori);color:#08120f}
+.swap b{font-family:var(--latin)}
+
+/* ---------- タイマー ---------- */
+.timer{display:flex;align-items:center;gap:12px;margin-top:9px}
+.timer .bar{flex:1;height:3px;background:rgba(240,236,225,.12);position:relative;overflow:hidden}
+.timer .bar i{
+  position:absolute;inset:0;transform-origin:left;background:var(--stage-accent);
+  box-shadow:0 0 12px var(--stage-accent);
+}
+.timer.warn .bar i{background:var(--shu);box-shadow:0 0 14px var(--shu)}
+.timer .num{font-family:var(--latin);font-size:15px;letter-spacing:.16em;color:var(--haiiro);min-width:60px;text-align:right}
+.timer.warn .num{color:var(--shu);font-weight:700}
+
+/* 大きな警告数字 */
+.bigcount{
+  position:fixed;inset:0;z-index:50;display:grid;place-items:center;pointer-events:none;
+  font-family:var(--latin);font-size:clamp(120px,32vh,280px);font-weight:100;color:var(--shu);
+  opacity:0;
+}
+.bigcount.on{animation:bc .95s ease-out}
+
+/* 爆発した問題文の破片 */
+#boom{position:fixed;inset:0;z-index:62;pointer-events:none}
+.shard{
+  position:fixed;display:flex;align-items:center;justify-content:center;
+  text-align:center;white-space:pre-wrap;will-change:transform,opacity,filter;
+  text-shadow:0 0 18px rgba(255,255,255,.5);
+}
+@keyframes bc{0%{opacity:.85;transform:scale(1.35)}100%{opacity:0;transform:scale(.7)}}
+
+/* ---------- オーバーレイ ---------- */
+#ov{
+  position:fixed;inset:0;z-index:70;display:none;place-items:center;text-align:center;
+  background:rgba(12,43,75,.72);backdrop-filter:blur(7px);padding:20px;
+}
+#ov.on{display:grid}
+#ov .in{animation:oi .4s cubic-bezier(.2,.8,.3,1)}
+@keyframes oi{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+#ov h2{
+  font-family:var(--latin);font-weight:200;letter-spacing:.3em;text-indent:.3em;
+  font-size:clamp(26px,6.5vw,58px);line-height:1.15;
+}
+#ov .sub{font-family:var(--mincho);letter-spacing:.5em;text-indent:.5em;margin-top:14px;color:var(--kin);font-size:15px}
+#ov p{margin-top:18px;color:var(--haiiro);font-size:14px;letter-spacing:.1em;line-height:1.9}
+#ov .big{font-family:var(--mincho);font-size:clamp(24px,6vh,44px);color:var(--shironeri);letter-spacing:.2em;margin-top:8px}
+#ov .acts{margin-top:26px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+#ov.good h2{color:var(--midori);text-shadow:0 0 50px rgba(63,214,176,.4)}
+#ov.bad h2{color:var(--shu);text-shadow:0 0 50px rgba(226,80,63,.4)}
+#ov.gold h2{color:var(--kin);text-shadow:0 0 50px rgba(224,179,74,.4)}
+.crewlarge{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.crewlarge i{width:16px;height:36px;background:var(--midori);clip-path:polygon(50% 0,100% 28%,100% 100%,0 100%,0 28%)}
+.crewlarge i.lost{background:#2c333d;opacity:.45}
+.crewlarge i.now{background:var(--kin);animation:bt 1s infinite}
+
+/* ---------- 問題編集 ---------- */
+#edit{position:fixed;inset:0;z-index:80;display:none;background:rgba(13,46,80,.94);padding:20px;overflow:auto}
+#edit.on{display:block}
+#edit .box{max-width:820px;margin:0 auto}
+#edit textarea{
+  width:100%;height:52vh;margin-top:14px;background:#153f69;color:var(--shironeri);
+  border:1px solid rgba(240,236,225,.2);padding:14px;font:13px/1.7 ui-monospace,Menlo,Consolas,monospace;
+  resize:vertical;
+}
+#edit .msg{font-size:12px;color:var(--kin);letter-spacing:.1em;min-height:18px;margin-top:8px}
+
+#pauseScreen{
+  position:fixed;inset:0;z-index:95;display:none;place-items:center;text-align:center;
+  background:rgba(10,36,65,.82);backdrop-filter:blur(12px);padding:20px;
+}
+#pauseScreen.on{display:grid}
+#pauseScreen .pause-card{
+  min-width:min(420px,92vw);border:1px solid rgba(255,255,255,.38);
+  background:rgba(31,78,123,.92);padding:34px 28px;box-shadow:0 24px 80px rgba(0,0,0,.28);
+}
+#pauseScreen h2{font-family:var(--latin);font-size:clamp(30px,7vw,58px);font-weight:300;letter-spacing:.28em;text-indent:.28em;color:var(--kin)}
+#pauseScreen p{margin-top:12px;color:var(--haiiro);letter-spacing:.12em}
+#pauseScreen .acts{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}
+.volume-gauge{margin-top:14px;padding:12px 14px;border:1px solid rgba(255,255,255,.2);background:rgba(16,55,92,.46)}
+.volume-gauge .volume-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.volume-gauge label{font-size:11px;letter-spacing:.18em;color:var(--haiiro)}
+.volume-gauge output{font-family:var(--latin);font-size:13px;color:var(--kin);min-width:44px;text-align:right}
+.volume-gauge input[type="range"]{
+  --volume-pct:75%;appearance:none;-webkit-appearance:none;width:100%;height:8px;border-radius:999px;outline:none;
+  background:linear-gradient(90deg,var(--kin) 0 var(--volume-pct),rgba(255,255,255,.16) var(--volume-pct) 100%);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.28);
+}
+.volume-gauge input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:21px;height:21px;border-radius:50%;border:2px solid #fff;background:var(--kin);
+  box-shadow:0 0 0 4px rgba(255,209,102,.2),0 3px 10px rgba(0,0,0,.3);cursor:pointer;
+}
+.volume-gauge input[type="range"]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;border:2px solid #fff;background:var(--kin);
+  box-shadow:0 0 0 4px rgba(255,209,102,.2),0 3px 10px rgba(0,0,0,.3);cursor:pointer;
+}
+#quitConfirm{
+  position:fixed;inset:0;z-index:105;display:none;place-items:center;text-align:center;
+  background:rgba(5,25,48,.88);backdrop-filter:blur(14px);padding:20px;
+}
+#quitConfirm.on{display:grid}
+#quitConfirm .confirm-card{width:min(430px,92vw);border:1px solid rgba(255,255,255,.38);background:rgba(31,78,123,.97);padding:30px 26px;box-shadow:0 24px 80px rgba(0,0,0,.34)}
+#quitConfirm h2{font-family:var(--mincho);font-size:clamp(23px,5vw,34px);color:var(--shu);letter-spacing:.12em}
+#quitConfirm p{margin-top:14px;color:var(--haiiro);line-height:1.7}
+#quitConfirm .acts{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}
+
+@media (max-width:640px){
+  .stages{grid-template-columns:repeat(4,1fr)}
+  .kbd{gap:3px}
+  .kbd button{padding:7px 0}
+  .alpha-kbd{gap:3px}
+  .alpha-kbd button{padding:8px 0}
+  .slot{width:27px;height:34px;font-size:18px}
+  .slots.english .slot{width:21px;font-size:16px}
+  .slot.math{font-size:18px}
+  .slot.math.wide{min-width:36px;height:42px;padding:1px 5px}
+  .slot.math.root{min-width:34px;padding:0 4px}
+  .slot.math.power-unit{min-width:36px;padding:0 4px}
+  .hud .stg{font-size:11px;letter-spacing:.2em}
+  .mathpad{gap:6px}
+  .mkeys{gap:4px}
+  .mkeys.num{grid-template-columns:repeat(3,minmax(44px,1fr))}
+  .mkeys.sym{grid-template-columns:repeat(2,minmax(44px,1fr))}
+  .mkeys button{padding:10px 0}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="vignette"></div>
+<div id="flash"></div>
+<button id="fullscreenBtn" type="button" aria-label="全画面表示を切り替える"><span class="enter">⛶ 全画面</span><span class="exit">× 全画面終了</span></button>
+<div class="bigcount" id="bigcount"></div>
+<div id="boom" aria-hidden="true"></div>
+<div id="pauseScreen" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+  <div class="pause-card">
+    <h2 id="pauseTitle">PAUSED</h2>
+    <p>ゲームを一時停止しています</p>
+    <div class="volume-gauge">
+      <div class="volume-row"><label for="pauseVolumeSlider">音量</label><output id="pauseVolumeValue">75%</output></div>
+      <input id="pauseVolumeSlider" type="range" min="0" max="100" step="5" value="75" aria-label="一時停止中の音量">
+    </div>
+    <div class="acts">
+      <button class="btn primary" id="resumeBtn">ゲームを再開</button>
+      <button class="btn" id="pauseQuitBtn">ゲームを中止</button>
+    </div>
+  </div>
+</div>
+<div id="quitConfirm" role="dialog" aria-modal="true" aria-labelledby="quitConfirmTitle">
+  <div class="confirm-card">
+    <h2 id="quitConfirmTitle">ゲームを中止しますか？</h2>
+    <p>現在の進行状況は失われ、設定画面へ戻ります。</p>
+    <div class="acts">
+      <button class="btn" id="cancelQuitBtn">ゲームに戻る</button>
+      <button class="btn primary" id="confirmQuitBtn">中止する</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════ 設定 ══════════ -->
+<section id="setup" class="screen on">
+  <div class="title">
+    <h1>FIVE READERS</h1>
+    <div class="jp">漢字読破の航路</div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">航路を選ぶ</div>
+    <div class="stages" id="stages"></div>
+
+    <div class="rule"></div>
+
+    <div class="opts" id="opts"></div>
+
+    <div class="setup-foot">
+      <div class="hintline">基＝基礎、標＝標準、発＝発展、最＝最難関。表示比率で配分し、後半ほど難しく出題します。</div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="editBtn">問題を編集</button>
+        <button class="btn primary" id="goBtn">出　発</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 出撃 ══════════ -->
+<section id="launch" class="screen">
+  <div class="cd" id="cdText"></div>
+</section>
+
+<!-- ══════════ ゲーム ══════════ -->
+<section id="play" class="screen">
+  <div class="hud">
+    <div>
+      <div class="stg" id="stgName">遺跡</div>
+      <div class="lv" id="lvName">LEVEL 1</div>
+      <div class="game-actions">
+        <button id="pauseBtn" type="button">Ⅱ 一時停止</button>
+        <button id="quitBtn" type="button">■ 中止</button>
+      </div>
+    </div>
+    <div class="pips" id="pips"></div>
+    <div class="crew" id="crew"></div>
+  </div>
+
+  <div class="stagearea">
+    <div class="seal" id="seal">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="glyphring" cx="100" cy="100" r="94"></circle>
+        <circle class="ring-bg" cx="100" cy="100" r="84"></circle>
+        <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="84"></circle>
+      </svg>
+      <div class="core">
+        <div class="lead" id="qLead">よみを こたえよ</div>
+        <div class="kanji" id="qText">封</div>
+        <div class="qsub" id="qSub"></div>
+      </div>
+      <div class="shock" id="shock"></div>
+      <div class="guard" id="guard"></div>
+      <div class="bonustag" id="bonusTag" hidden>BONUS</div>
+      <div class="reveal" id="reveal"></div>
+    </div>
+    <div class="hintbox" id="hintBox" hidden></div>
+  </div>
+
+  <div>
+    <div class="slots" id="slots"></div>
+    <div id="kbdArea"></div>
+    <div class="ctrls">
+      <button class="btn swap" id="swapBtn" hidden>問題入替 <b>×<span id="swapN">0</span></b></button>
+      <button class="btn" id="delBtn">一字消す</button>
+      <button class="btn fire" id="fireBtn" disabled>発射</button>
+    </div>
+    <div class="timer" id="timer">
+      <div class="bar"><i id="timerBar"></i></div>
+      <div class="num" id="timerNum">25.0</div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- ══════════ オーバーレイ ══════════ -->
+<div id="ov"><div class="in" id="ovIn"></div></div>
+
+<!-- ══════════ 問題編集 ══════════ -->
+<div id="edit">
+  <div class="box">
+    <div class="eyebrow" style="margin-bottom:6px">問題データ</div>
+    <h2 style="font-family:var(--mincho);font-size:22px;letter-spacing:.2em">授業に合わせて差し替えられます</h2>
+    <p style="color:var(--haiiro);font-size:13px;line-height:1.9;margin-top:10px">
+      <code>q</code> が画面に出る文字、<code>a</code> が答えです。答えは<b>ひらがな</b>（ボーナス2のみ<b>カタカナ</b>）で書きます。<br>
+      複数の答えを認めるときは <code>|</code> で区切ります。例：<code>"a":"しんにょう|しんにゅう"</code>
+    </p>
+    <textarea id="editArea" spellcheck="false"></textarea>
+    <div class="msg" id="editMsg"></div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn primary" id="editApply">この内容で使う</button>
+      <button class="btn" id="editDl">JSONを保存</button>
+      <label class="btn" style="display:inline-block">JSONを読む<input type="file" id="editUp" accept="application/json" hidden></label>
+      <button class="btn" id="editReset">初期値に戻す</button>
+      <button class="btn" id="editClose" style="margin-left:auto">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   FIVE READERS — 漢字読破の航路
+   ネプリーグ「ファイブツアーズ」の Scratch 版（.sb3）を解析して得た
+   ゲーム進行ルールのみを再現し、映像・音・文言・問題はすべて
+   オリジナルとして書き起こしたものです。
+   ================================================================ */
+"use strict";
+
+/* ===== js1_data.js ===== */
+/* ========== 1. データ ========== */
+
+const DEFAULT_Q = {
+  l1: [
+    ["温泉","おんせん"],["郵便","ゆうびん"],["卒業","そつぎょう"],["招待","しょうたい"],
+    ["貯金","ちょきん"],["拡大","かくだい"],["観察","かんさつ"],["訪問","ほうもん"],
+    ["呼吸","こきゅう"],["縮小","しゅくしょう"],["燃料","ねんりょう"],["冷蔵","れいぞう"],
+    ["署名","しょめい"],["反復","はんぷく"],["沿岸","えんがん"],["保存","ほぞん"],
+    ["快適","かいてき"],["混雑","こんざつ"],["誕生","たんじょう"],["資源","しげん"],
+    ["危険","きけん"],["討論","とうろん"],["幼稚","ようち"],["沸騰","ふっとう"],
+    ["抽出","ちゅうしゅつ"],["委託","いたく"],["貫通","かんつう"],["遭遇","そうぐう"],
+    ["循環","じゅんかん"],["陳列","ちんれつ"],["抑制","よくせい"],["潤滑","じゅんかつ"],
+    ["把握","はあく"],["洗練","せんれん"],["促進","そくしん"],["郊外","こうがい"],
+    ["舗装","ほそう"],["陶器","とうき"],["貢献","こうけん"],["繁栄","はんえい"]
+  ],
+  l2: [
+    ["遂行","すいこう"],["進捗","しんちょく"],["更迭","こうてつ"],["逼迫","ひっぱく"],
+    ["罷免","ひめん"],["忌憚","きたん"],["遵守","じゅんしゅ"],["出納","すいとう"],
+    ["定款","ていかん"],["稟議","りんぎ|ひんぎ"],["相殺","そうさい"],["生粋","きっすい"],
+    ["早急","さっきゅう|そうきゅう"],["続柄","つづきがら|ぞくがら"],["帰依","きえ"],["会得","えとく"],
+    ["反物","たんもの"],["建立","こんりゅう"],["遊説","ゆうぜい"],["発端","ほったん"],
+    ["脆弱","ぜいじゃく"],["汎用","はんよう"],["俯瞰","ふかん"],["逝去","せいきょ"],
+    ["拝謁","はいえつ"],["割愛","かつあい"],["委嘱","いしょく"],["斡旋","あっせん"],
+    ["折衷","せっちゅう"],["曖昧","あいまい"],["憂鬱","ゆううつ"],["語彙","ごい"],
+    ["破綻","はたん"],["疾病","しっぺい"],["貼付","ちょうふ|てんぷ"],["遡及","そきゅう"],
+    ["逐次","ちくじ"],["塩梅","あんばい"],["凡例","はんれい"],["出来高","できだか"]
+  ],
+  l3: [
+    ["燦然","さんぜん"],["蹉跌","さてつ"],["慟哭","どうこく"],["邂逅","かいこう"],
+    ["忖度","そんたく"],["髣髴","ほうふつ"],["顰蹙","ひんしゅく"],["逢瀬","おうせ"],
+    ["忸怩","じくじ"],["隘路","あいろ"],["剽窃","ひょうせつ"],["畢竟","ひっきょう"],
+    ["僥倖","ぎょうこう"],["慇懃","いんぎん"],["陽炎","かげろう"],["東雲","しののめ"],
+    ["五月雨","さみだれ"],["時雨","しぐれ"],["疾風","はやて|しっぷう"],["息吹","いぶき"],
+    ["名残","なごり"],["素人","しろうと"],["玄人","くろうと"],["老舗","しにせ"],
+    ["為替","かわせ"],["山車","だし"],["神楽","かぐら"],["祝詞","のりと"],
+    ["数珠","じゅず"],["熨斗","のし"],["蒲鉾","かまぼこ"],["海豚","いるか"],
+    ["海月","くらげ"],["河豚","ふぐ"],["蜻蛉","とんぼ|かげろう"],["秋刀魚","さんま"],
+    ["山葵","わさび"],["心太","ところてん"],["浴衣","ゆかた"],["足袋","たび"]
+  ],
+  final: [
+    ["麒麟","きりん"],["木乃伊","みいら"],["独楽","こま"],["灰汁","あく"],
+    ["案山子","かかし"],["海星","ひとで"],["五月蠅い","うるさい"],["天邪鬼","あまのじゃく"],
+    ["女将","おかみ"],["御神籤","おみくじ"],["蜥蜴","とかげ"],["蝸牛","かたつむり"],
+    ["蟷螂","かまきり"],["百足","むかで"],["海鼠","なまこ"],["章魚","たこ"],
+    ["山椒魚","さんしょううお"],["啄木鳥","きつつき"],["郭公","かっこう"],["不如帰","ほととぎす"],
+    ["向日葵","ひまわり"],["山茶花","さざんか"],["満天星","どうだんつつじ"],["含羞草","おじぎそう"]
+  ],
+  /* ボーナス1：部首の名前（q=部首 / sub=例 / a=読み） */
+  b1: [
+    ["氵","例：海・池","さんずい"],["亻","例：休・伝","にんべん"],
+    ["扌","例：持・投","てへん"],["忄","例：性・快","りっしんべん"],
+    ["彳","例：役・待","ぎょうにんべん"],["辶","例：進・道","しんにょう|しんにゅう"],
+    ["艹","例：草・花","くさかんむり"],["竹","例：笑・筆","たけかんむり"],
+    ["禾","例：秋・種","のぎへん"],["糸","例：紙・組","いとへん"],
+    ["言","例：話・記","ごんべん"],["阝","例：階・陽（左）","こざとへん"],
+    ["宀","例：安・家","うかんむり"],["广","例：庭・店","まだれ"],
+    ["疒","例：病・痛","やまいだれ"],["厂","例：原・厚","がんだれ"],
+    ["囗","例：国・園","くにがまえ"],["門","例：開・閉","もんがまえ"],
+    ["灬","例：無・然","れっか|れんが"],["儿","例：先・元","ひとあし|にんにょう"],
+    ["攵","例：改・放","のぶん|ぼくづくり"],["刂","例：割・利","りっとう"],
+    ["頁","例：頭・題","おおがい"],["隹","例：集・難","ふるとり"]
+  ],
+  /* ボーナス2：カタカナ語（q=意味 / a=カタカナ） */
+  b2: [
+    ["新しい価値を生む変革","イノベーション"],["自分が自分であるという感覚","アイデンティティ"],
+    ["記念日","アニバーサリー"],["提案・申し出","オファー"],
+    ["新入生などへの説明会","オリエンテーション"],["物語の結びの部分","エピローグ"],
+    ["例外的で不規則なこと","イレギュラー"],["積極的で攻めの姿勢","アグレッシブ"],
+    ["組み合わせで生まれる相乗効果","シナジー"],["物事の優先順位","プライオリティ"],
+    ["関係者全員の合意","コンセンサス"],["最終の締め切り","デッドライン"],
+    ["助言を与える先輩役","メンター"],["人材や価値観の多様性","ダイバーシティ"],
+    ["将来も続けられること","サステナブル"],["費用に対する効果","コストパフォーマンス"],
+    ["まだ表に出ていない能力","ポテンシャル"],["別の選択肢","オルタナティブ"],
+    ["物事の枠組み","フレームワーク"],["前後の文脈・状況","コンテクスト"],
+    ["結果を説明する責任","アカウンタビリティ"],["法令や規則を守ること","コンプライアンス"],
+    ["利害関係者","ステークホルダー"],["反応や意見の返し","フィードバック"],
+    ["到達点となる節目","マイルストーン"],["社会を動かす大きな流れ","ムーブメント"],
+    ["突然のひらめき","インスピレーション"],["要点をまとめたもの","サマリー"]
+  ]
+};
+
+/* 英語モード：日本語を見て英単語を入力（q=日本語 / a=英語 / sub=補足） */
+const ENGLISH_Q = {
+  l1: [
+    ["りんご","apple","基本単語"],["本","book","基本単語"],["学校","school","基本単語"],
+    ["水","water","基本単語"],["机","desk","基本単語"],["いす","chair","基本単語"],
+    ["犬","dog","基本単語"],["猫","cat","基本単語"],["車","car","基本単語"],
+    ["家","house","基本単語"],["友達","friend","基本単語"],["家族","family","基本単語"],
+    ["音楽","music","基本単語"],["朝","morning","基本単語"],["夜","night","基本単語"],
+    ["赤い","red","基本単語"],["大きい","big","基本単語"],["小さい","small","基本単語"]
+  ],
+  l2: [
+    ["始める","begin|start","動詞"],["選ぶ","choose","動詞"],["建てる","build","動詞"],
+    ["運ぶ","carry","動詞"],["必要な","necessary","形容詞"],["有名な","famous","形容詞"],
+    ["危険な","dangerous","形容詞"],["異なる","different","形容詞"],["十分な","enough","形容詞"],
+    ["質問","question","名詞"],["答え","answer","名詞"],["未来","future","名詞"],
+    ["文化","culture","名詞"],["自然","nature","名詞"],["旅行","travel","名詞"],
+    ["健康","health","名詞"],["練習","practice","名詞"],["成功","success","名詞"]
+  ],
+  l3: [
+    ["環境","environment","発展単語"],["技術","technology","発展単語"],["教育","education","発展単語"],
+    ["経験","experience","発展単語"],["知識","knowledge","発展単語"],["改善","improvement","発展単語"],
+    ["機会","opportunity","発展単語"],["責任","responsibility","発展単語"],["意思疎通","communication","発展単語"],
+    ["情報","information","発展単語"],["産業","industry","発展単語"],["安全","safety","発展単語"],
+    ["品質","quality","発展単語"],["設計","design","発展単語"],["材料","material","発展単語"],
+    ["測定","measurement","発展単語"],["製造","manufacturing","発展単語"],["持続可能な","sustainable","発展単語"]
+  ],
+  final: [
+    ["達成","achievement","最終問題"],["発展・開発","development","最終問題"],
+    ["国際的な","international","最終問題"],["関係","relationship","最終問題"],
+    ["組織","organization","最終問題"],["電気","electricity","最終問題"],
+    ["温度","temperature","最終問題"],["交通・輸送","transportation","最終問題"],
+    ["発音","pronunciation","最終問題"],["実験","experiment","最終問題"],
+    ["工学","engineering","最終問題"],["数学","mathematics","最終問題"],
+    ["独立","independence","最終問題"],["創造性","creativity","最終問題"],
+    ["挑戦","challenge","最終問題"],["建築","architecture","最終問題"]
+  ],
+  b1: [
+    ["春","最初の文字：s","spring"],["夏","最初の文字：s","summer"],
+    ["秋","最初の文字：a","autumn|fall"],["冬","最初の文字：w","winter"],
+    ["東","最初の文字：e","east"],["西","最初の文字：w","west"],
+    ["南","最初の文字：s","south"],["北","最初の文字：n","north"],
+    ["月曜日","最初の文字：m","monday"],["火曜日","最初の文字：t","tuesday"],
+    ["水曜日","最初の文字：w","wednesday"],["木曜日","最初の文字：t","thursday"]
+  ],
+  b2: [
+    ["美しい","beautiful","発展単語"],["重要な","important","発展単語"],
+    ["興味深い","interesting","発展単語"],["理解する","understand","発展単語"],
+    ["説明する","explain","発展単語"],["決定する","decide","発展単語"],
+    ["準備する","prepare","発展単語"],["守る・保護する","protect","発展単語"],
+    ["発見する","discover","発展単語"],["想像する","imagine","発展単語"],
+    ["比べる","compare","発展単語"],["完成させる","complete","発展単語"]
+  ]
+};
+
+/* 英語モード（日本語訳）：英単語を見て、訳をひらがなで入力 */
+const ENGLISH_JA_Q = {
+  l1: [
+    ["APPLE","りんご","日本語訳・基本"],["BOOK","ほん","日本語訳・基本"],
+    ["SCHOOL","がっこう","日本語訳・基本"],["WATER","みず","日本語訳・基本"],
+    ["DESK","つくえ","日本語訳・基本"],["CHAIR","いす","日本語訳・基本"],
+    ["DOG","いぬ","日本語訳・基本"],["CAT","ねこ","日本語訳・基本"],
+    ["CAR","くるま","日本語訳・基本"],["HOUSE","いえ","日本語訳・基本"],
+    ["FRIEND","ともだち","日本語訳・基本"],["FAMILY","かぞく","日本語訳・基本"],
+    ["MUSIC","おんがく","日本語訳・基本"],["MORNING","あさ","日本語訳・基本"],
+    ["NIGHT","よる","日本語訳・基本"],["RED","あか|あかい","日本語訳・基本"]
+  ],
+  l2: [
+    ["BEGIN / START","はじめる","日本語訳・動詞"],["CHOOSE","えらぶ","日本語訳・動詞"],
+    ["BUILD","たてる","日本語訳・動詞"],["CARRY","はこぶ","日本語訳・動詞"],
+    ["NECESSARY","ひつような|ひつよう","日本語訳・形容詞"],["FAMOUS","ゆうめいな|ゆうめい","日本語訳・形容詞"],
+    ["DANGEROUS","きけんな|きけん","日本語訳・形容詞"],["DIFFERENT","ことなる|ちがう","日本語訳・形容詞"],
+    ["ENOUGH","じゅうぶんな|じゅうぶん","日本語訳・形容詞"],["QUESTION","しつもん","日本語訳・名詞"],
+    ["ANSWER","こたえ","日本語訳・名詞"],["FUTURE","みらい","日本語訳・名詞"],
+    ["CULTURE","ぶんか","日本語訳・名詞"],["NATURE","しぜん","日本語訳・名詞"],
+    ["TRAVEL","りょこう|たび","日本語訳・名詞"],["HEALTH","けんこう","日本語訳・名詞"]
+  ],
+  l3: [
+    ["ENVIRONMENT","かんきょう","日本語訳・発展"],["TECHNOLOGY","ぎじゅつ","日本語訳・発展"],
+    ["EDUCATION","きょういく","日本語訳・発展"],["EXPERIENCE","けいけん","日本語訳・発展"],
+    ["KNOWLEDGE","ちしき","日本語訳・発展"],["IMPROVEMENT","かいぜん","日本語訳・発展"],
+    ["OPPORTUNITY","きかい","日本語訳・発展"],["RESPONSIBILITY","せきにん","日本語訳・発展"],
+    ["COMMUNICATION","いしそつう|こみゅにけーしょん","日本語訳・発展"],
+    ["INFORMATION","じょうほう","日本語訳・発展"],["INDUSTRY","さんぎょう","日本語訳・発展"],
+    ["SAFETY","あんぜん","日本語訳・発展"],["QUALITY","ひんしつ","日本語訳・発展"],
+    ["DESIGN","せっけい|でざいん","日本語訳・発展"],["MATERIAL","ざいりょう","日本語訳・発展"],
+    ["MEASUREMENT","そくてい","日本語訳・発展"]
+  ],
+  final: [
+    ["ACHIEVEMENT","たっせい","日本語訳・最終"],["DEVELOPMENT","かいはつ|はってん","日本語訳・最終"],
+    ["INTERNATIONAL","こくさいてきな|こくさいてき","日本語訳・最終"],["RELATIONSHIP","かんけい","日本語訳・最終"],
+    ["ORGANIZATION","そしき","日本語訳・最終"],["ELECTRICITY","でんき","日本語訳・最終"],
+    ["TEMPERATURE","おんど","日本語訳・最終"],["TRANSPORTATION","こうつう|ゆそう","日本語訳・最終"],
+    ["PRONUNCIATION","はつおん","日本語訳・最終"],["EXPERIMENT","じっけん","日本語訳・最終"],
+    ["ENGINEERING","こうがく","日本語訳・最終"],["MATHEMATICS","すうがく","日本語訳・最終"],
+    ["INDEPENDENCE","どくりつ","日本語訳・最終"],["CREATIVITY","そうぞうせい","日本語訳・最終"],
+    ["CHALLENGE","ちょうせん","日本語訳・最終"],["ARCHITECTURE","けんちく","日本語訳・最終"]
+  ],
+  b1: [
+    ["SPRING","季節","はる"],["SUMMER","季節","なつ"],["AUTUMN / FALL","季節","あき"],
+    ["WINTER","季節","ふゆ"],["EAST","方角","ひがし"],["WEST","方角","にし"],
+    ["SOUTH","方角","みなみ"],["NORTH","方角","きた"],["MONDAY","曜日","げつようび"],
+    ["TUESDAY","曜日","かようび"],["WEDNESDAY","曜日","すいようび"],["THURSDAY","曜日","もくようび"]
+  ],
+  b2: [
+    ["BEAUTIFUL","うつくしい","日本語訳・発展"],["IMPORTANT","じゅうような|じゅうよう","日本語訳・発展"],
+    ["INTERESTING","きょうみぶかい|おもしろい","日本語訳・発展"],["UNDERSTAND","りかいする|わかる","日本語訳・発展"],
+    ["EXPLAIN","せつめいする","日本語訳・発展"],["DECIDE","きめる|けっていする","日本語訳・発展"],
+    ["PREPARE","じゅんびする","日本語訳・発展"],["PROTECT","まもる|ほごする","日本語訳・発展"],
+    ["DISCOVER","はっけんする|みつける","日本語訳・発展"],["IMAGINE","そうぞうする","日本語訳・発展"],
+    ["COMPARE","くらべる|ひかくする","日本語訳・発展"],["COMPLETE","かんせいさせる|しあげる","日本語訳・発展"]
+  ]
+};
+
+/* 部首モード：部首を見て名前を入力（q=部首 / a=読み / sub=使用例） */
+const RADICAL_Q = {
+  l1: [
+    ["氵","さんずい","例：海・池"],["亻","にんべん","例：休・伝"],["扌","てへん","例：持・投"],
+    ["忄","りっしんべん","例：性・快"],["艹","くさかんむり","例：草・花"],["宀","うかんむり","例：安・家"],
+    ["糸","いとへん","例：紙・組"],["言","ごんべん","例：話・記"],["禾","のぎへん","例：秋・種"],
+    ["辶","しんにょう|しんにゅう","例：進・道"],["疒","やまいだれ","例：病・痛"],["囗","くにがまえ","例：国・園"],
+    ["門","もんがまえ","例：開・閉"],["广","まだれ","例：庭・店"],["刂","りっとう","例：割・利"],
+    ["頁","おおがい","例：頭・題"]
+  ],
+  l2: [
+    ["彳","ぎょうにんべん","例：役・待"],["阝","こざとへん","例：階・陽（左）"],
+    ["阝","おおざと","例：都・部（右）"],["灬","れっか|れんが","例：無・然"],
+    ["儿","ひとあし|にんにょう","例：先・元"],["攵","のぶん|ぼくづくり","例：改・放"],
+    ["隹","ふるとり","例：集・難"],["厂","がんだれ","例：原・厚"],
+    ["竹","たけかんむり","例：笑・筆"],["雨","あめかんむり","例：雪・雲"],
+    ["穴","あなかんむり","例：空・窓"],["尸","しかばね","例：屋・局"],
+    ["弓","ゆみへん","例：引・強"],["馬","うまへん","例：駅・験"],
+    ["魚","うおへん","例：鮮・鯨"],["金","かねへん","例：銀・鉄"]
+  ],
+  l3: [
+    ["礻","しめすへん","例：神・社"],["衤","ころもへん","例：補・裕"],
+    ["犭","けものへん","例：猫・独"],["王","おうへん|たまへん","例：理・球"],
+    ["月","にくづき","例：肝・胸"],["貝","かいへん","例：財・販"],
+    ["車","くるまへん","例：転・輪"],["足","あしへん","例：路・跳"],
+    ["身","みへん","例：軟・躯"],["酉","とりへん","例：配・酸"],
+    ["革","かわへん","例：靴・鞄"],["骨","ほねへん","例：骸・髄"],
+    ["立","たつへん","例：端・競"],["米","こめへん","例：粉・糖"],
+    ["歯","はへん","例：齢・齟"],["舟","ふねへん","例：船・航"]
+  ],
+  final: [
+    ["爫","つめかんむり","例：受・愛"],["罒","あみがしら","例：置・罪"],
+    ["耂","おいかんむり","例：考・者"],["虍","とらがしら","例：虎・虚"],
+    ["襾","にし","例：要・覆"],["殳","るまた","例：段・殺"],
+    ["匚","はこがまえ","例：区・医"],["冂","けいがまえ|まきがまえ","例：円・冊"],
+    ["勹","つつみがまえ","例：包・句"],["匸","かくしがまえ","例：匹・区"],
+    ["凵","うけばこ","例：凶・出"],["厶","む","例：去・参"],
+    ["彡","さんづくり","例：形・彩"],["廴","えんにょう","例：延・建"],
+    ["廾","きょう","例：弁・弄"],["癶","はつがしら","例：発・登"]
+  ],
+  b1: [
+    ["木","例：村・林","きへん"],["火","例：灯・焼","ひへん"],
+    ["土","例：地・坂","つちへん"],["女","例：姉・妹","おんなへん"],
+    ["口","例：味・呼","くちへん"],["日","例：時・晴","ひへん"],
+    ["目","例：眼・眠","めへん"],["石","例：研・砂","いしへん"],
+    ["虫","例：蚊・蛍","むしへん"],["耳","例：聴・職","みみへん"],
+    ["心","例：思・想","こころ"],["手","例：挙・掌","て"]
+  ],
+  b2: [
+    ["彡","さんづくり","例：形・彩"],["殳","るまた","例：段・殺"],
+    ["爿","しょうへん","例：状・将"],["耒","らいすき","例：耕・耗"],
+    ["臣","しん","例：臨・監"],["釆","のごめ","例：番・釈"],
+    ["黽","べんあし","例：鼈・蠅"],["鼎","かなえ","例：鼎"],
+    ["鬥","とうがまえ","例：闘"],["龠","やく","例：龠"],
+    ["隶","れいづくり","例：隷"],["鬯","ちょう","例：鬱"]
+  ]
+};
+
+/* ===== 追加問題データ（各難度帯を増量） ===== */
+const KANJI_EXTRA_Q = {
+  l1: [
+    ["工場","こうじょう"],["製品","せいひん"],["機械","きかい"],["材料","ざいりょう"],
+    ["図面","ずめん"],["測定","そくてい"],["安全","あんぜん"],["品質","ひんしつ"],
+    ["加工","かこう"],["組立","くみたて"],["電流","でんりゅう"],["電圧","でんあつ"],
+    ["速度","そくど"],["摩擦","まさつ"],["熱量","ねつりょう"],["圧力","あつりょく"],
+    ["効率","こうりつ"],["記録","きろく"],["改善","かいぜん"],["検査","けんさ"]
+  ],
+  l2: [
+    ["鋳造","ちゅうぞう"],["鍛造","たんぞう"],["旋盤","せんばん"],["溶接","ようせつ"],
+    ["切削","せっさく"],["研削","けんさく"],["公差","こうさ"],["軸受","じくうけ"],
+    ["歯車","はぐるま"],["締結","ていけつ"],["荷重","かじゅう"],["剛性","ごうせい"],
+    ["靭性","じんせい"],["脆性","ぜいせい"],["塑性","そせい"],["粘性","ねんせい"],
+    ["応力","おうりょく"],["歪み","ひずみ"],["摺動","しゅうどう"],["浸炭","しんたん"]
+  ],
+  l3: [
+    ["遵奉","じゅんぽう"],["杜撰","ずさん"],["踏襲","とうしゅう"],["懐柔","かいじゅう"],
+    ["逡巡","しゅんじゅん"],["躊躇","ちゅうちょ"],["薫陶","くんとう"],["諧謔","かいぎゃく"],
+    ["矜持","きょうじ"],["狼狽","ろうばい"],["恣意","しい"],["琴線","きんせん"],
+    ["喧伝","けんでん"],["嚆矢","こうし"],["斟酌","しんしゃく"],["反芻","はんすう"],
+    ["膾炙","かいしゃ"],["慫慂","しょうよう"],["謦咳","けいがい"],["衒学","げんがく"]
+  ],
+  final: [
+    ["蜉蝣","かげろう"],["鶺鴒","せきれい"],["鴛鴦","おしどり"],["海鞘","ほや"],
+    ["海胆","うに"],["馴鹿","となかい"],["膃肭臍","おっとせい"],["豪猪","やまあらし"],
+    ["樹懶","なまけもの"],["土竜","もぐら"],["蝙蝠","こうもり"],["蟋蟀","こおろぎ"],
+    ["螽斯","きりぎりす"],["蚯蚓","みみず"],["蛞蝓","なめくじ"],["虎魚","おこぜ"],
+    ["鱸","すずき"],["鰰","はたはた"],["鱧","はも"],["鯑","かずのこ"]
+  ],
+  b1: [
+    ["木","例：林・校","きへん"],["火","例：灯・焼","ひへん"],
+    ["土","例：地・坂","つちへん"],["女","例：姉・妹","おんなへん"],
+    ["口","例：味・呼","くちへん"],["日","例：時・晴","ひへん"],
+    ["目","例：眼・眠","めへん"],["石","例：研・砂","いしへん"],
+    ["虫","例：蚊・蛍","むしへん"],["耳","例：聴・職","みみへん"],
+    ["貝","例：財・販","かいへん"],["車","例：転・輪","くるまへん"]
+  ],
+  b2: [
+    ["物事の大まかな構想","コンセプト"],["行動を起こす意欲","モチベーション"],
+    ["危険を管理すること","リスクマネジメント"],["必要に応じて調整すること","カスタマイズ"],
+    ["複数案のうち最良のもの","ベストプラクティス"],["問題を解決するための手順","プロセス"],
+    ["情報を分かりやすく見える化すること","ビジュアライズ"],["作業を自動で行う仕組み","オートメーション"],
+    ["実現できるかを確かめる調査","フィージビリティ"],["利用者の使いやすさ","ユーザビリティ"],
+    ["複数分野を横断すること","クロスオーバー"],["計画を具体的に実行すること","インプリメンテーション"]
+  ]
+};
+
+/* [日本語表示, 英単語, 日本語訳（かな）, 分類] */
+const ENGLISH_EXTRA = {
+  l1: [
+    ["食べ物","food","たべもの","基本単語"],["時計","clock","とけい","基本単語"],
+    ["鉛筆","pencil","えんぴつ","基本単語"],["部屋","room","へや","基本単語"],
+    ["窓","window","まど","基本単語"],["扉","door","とびら","基本単語"],
+    ["先生","teacher","せんせい","基本単語"],["生徒","student","せいと","基本単語"],
+    ["町","town","まち","基本単語"],["国","country","くに","基本単語"],
+    ["川","river","かわ","基本単語"],["山","mountain","やま","基本単語"],
+    ["海","sea","うみ","基本単語"],["空","sky","そら","基本単語"],
+    ["太陽","sun","たいよう","基本単語"],["雨","rain","あめ","基本単語"],
+    ["幸せな","happy","しあわせな","基本単語"],["速い","fast","はやい","基本単語"],
+    ["新しい","new","あたらしい","基本単語"],["古い","old","ふるい","基本単語"]
+  ],
+  l2: [
+    ["覚える","remember","おぼえる","標準単語"],["忘れる","forget","わすれる","標準単語"],
+    ["借りる","borrow","かりる","標準単語"],["貸す","lend","かす","標準単語"],
+    ["到着する","arrive","とうちゃくする","標準単語"],["出発する・去る","leave","しゅっぱつする|でる","標準単語"],
+    ["起こる","happen","おこる","標準単語"],["続ける","continue","つづける","標準単語"],
+    ["可能な","possible","かのうな|かのう","標準単語"],["難しい","difficult","むずかしい","標準単語"],
+    ["注意深い","careful","ちゅういぶかい","標準単語"],["役に立つ","useful","やくにたつ","標準単語"],
+    ["人気のある","popular","にんきのある","標準単語"],["理由","reason","りゆう","標準単語"],
+    ["例","example","れい","標準単語"],["言語","language","げんご","標準単語"],
+    ["歴史","history","れきし","標準単語"],["科学","science","かがく","標準単語"],
+    ["エネルギー","energy","えねるぎー","標準単語"],["工場","factory","こうじょう","標準単語"]
+  ],
+  l3: [
+    ["能力","ability","のうりょく","発展単語"],["利点","advantage","りてん","発展単語"],
+    ["行動","behavior","こうどう","発展単語"],["地域社会","community","ちいきしゃかい","発展単語"],
+    ["状態・条件","condition","じょうたい|じょうけん","発展単語"],["建設","construction","けんせつ","発展単語"],
+    ["顧客","customer","こきゃく","発展単語"],["決定","decision","けってい","発展単語"],
+    ["経済","economy","けいざい","発展単語"],["効果","effect","こうか","発展単語"],
+    ["従業員","employee","じゅうぎょういん","発展単語"],["装置・設備","equipment","そうち|せつび","発展単語"],
+    ["機能","function","きのう","発展単語"],["管理","management","かんり","発展単語"],
+    ["方法","method","ほうほう","発展単語"],["生産","production","せいさん","発展単語"],
+    ["研究","research","けんきゅう","発展単語"],["資源","resource","しげん","発展単語"],
+    ["構造","structure","こうぞう","発展単語"],["仕組み・体系","system","しすてむ","発展単語"]
+  ],
+  final: [
+    ["分析","analysis","ぶんせき","最終単語"],["適切な","appropriate","てきせつな|てきせつ","最終単語"],
+    ["状況","circumstance","じょうきょう","最終単語"],["結果・成り行き","consequence","けっか","最終単語"],
+    ["貢献","contribution","こうけん","最終単語"],["効率","efficiency","こうりつ","最終単語"],
+    ["証拠","evidence","しょうこ","最終単語"],["基本的な","fundamental","きほんてきな|きほんてき","最終単語"],
+    ["革新","innovation","かくしん","最終単語"],["保守・整備","maintenance","ほしゅ|せいび","最終単語"],
+    ["製造する","manufacture","せいぞうする","最終単語"],["機構","mechanism","きこう","最終単語"],
+    ["性能","performance","せいのう","最終単語"],["精度","precision","せいど","最終単語"],
+    ["手順","procedure","てじゅん","最終単語"],["要件","requirement","ようけん","最終単語"],
+    ["重要な","significant","じゅうような|じゅうよう","最終単語"],["仕様","specification","しよう","最終単語"],
+    ["戦略","strategy","せんりゃく","最終単語"],["公差・許容差","tolerance","こうさ|きょようさ","最終単語"]
+  ],
+  b1: [
+    ["金曜日","friday","きんようび","曜日"],["土曜日","saturday","どようび","曜日"],
+    ["日曜日","sunday","にちようび","曜日"],["1月","january","いちがつ","月"],
+    ["2月","february","にがつ","月"],["3月","march","さんがつ","月"],
+    ["4月","april","しがつ","月"],["5月","may","ごがつ","月"],
+    ["6月","june","ろくがつ","月"],["7月","july","しちがつ","月"],
+    ["8月","august","はちがつ","月"],["9月","september","くがつ","月"]
+  ],
+  b2: [
+    ["信頼性","reliability","しんらいせい","発展単語"],["持続可能性","sustainability","じぞくかのうせい","発展単語"],
+    ["特徴","characteristic","とくちょう","発展単語"],["実施","implementation","じっし","発展単語"],
+    ["調査","investigation","ちょうさ","発展単語"],["評価","evaluation","ひょうか","発展単語"],
+    ["解決策","solution","かいけつさく","発展単語"],["利用可能な","available","りようかのうな","発展単語"],
+    ["予防","prevention","よぼう","発展単語"],["複雑な","complex","ふくざつな","発展単語"],
+    ["正確な","accurate","せいかくな","発展単語"],["一貫した","consistent","いっかんした","発展単語"]
+  ]
+};
+
+const RADICAL_EXTRA_Q = {
+  l1: [
+    ["木","きへん","例：林・校"],["火","ひへん","例：灯・焼"],["土","つちへん","例：地・坂"],
+    ["女","おんなへん","例：姉・妹"],["口","くちへん","例：味・呼"],["日","ひへん","例：時・晴"],
+    ["目","めへん","例：眼・眠"],["石","いしへん","例：研・砂"],["虫","むしへん","例：蚊・蛍"],
+    ["耳","みみへん","例：聴・職"],["山","やまへん","例：岐・峰"],["子","こへん","例：孫・孔"],
+    ["田","たへん","例：町・畔"],["白","しろへん","例：的・皓"],["貝","かいへん","例：財・販"],
+    ["車","くるまへん","例：転・輪"]
+  ],
+  l2: [
+    ["丶","てん","例：主・丸"],["丿","の|はらいぼう","例：乏・乗"],["乙","おつ","例：乱・乳"],
+    ["亅","はねぼう","例：了・事"],["二","に","例：井・亜"],["亠","なべぶた","例：京・交"],
+    ["十","じゅう","例：協・博"],["厶","む","例：去・参"],["又","また","例：取・受"],
+    ["寸","すん","例：寺・対"],["小","しょう","例：少・尚"],["工","たくみ","例：巧・差"],
+    ["己","おのれ","例：改・巻"],["巾","はばへん","例：帆・帳"],["干","かん","例：平・年"],
+    ["幺","いとがしら","例：幼・幽"]
+  ],
+  l3: [
+    ["冫","にすい","例：冷・凍"],["几","つくえ","例：凡・処"],["冖","わかんむり","例：冠・軍"],
+    ["卩","ふしづくり|まげわりふ","例：印・却"],["夂","ふゆがしら","例：冬・各"],["夊","すいにょう","例：夊・夌"],
+    ["廾","きょう","例：弁・弄"],["弋","しきがまえ","例：式・弐"],["爿","しょうへん","例：状・将"],
+    ["疋","ひき","例：疎・楚"],["癶","はつがしら","例：発・登"],["禸","ぐうのあし","例：禺・禸"],
+    ["缶","ほとぎ","例：缶・罅"],["网","あみがしら","例：罔・羅"],["老","おい","例：考・者"],
+    ["而","しかして","例：而・耐"]
+  ],
+  final: [
+    ["髟","かみがしら|かみかんむり","例：髪・髭"],["鬥","とうがまえ|たたかいがまえ","例：闘・鬨"],
+    ["鬯","ちょう","例：鬱"],["鬲","かなえ","例：鬻"],["鬼","おに|きにょう","例：魂・魅"],
+    ["韋","なめしがわ","例：韓・韜"],["韭","にら","例：韮"],["飛","とぶ","例：飛"],
+    ["食","しょく|しょくへん","例：飯・館"],["香","かおり","例：香・馨"],["麥","むぎ","例：麥・麴"],
+    ["麻","あさ","例：魔・磨"],["黍","きび","例：黍・黎"],["黹","ぬいとり","例：黼・黻"],
+    ["鼠","ねずみ","例：鼠・鼬"],["鼻","はな","例：鼻・鼾"]
+  ],
+  b1: [
+    ["山","例：岐・峰","やまへん"],["子","例：孫・孔","こへん"],["田","例：町・畔","たへん"],
+    ["白","例：的・皓","しろへん"],["金","例：銀・鉄","かねへん"],["魚","例：鮮・鯨","うおへん"],
+    ["馬","例：駅・験","うまへん"],["弓","例：引・強","ゆみへん"]
+  ],
+  b2: [
+    ["髟","かみがしら|かみかんむり","例：髪・髭"],["鬲","かなえ","例：鬻"],
+    ["鬼","おに|きにょう","例：魂・魅"],["韋","なめしがわ","例：韓・韜"],
+    ["韭","にら","例：韮"],["黍","きび","例：黍・黎"],
+    ["黹","ぬいとり","例：黼・黻"],["鼻","はな","例：鼻・鼾"]
+  ]
+};
+
+/* ステージ定義 */
+const STAGES = {
+  1:{jp:"遺跡",  en:"RUINS",   kind:"ruins",   accent:"#ffd166", fog:"#b9852e", sky:["#4b300b","#9a6b27"], bpm:96},
+  2:{jp:"深海",  en:"ABYSS",   kind:"abyss",   accent:"#67e8f9", fog:"#238bb7", sky:["#07466f","#1591c7"], bpm:92},
+  3:{jp:"樹海",  en:"CANOPY",  kind:"canopy",  accent:"#86ef8a", fog:"#3a9657", sky:["#12512d","#36a05b"], bpm:104},
+  4:{jp:"鋼窟",  en:"FOUNDRY", kind:"foundry", accent:"#ffad66", fog:"#b95d24", sky:["#5a2b10","#a45a28"], bpm:112},
+  5:{jp:"幻影",  en:"MIRAGE",  kind:"mirage",  accent:"#d0a7ff", fog:"#8549c2", sky:["#48206d","#8b4cc7"], bpm:118},
+  6:{jp:"学舎",  en:"ACADEMY", kind:"academy", accent:"#fff2c7", fog:"#74849d", sky:["#46566d","#8292aa"], bpm:100},
+  7:{jp:"天空",  en:"ZENITH",  kind:"zenith",  accent:"#c5efff", fog:"#4677bd", sky:["#244a82","#5594d6"], bpm:126}
+};
+/* 幻影＝これまでの守護者が順に現れる（原作のボスラッシュ構成に相当） */
+const MIRAGE_ORDER = { l1:"canopy", l2:"abyss", l3:"mirage", final:"foundry" };
+const ROOMS = ["保健室","音楽室","理科室"];
+
+const BOUNDS = { 7:[2,4,6,7], 10:[3,6,9,10], 13:[4,8,12,13], 15:[5,10,14,15], 20:[6,12,18,20] };
+const LV_LABEL = { l1:"LEVEL 1", l2:"LEVEL 2", l3:"LEVEL 3", final:"FINAL" };
+
+/* ========== 2. かな ========== */
+const KANA_COLS = [
+  ["あ","い","う","え","お"],["か","き","く","け","こ"],["さ","し","す","せ","そ"],
+  ["た","ち","つ","て","と"],["な","に","ぬ","ね","の"],["は","ひ","ふ","へ","ほ"],
+  ["ま","み","む","め","も"],["や","","ゆ","","よ"],["ら","り","る","れ","ろ"],
+  ["わ","","","","を"]
+];
+const KANA_EXTRA = ["ん","ー","゛","゜","っ","ゃ","ゅ","ょ","ぁ","ぃ","ぅ","ぇ","ぉ"];
+
+const DAKU_FROM = "かきくけこさしすせそたちつてとはひふへほ";
+const DAKU_TO   = "がぎぐげござじずぜぞだぢづでどばびぶべぼ";
+const HAN_FROM  = "はひふへほ";
+const HAN_TO    = "ぱぴぷぺぽ";
+
+function toKata(s){
+  return s.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+}
+function toHira(s){
+  return s.replace(/[\u30a1-\u30f6]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
+}
+
+const ROMAJI = {
+  a:"あ",i:"い",u:"う",e:"え",o:"お",
+  ka:"か",ki:"き",ku:"く",ke:"け",ko:"こ",ca:"か",cu:"く",co:"こ",qu:"く",
+  sa:"さ",si:"し",shi:"し",ci:"し",su:"す",se:"せ",ce:"せ",so:"そ",
+  ta:"た",ti:"ち",chi:"ち",tu:"つ",tsu:"つ",te:"て",to:"と",
+  na:"な",ni:"に",nu:"ぬ",ne:"ね",no:"の",
+  ha:"は",hi:"ひ",hu:"ふ",fu:"ふ",he:"へ",ho:"ほ",
+  ma:"ま",mi:"み",mu:"む",me:"め",mo:"も",
+  ya:"や",yu:"ゆ",yo:"よ",
+  ra:"ら",ri:"り",ru:"る",re:"れ",ro:"ろ",
+  wa:"わ",wo:"を",nn:"ん",
+  ga:"が",gi:"ぎ",gu:"ぐ",ge:"げ",go:"ご",
+  za:"ざ",zi:"じ",ji:"じ",zu:"ず",ze:"ぜ",zo:"ぞ",
+  da:"だ",di:"ぢ",du:"づ",de:"で",do:"ど",
+  ba:"ば",bi:"び",bu:"ぶ",be:"べ",bo:"ぼ",
+  pa:"ぱ",pi:"ぴ",pu:"ぷ",pe:"ぺ",po:"ぽ",
+  kya:"きゃ",kyu:"きゅ",kyo:"きょ",gya:"ぎゃ",gyu:"ぎゅ",gyo:"ぎょ",
+  sha:"しゃ",shu:"しゅ",sho:"しょ",sya:"しゃ",syu:"しゅ",syo:"しょ",
+  ja:"じゃ",ju:"じゅ",jo:"じょ",jya:"じゃ",jyu:"じゅ",jyo:"じょ",
+  zya:"じゃ",zyu:"じゅ",zyo:"じょ",
+  cha:"ちゃ",chu:"ちゅ",cho:"ちょ",cya:"ちゃ",cyu:"ちゅ",cyo:"ちょ",
+  tya:"ちゃ",tyu:"ちゅ",tyo:"ちょ",
+  nya:"にゃ",nyu:"にゅ",nyo:"にょ",
+  hya:"ひゃ",hyu:"ひゅ",hyo:"ひょ",
+  bya:"びゃ",byu:"びゅ",byo:"びょ",
+  pya:"ぴゃ",pyu:"ぴゅ",pyo:"ぴょ",
+  mya:"みゃ",myu:"みゅ",myo:"みょ",
+  rya:"りゃ",ryu:"りゅ",ryo:"りょ",
+  fa:"ふぁ",fi:"ふぃ",fe:"ふぇ",fo:"ふぉ",
+  ti_:"", // ダミー（未使用）
+  la:"ぁ",li:"ぃ",lu:"ぅ",le:"ぇ",lo:"ぉ",
+  xa:"ぁ",xi:"ぃ",xu:"ぅ",xe:"ぇ",xo:"ぉ",
+  lya:"ゃ",lyu:"ゅ",lyo:"ょ",xya:"ゃ",xyu:"ゅ",xyo:"ょ",
+  ltu:"っ",xtu:"っ",ltsu:"っ",
+  "-":"ー"
+};
+delete ROMAJI.ti_;
+
+const ROMAJI_PREFIX = (() => {
+  const s = new Set();
+  for (const k of Object.keys(ROMAJI)) for (let i = 1; i <= k.length; i++) s.add(k.slice(0, i));
+  return s;
+})();
+
+/* ローマ字バッファを可能な限りかなに変換する */
+function romajiConsume(buf, final) {
+  let out = "", s = buf;
+  let guard = 0;
+  while (s.length && guard++ < 40) {
+    if (s.length >= 2 && s[0] === s[1] && /[bcdfghjkmpqrstvwxyz]/.test(s[0])) { out += "っ"; s = s.slice(1); continue; }
+    if (s[0] === "n" && s.length >= 2 && s[1] !== "n" && !"aiueoy".includes(s[1])) { out += "ん"; s = s.slice(1); continue; }
+    let hit = null;
+    for (let L = Math.min(4, s.length); L >= 1; L--) {
+      const k = s.slice(0, L);
+      if (Object.prototype.hasOwnProperty.call(ROMAJI, k)) { hit = k; break; }
+    }
+    if (hit) { out += ROMAJI[hit]; s = s.slice(hit.length); continue; }
+    if (ROMAJI_PREFIX.has(s)) break;
+    s = s.slice(1);
+  }
+  if (final && s === "n") { out += "ん"; s = ""; }
+  return [out, s];
+}
+
+/* ===== js1b_math.js ===== */
+/* ========== 6. 数学モード ==========
+   出典：中学数学の基礎（整数の四則／文字式／指数／平方根／式の変形）。
+   各問は { disp, a, cat } で持つ。
+     disp … 画面に出す式（下記の軽量マークアップ）
+       ^(...)     指数         例 2^(3), x^(20)
+       sqrt(...)  平方根       例 sqrt(45)
+       frac(a,b)  分数         例 frac(y,5)
+       × ÷ ( ) -  はそのまま
+     a   … 答え（半角。指数は ^、平方根は √、分数は / を使う）
+     cat … 判定方法 int / frac / poly / root / eqn
+       eqn は「y＝◯」の右辺だけを答える（y＝ は画面が出す）
+*/
+
+const MATH_Q = {
+  /* ---- LEVEL1：整数の四則計算＋文字式の加減 ---- */
+  l1: [
+    { disp: "(-2)+(-4)", a: "-6", cat: "int" },
+    { disp: "(-6)+(-3)", a: "-9", cat: "int" },
+    { disp: "(-9)+6", a: "-3", cat: "int" },
+    { disp: "8+(-5)", a: "3", cat: "int" },
+    { disp: "(-4)+(-9)", a: "-13", cat: "int" },
+    { disp: "(-7)+(-5)", a: "-12", cat: "int" },
+    { disp: "14-(+2)", a: "12", cat: "int" },
+    { disp: "4-(+3)", a: "1", cat: "int" },
+    { disp: "(-4)-(-7)", a: "3", cat: "int" },
+    { disp: "3-7", a: "-4", cat: "int" },
+    { disp: "(-6)-12", a: "-18", cat: "int" },
+    { disp: "(-10)-5", a: "-15", cat: "int" },
+    { disp: "5×(-7)", a: "-35", cat: "int" },
+    { disp: "(-5)×(-9)", a: "45", cat: "int" },
+    { disp: "(-8)×4", a: "-32", cat: "int" },
+    { disp: "8×(-2)", a: "-16", cat: "int" },
+    { disp: "(-24)÷(-6)", a: "4", cat: "int" },
+    { disp: "12÷(-3)", a: "-4", cat: "int" },
+    { disp: "(-36)÷4", a: "-9", cat: "int" },
+    { disp: "8÷(-4)", a: "-2", cat: "int" },
+    { disp: "2x+9x", a: "11x", cat: "poly" },
+    { disp: "4x-3x", a: "x", cat: "poly" },
+    { disp: "5x+x", a: "6x", cat: "poly" },
+    { disp: "9x+3-4x+7", a: "5x+10", cat: "poly" },
+    { disp: "4x-5+8x-9", a: "12x-14", cat: "poly" },
+    { disp: "-3x-6+4x+2", a: "x-4", cat: "poly" },
+    { disp: "6x-9+2x-7", a: "8x-16", cat: "poly" },
+    { disp: "2x+6-8x-3", a: "-6x+3", cat: "poly" },
+    { disp: "-4x-5-7x-2", a: "-11x-7", cat: "poly" },
+    { disp: "-8x-2+7x+4", a: "-x+2", cat: "poly" }
+  ],
+  /* ---- LEVEL2：文字式の乗除（分配）＋指数計算＋分数 ---- */
+  l2: [
+    { disp: "3(2x+7y)", a: "6x+21y", cat: "poly" },
+    { disp: "5(3x-9y)", a: "15x-45y", cat: "poly" },
+    { disp: "-8(5x+2y)", a: "-40x-16y", cat: "poly" },
+    { disp: "-4(6a-3b)", a: "-24a+12b", cat: "poly" },
+    { disp: "(6a-4b)÷2", a: "3a-2b", cat: "poly" },
+    { disp: "(9a-3b)÷3", a: "3a-b", cat: "poly" },
+    { disp: "(12x+4y)÷(-4)", a: "-3x-y", cat: "poly" },
+    { disp: "(6x+15y)÷(-3)", a: "-2x-5y", cat: "poly" },
+    { disp: "(-8a-6b)÷(-2)", a: "4a+3b", cat: "poly" },
+    { disp: "-2(9a-6b)", a: "-18a+12b", cat: "poly" },
+    { disp: "2^(3)", a: "8", cat: "int" },
+    { disp: "3^(5)", a: "243", cat: "int" },
+    { disp: "(-3)^(2)", a: "9", cat: "int" },
+    { disp: "-4^(3)", a: "-64", cat: "int" },
+    { disp: "(-5)^(3)", a: "-125", cat: "int" },
+    { disp: "(-2)^(3)×3^(2)", a: "-72", cat: "int" },
+    { disp: "-3^(3)+(-4)^(2)×5", a: "53", cat: "int" },
+    { disp: "-3^(3)-(-5)", a: "-22", cat: "int" },
+    { disp: "-(-2)^(4)+((-4)^(2)-8)", a: "-8", cat: "int" },
+    { disp: "7×frac(3,14)", a: "3/2", cat: "frac" },
+    { disp: "frac(-3,10)×(-5)", a: "3/2", cat: "frac" },
+    { disp: "(-10)÷(-frac(5,7))", a: "14", cat: "int" },
+    { disp: "21÷(-frac(7,2))", a: "-6", cat: "int" },
+    { disp: "4×(-frac(7,2))", a: "-14", cat: "int" }
+  ],
+  /* ---- LEVEL3：指数法則＋平方根 ---- */
+  l3: [
+    { disp: "a^(3)×a^(8)", a: "a^11", cat: "poly" },
+    { disp: "x^(2)×x^(7)", a: "x^9", cat: "poly" },
+    { disp: "(x^(4))^(5)", a: "x^20", cat: "poly" },
+    { disp: "(a^(3))^(2)", a: "a^6", cat: "poly" },
+    { disp: "(x^(7))^(3)", a: "x^21", cat: "poly" },
+    { disp: "(3y)^(2)", a: "9y^2", cat: "poly" },
+    { disp: "6x^(2)×(-2x)", a: "-12x^3", cat: "poly" },
+    { disp: "(-3a)^(3)×(-ab)", a: "27a^4b", cat: "poly" },
+    { disp: "4ab^(2)×(-3a^(2)b)", a: "-12a^3b^3", cat: "poly" },
+    { disp: "10ab÷(5a)", a: "2b", cat: "poly" },
+    { disp: "6x^(5)÷(2x^(2))", a: "3x^3", cat: "poly" },
+    { disp: "12a^(3)b^(2)÷(4ab)", a: "3a^2b", cat: "poly" },
+    { disp: "sqrt(16)", a: "4", cat: "root" },
+    { disp: "sqrt(25)", a: "5", cat: "root" },
+    { disp: "sqrt(81)", a: "9", cat: "root" },
+    { disp: "sqrt(49)", a: "7", cat: "root" },
+    { disp: "sqrt(5^(2)×3)", a: "5√3", cat: "root" },
+    { disp: "sqrt(16×5)", a: "4√5", cat: "root" },
+    { disp: "sqrt(45)", a: "3√5", cat: "root" },
+    { disp: "sqrt(72)", a: "6√2", cat: "root" },
+    { disp: "sqrt(3)×sqrt(7)", a: "√21", cat: "root" },
+    { disp: "sqrt(4)×sqrt(5)", a: "2√5", cat: "root" },
+    { disp: "sqrt(24)÷sqrt(4)", a: "√6", cat: "root" },
+    { disp: "sqrt(72)÷sqrt(9)", a: "2√2", cat: "root" },
+    { disp: "3sqrt(7)+2sqrt(7)", a: "5√7", cat: "root" },
+    { disp: "5sqrt(3)+6sqrt(3)", a: "11√3", cat: "root" },
+    { disp: "8sqrt(2)-4sqrt(2)", a: "4√2", cat: "root" },
+    { disp: "3sqrt(8)+4sqrt(8)-5sqrt(8)", a: "4√2", cat: "root" },
+    { disp: "2sqrt(3)+sqrt(48)", a: "6√3", cat: "root" },
+    { disp: "sqrt(63)-2sqrt(7)", a: "√7", cat: "root" },
+    { disp: "sqrt(3)(2sqrt(5)+sqrt(45))", a: "5√15", cat: "root" },
+    { disp: "sqrt(7)(6sqrt(2)+sqrt(32))", a: "10√14", cat: "root" }
+  ],
+  /* ---- FINAL：式の変形（移項・乗算変形・除算変形） ---- */
+  final: [
+    { disp: "y-2=4x", a: "4x+2", cat: "eqn" },
+    { disp: "y+7=9x", a: "9x-7", cat: "eqn" },
+    { disp: "y-11=9x", a: "9x+11", cat: "eqn" },
+    { disp: "y-5x=8", a: "5x+8", cat: "eqn" },
+    { disp: "y+14x=-2", a: "-14x-2", cat: "eqn" },
+    { disp: "y-10=2x+5", a: "2x+15", cat: "eqn" },
+    { disp: "y+5=8x-6", a: "8x-11", cat: "eqn" },
+    { disp: "2y+3=5x+y-7", a: "5x-10", cat: "eqn" },
+    { disp: "4y+7x=6x+3y-9", a: "-x-9", cat: "eqn" },
+    { disp: "5x+2y=3y-9+6x", a: "-x+9", cat: "eqn" },
+    { disp: "7y=14x", a: "2x", cat: "eqn" },
+    { disp: "5y=20x", a: "4x", cat: "eqn" },
+    { disp: "2y=4(x+5)", a: "2x+10", cat: "eqn" },
+    { disp: "6y=24(2x-6)", a: "8x-24", cat: "eqn" },
+    { disp: "8y=16x+40", a: "2x+5", cat: "eqn" },
+    { disp: "9y=9x-81", a: "x-9", cat: "eqn" },
+    { disp: "3y-12=18x+9", a: "6x+7", cat: "eqn" },
+    { disp: "7y+24=14x+3", a: "2x-3", cat: "eqn" },
+    { disp: "frac(y,5)=x", a: "5x", cat: "eqn" },
+    { disp: "frac(y,3)=-7x", a: "-21x", cat: "eqn" },
+    { disp: "frac(2y,3)=4x", a: "6x", cat: "eqn" },
+    { disp: "frac(3y,6)=-2x", a: "-4x", cat: "eqn" },
+    { disp: "frac(y,7)=9x+2", a: "63x+14", cat: "eqn" },
+    { disp: "frac(y,2)=2(x+3)", a: "4x+12", cat: "eqn" },
+    { disp: "frac(y,6)=-(x+2)", a: "-6x-12", cat: "eqn" },
+    { disp: "frac(y,5)=6x+1", a: "30x+5", cat: "eqn" },
+    { disp: "frac(2y,3)=4x-8", a: "6x-12", cat: "eqn" },
+    { disp: "frac(y,7)+3x=9x+2", a: "42x+14", cat: "eqn" },
+    { disp: "frac(y,2)+8=2(x+3)", a: "4x-4", cat: "eqn" },
+    { disp: "frac(5y,6)=-(x+2)+y", a: "6x+12", cat: "eqn" }
+  ],
+  /* ---- ボーナス1（LEVEL1の後）：整数四則の早撃ち ---- */
+  b1: [
+    { disp: "(-3)+(-8)", a: "-11", cat: "int" },
+    { disp: "(-9)+(-4)", a: "-13", cat: "int" },
+    { disp: "7+(-12)", a: "-5", cat: "int" },
+    { disp: "(-15)+6", a: "-9", cat: "int" },
+    { disp: "(-4)-(-9)", a: "5", cat: "int" },
+    { disp: "6-14", a: "-8", cat: "int" },
+    { disp: "(-7)-8", a: "-15", cat: "int" },
+    { disp: "(-6)×5", a: "-30", cat: "int" },
+    { disp: "(-4)×(-8)", a: "32", cat: "int" },
+    { disp: "9×(-3)", a: "-27", cat: "int" },
+    { disp: "(-48)÷6", a: "-8", cat: "int" },
+    { disp: "(-42)÷(-7)", a: "6", cat: "int" },
+    { disp: "36÷(-9)", a: "-4", cat: "int" },
+    { disp: "(-30)÷(-5)", a: "6", cat: "int" }
+  ],
+  /* ---- ボーナス2（LEVEL2の後）：平方根の値の早撃ち ---- */
+  b2: [
+    { disp: "sqrt(4)", a: "2", cat: "root" },
+    { disp: "sqrt(9)", a: "3", cat: "root" },
+    { disp: "sqrt(36)", a: "6", cat: "root" },
+    { disp: "sqrt(64)", a: "8", cat: "root" },
+    { disp: "sqrt(100)", a: "10", cat: "root" },
+    { disp: "sqrt(121)", a: "11", cat: "root" },
+    { disp: "sqrt(144)", a: "12", cat: "root" },
+    { disp: "sqrt(8)", a: "2√2", cat: "root" },
+    { disp: "sqrt(12)", a: "2√3", cat: "root" },
+    { disp: "sqrt(18)", a: "3√2", cat: "root" },
+    { disp: "sqrt(20)", a: "2√5", cat: "root" },
+    { disp: "sqrt(50)", a: "5√2", cat: "root" },
+    { disp: "sqrt(32)", a: "4√2", cat: "root" },
+    { disp: "sqrt(27)", a: "3√3", cat: "root" }
+  ]
+};
+
+const MATH_EXTRA_Q = {
+  l1: [
+    { disp: "(-18)+7", a: "-11", cat: "int" },
+    { disp: "25+(-16)", a: "9", cat: "int" },
+    { disp: "(-14)-(-9)", a: "-5", cat: "int" },
+    { disp: "11-23", a: "-12", cat: "int" },
+    { disp: "(-7)×(-6)", a: "42", cat: "int" },
+    { disp: "(-9)×5", a: "-45", cat: "int" },
+    { disp: "56÷(-7)", a: "-8", cat: "int" },
+    { disp: "(-72)÷(-9)", a: "8", cat: "int" },
+    { disp: "(-24)+(-17)", a: "-41", cat: "int" },
+    { disp: "32-(-15)", a: "47", cat: "int" },
+    { disp: "3x+8x", a: "11x", cat: "poly" },
+    { disp: "12x-5x", a: "7x", cat: "poly" },
+    { disp: "-6x+9x", a: "3x", cat: "poly" },
+    { disp: "7a+4a", a: "11a", cat: "poly" },
+    { disp: "10y-13y", a: "-3y", cat: "poly" },
+    { disp: "5x+2-3x+7", a: "2x+9", cat: "poly" },
+    { disp: "-2x+8+6x-3", a: "4x+5", cat: "poly" },
+    { disp: "9a-4+2a-6", a: "11a-10", cat: "poly" },
+    { disp: "-5y+7-3y+2", a: "-8y+9", cat: "poly" },
+    { disp: "4x-11-9x+6", a: "-5x-5", cat: "poly" }
+  ],
+  l2: [
+    { disp: "4(3x+2y)", a: "12x+8y", cat: "poly" },
+    { disp: "-3(4a-5b)", a: "-12a+15b", cat: "poly" },
+    { disp: "6(2x-3y)", a: "12x-18y", cat: "poly" },
+    { disp: "-5(3a+2b)", a: "-15a-10b", cat: "poly" },
+    { disp: "(15x-10y)÷5", a: "3x-2y", cat: "poly" },
+    { disp: "(-18a+12b)÷(-6)", a: "3a-2b", cat: "poly" },
+    { disp: "(21x+14y)÷7", a: "3x+2y", cat: "poly" },
+    { disp: "(-16a-20b)÷4", a: "-4a-5b", cat: "poly" },
+    { disp: "2^(5)", a: "32", cat: "int" },
+    { disp: "5^(3)", a: "125", cat: "int" },
+    { disp: "(-4)^(2)", a: "16", cat: "int" },
+    { disp: "(-2)^(5)", a: "-32", cat: "int" },
+    { disp: "3^(3)×2^(2)", a: "108", cat: "int" },
+    { disp: "(-3)^(2)×(-2)^(3)", a: "-72", cat: "int" },
+    { disp: "8×frac(3,16)", a: "3/2", cat: "frac" },
+    { disp: "frac(-5,12)×6", a: "-5/2", cat: "frac" },
+    { disp: "18÷frac(3,2)", a: "12", cat: "int" },
+    { disp: "(-15)÷frac(5,3)", a: "-9", cat: "int" },
+    { disp: "frac(7,9)×frac(3,14)", a: "1/6", cat: "frac" },
+    { disp: "frac(-8,15)÷frac(4,5)", a: "-2/3", cat: "frac" }
+  ],
+  l3: [
+    { disp: "x^(4)×x^(6)", a: "x^10", cat: "poly" },
+    { disp: "a^(2)×a^(9)", a: "a^11", cat: "poly" },
+    { disp: "(x^(3))^(4)", a: "x^12", cat: "poly" },
+    { disp: "(a^(5))^(3)", a: "a^15", cat: "poly" },
+    { disp: "(2x)^(3)", a: "8x^3", cat: "poly" },
+    { disp: "(-2x)^(3)", a: "-8x^3", cat: "poly" },
+    { disp: "3a^(2)×4a^(3)", a: "12a^5", cat: "poly" },
+    { disp: "-5x^(4)×2x^(2)", a: "-10x^6", cat: "poly" },
+    { disp: "15a^(4)b^(3)÷(5a^(2)b)", a: "3a^2b^2", cat: "poly" },
+    { disp: "18x^(5)y^(2)÷(6x^(2)y)", a: "3x^3y", cat: "poly" },
+    { disp: "sqrt(98)", a: "7√2", cat: "root" },
+    { disp: "sqrt(108)", a: "6√3", cat: "root" },
+    { disp: "sqrt(147)", a: "7√3", cat: "root" },
+    { disp: "sqrt(200)", a: "10√2", cat: "root" },
+    { disp: "sqrt(12)×sqrt(6)", a: "6√2", cat: "root" },
+    { disp: "sqrt(75)÷sqrt(3)", a: "5", cat: "root" },
+    { disp: "4sqrt(5)-sqrt(5)", a: "3√5", cat: "root" },
+    { disp: "2sqrt(12)+sqrt(27)", a: "7√3", cat: "root" },
+    { disp: "sqrt(50)+3sqrt(8)", a: "11√2", cat: "root" },
+    { disp: "sqrt(6)(sqrt(24)-sqrt(6))", a: "6", cat: "root" }
+  ],
+  final: [
+    { disp: "2y=6x+8", a: "3x+4", cat: "eqn" },
+    { disp: "3y=12x-15", a: "4x-5", cat: "eqn" },
+    { disp: "4y+8=20x", a: "5x-2", cat: "eqn" },
+    { disp: "5y-10=15x+5", a: "3x+3", cat: "eqn" },
+    { disp: "6y+18=24x-6", a: "4x-4", cat: "eqn" },
+    { disp: "7y-14=21x+7", a: "3x+3", cat: "eqn" },
+    { disp: "8y+16=32x-8", a: "4x-3", cat: "eqn" },
+    { disp: "9y-27=18x+9", a: "2x+4", cat: "eqn" },
+    { disp: "2y+5=8x-3", a: "4x-4", cat: "eqn" },
+    { disp: "3y-7=15x+2", a: "5x+3", cat: "eqn" },
+    { disp: "4y+3x=7x+12", a: "x+3", cat: "eqn" },
+    { disp: "5y-2x=13x-10", a: "3x-2", cat: "eqn" },
+    { disp: "6y+4x=22x+12", a: "3x+2", cat: "eqn" },
+    { disp: "frac(y,4)=3x-2", a: "12x-8", cat: "eqn" },
+    { disp: "frac(y,8)=2x+5", a: "16x+40", cat: "eqn" },
+    { disp: "frac(3y,4)=6x-9", a: "8x-12", cat: "eqn" },
+    { disp: "frac(2y,5)=4x+6", a: "10x+15", cat: "eqn" },
+    { disp: "frac(y,3)+2=5x", a: "15x-6", cat: "eqn" },
+    { disp: "frac(y,6)-x=3x+2", a: "24x+12", cat: "eqn" },
+    { disp: "frac(y,5)+4x=10x-3", a: "30x-15", cat: "eqn" }
+  ],
+  b1: [
+    { disp: "(-19)+8", a: "-11", cat: "int" },
+    { disp: "17+(-29)", a: "-12", cat: "int" },
+    { disp: "(-21)-(-13)", a: "-8", cat: "int" },
+    { disp: "14-31", a: "-17", cat: "int" },
+    { disp: "(-8)×7", a: "-56", cat: "int" },
+    { disp: "(-9)×(-6)", a: "54", cat: "int" },
+    { disp: "72÷(-8)", a: "-9", cat: "int" },
+    { disp: "(-81)÷(-9)", a: "9", cat: "int" },
+    { disp: "(-12)+(-25)", a: "-37", cat: "int" },
+    { disp: "43-(-18)", a: "61", cat: "int" },
+    { disp: "(-11)×12", a: "-132", cat: "int" },
+    { disp: "144÷(-12)", a: "-12", cat: "int" },
+    { disp: "(-35)-27", a: "-62", cat: "int" },
+    { disp: "68+(-47)", a: "21", cat: "int" },
+    { disp: "(-96)÷8", a: "-12", cat: "int" },
+    { disp: "13×(-9)", a: "-117", cat: "int" }
+  ],
+  b2: [
+    { disp: "sqrt(169)", a: "13", cat: "root" },
+    { disp: "sqrt(196)", a: "14", cat: "root" },
+    { disp: "sqrt(225)", a: "15", cat: "root" },
+    { disp: "sqrt(256)", a: "16", cat: "root" },
+    { disp: "sqrt(288)", a: "12√2", cat: "root" },
+    { disp: "sqrt(300)", a: "10√3", cat: "root" },
+    { disp: "sqrt(125)", a: "5√5", cat: "root" },
+    { disp: "sqrt(180)", a: "6√5", cat: "root" },
+    { disp: "sqrt(242)", a: "11√2", cat: "root" },
+    { disp: "sqrt(192)", a: "8√3", cat: "root" },
+    { disp: "sqrt(245)", a: "7√5", cat: "root" },
+    { disp: "sqrt(363)", a: "11√3", cat: "root" },
+    { disp: "sqrt(432)", a: "12√3", cat: "root" },
+    { disp: "sqrt(500)", a: "10√5", cat: "root" },
+    { disp: "sqrt(675)", a: "15√3", cat: "root" },
+    { disp: "sqrt(800)", a: "20√2", cat: "root" }
+  ]
+};
+
+/* ===== 一般教養を中心に再選定した追加問題 =====
+   l1=基礎 / l2=標準 / l3=発展 / final=最難関
+   英語は基礎頻出語→日常動詞→教養語→抽象・学術語、
+   数学は計算手順と抽象度、部首は使用頻度と字形の希少性で段階化。 */
+const GENERAL_KANJI_MORE = {
+  l1: [
+    ["社会","しゃかい"],["自然","しぜん"],["科学","かがく"],["歴史","れきし"],["文化","ぶんか"],
+    ["政治","せいじ"],["経済","けいざい"],["地理","ちり"],["国際","こくさい"],["環境","かんきょう"],
+    ["健康","けんこう"],["教育","きょういく"],["情報","じょうほう"],["技術","ぎじゅつ"],["交通","こうつう"],
+    ["災害","さいがい"],["防災","ぼうさい"],["人権","じんけん"],["福祉","ふくし"],["地域","ちいき"],
+    ["伝統","でんとう"],["芸術","げいじゅつ"],["宇宙","うちゅう"],["気候","きこう"],["農業","のうぎょう"],
+    ["貿易","ぼうえき"],["税金","ぜいきん"],["選挙","せんきょ"],["法律","ほうりつ"],["平和","へいわ"]
+  ],
+  l2: [
+    ["概念","がいねん"],["根拠","こんきょ"],["仮説","かせつ"],["検証","けんしょう"],["論理","ろんり"],
+    ["客観","きゃっかん"],["主観","しゅかん"],["傾向","けいこう"],["影響","えいきょう"],["現象","げんしょう"],
+    ["構造","こうぞう"],["制度","せいど"],["権利","けんり"],["義務","ぎむ"],["財政","ざいせい"],
+    ["需要","じゅよう"],["供給","きょうきゅう"],["景気","けいき"],["憲法","けんぽう"],["条約","じょうやく"],
+    ["世論","よろん"],["宗教","しゅうきょう"],["哲学","てつがく"],["倫理","りんり"],["批判","ひはん"],
+    ["象徴","しょうちょう"],["普遍","ふへん"],["多様","たよう"],["課題","かだい"],["展望","てんぼう"]
+  ],
+  l3: [
+    ["脈絡","みゃくらく"],["端緒","たんしょ"],["示唆","しさ"],["乖離","かいり"],["変遷","へんせん"],
+    ["凌駕","りょうが"],["享受","きょうじゅ"],["醸成","じょうせい"],["収斂","しゅうれん"],["敷衍","ふえん"],
+    ["蓋然性","がいぜんせい"],["帰納","きのう"],["演繹","えんえき"],["俎上","そじょう"],["忌避","きひ"],
+    ["毀損","きそん"],["払拭","ふっしょく"],["遷移","せんい"],["趨勢","すうせい"],["淘汰","とうた"],
+    ["含蓄","がんちく"],["示威","じい"],["席巻","せっけん"],["変貌","へんぼう"],["矛盾","むじゅん"],
+    ["錯綜","さくそう"],["拘泥","こうでい"],["網羅","もうら"],["補填","ほてん"],["剥奪","はくだつ"]
+  ],
+  final: [
+    ["有耶無耶","うやむや"],["喧々囂々","けんけんごうごう"],["侃々諤々","かんかんがくがく"],["魑魅魍魎","ちみもうりょう"],["阿鼻叫喚","あびきょうかん"],
+    ["換骨奪胎","かんこつだったい"],["臥薪嘗胆","がしんしょうたん"],["捲土重来","けんどちょうらい"],["呉越同舟","ごえつどうしゅう"],["森羅万象","しんらばんしょう"],
+    ["百花繚乱","ひゃっかりょうらん"],["慇懃無礼","いんぎんぶれい"],["付和雷同","ふわらいどう"],["画竜点睛","がりょうてんせい"],["乾坤一擲","けんこんいってき"],
+    ["鶏口牛後","けいこうぎゅうご"],["朝三暮四","ちょうさんぼし"],["羊頭狗肉","ようとうくにく"],["竜頭蛇尾","りゅうとうだび"],["荒唐無稽","こうとうむけい"],
+    ["不倶戴天","ふぐたいてん"],["一瀉千里","いっしゃせんり"],["玩物喪志","がんぶつそうし"],["矯角殺牛","きょうかくさつぎゅう"],["君子豹変","くんしひょうへん"],
+    ["堅忍不抜","けんにんふばつ"],["蛍雪之功","けいせつのこう"],["狡兎三窟","こうとさんくつ"],["隔靴掻痒","かっかそうよう"],["牽強付会","けんきょうふかい"]
+  ],
+  b1: [],
+  b2: []
+};
+
+/* [日本語表示, 英単語, 日本語訳（かな・別解は|区切り）, 分類] */
+const GENERAL_ENGLISH_MORE = {
+  l1: [
+    ["紙","paper","かみ","基礎頻出語"],["かばん","bag","かばん","基礎頻出語"],["手","hand","て","基礎頻出語"],["頭","head","あたま","基礎頻出語"],["目","eye","め","基礎頻出語"],
+    ["耳","ear","みみ","基礎頻出語"],["顔","face","かお","基礎頻出語"],["名前","name","なまえ","基礎頻出語"],["日","day","ひ","基礎頻出語"],["週","week","しゅう","基礎頻出語"],
+    ["月","month","つき","基礎頻出語"],["年","year","とし","基礎頻出語"],["時間","time","じかん","基礎頻出語"],["場所","place","ばしょ","基礎頻出語"],["人々","people","ひとびと","基礎頻出語"],
+    ["子ども","child","こども","基礎頻出語"],["母","mother","はは","基礎頻出語"],["父","father","ちち","基礎頻出語"],["兄・弟","brother","あに|おとうと|きょうだい","基礎頻出語"],["姉・妹","sister","あね|いもうと|しまい","基礎頻出語"]
+  ],
+  l2: [
+    ["受け入れる","accept","うけいれる","日常・標準動詞"],["同意する","agree","どういする","日常・標準動詞"],["信じる","believe","しんじる","日常・標準動詞"],["変える","change","かえる","日常・標準動詞"],["発展させる・開発する","develop","はってんさせる|かいはつする","日常・標準動詞"],
+    ["発見する","discover","はっけんする","日常・標準動詞"],["楽しむ","enjoy","たのしむ","日常・標準動詞"],["従う","follow","したがう","日常・標準動詞"],["学ぶ","learn","まなぶ","日常・標準動詞"],["意味する","mean","いみする","日常・標準動詞"],
+    ["動く・移動する","move","うごく|いどうする","日常・標準動詞"],["提供する・申し出る","offer","ていきょうする|もうしでる","日常・標準動詞"],["計画する","plan","けいかくする","日常・標準動詞"],["約束する","promise","やくそくする","日常・標準動詞"],["到達する","reach","とうたつする","日常・標準動詞"],
+    ["受け取る","receive","うけとる","日常・標準動詞"],["戻る・返す","return","もどる|かえす","日常・標準動詞"],["分かち合う・共有する","share","わかちあう|きょうゆうする","日常・標準動詞"],["費やす・過ごす","spend","ついやす|すごす","日常・標準動詞"],["支える","support","ささえる","日常・標準動詞"]
+  ],
+  l3: [
+    ["記事","article","きじ","一般教養語"],["市民","citizen","しみん","一般教養語"],["民主主義","democracy","みんしゅしゅぎ","一般教養語"],["政府","government","せいふ","一般教養語"],["社会","society","しゃかい","一般教養語"],
+    ["人口","population","じんこう","一般教養語"],["気候","climate","きこう","一般教養語"],["汚染","pollution","おせん","一般教養語"],["伝統","tradition","でんとう","一般教養語"],["宗教","religion","しゅうきょう","一般教養語"],
+    ["文学","literature","ぶんがく","一般教養語"],["哲学","philosophy","てつがく","一般教養語"],["心理学","psychology","しんりがく","一般教養語"],["生物学","biology","せいぶつがく","一般教養語"],["化学","chemistry","かがく","一般教養語"],
+    ["物理学","physics","ぶつりがく","一般教養語"],["地理","geography","ちり","一般教養語"],["政治","politics","せいじ","一般教養語"],["正義","justice","せいぎ","一般教養語"],["自由","freedom","じゆう","一般教養語"]
+  ],
+  final: [
+    ["抽象的な","abstract","ちゅうしょうてきな|ちゅうしょうてき","抽象・学術語"],["仮定","assumption","かてい","抽象・学術語"],["権威","authority","けんい","抽象・学術語"],["文明","civilization","ぶんめい","抽象・学術語"],["憲法","constitution","けんぽう","抽象・学術語"],
+    ["論争","controversy","ろんそう","抽象・学術語"],["多様性","diversity","たようせい","抽象・学術語"],["仮説","hypothesis","かせつ","抽象・学術語"],["イデオロギー","ideology","いでおろぎー","抽象・学術語"],["不平等","inequality","ふびょうどう","抽象・学術語"],
+    ["解釈","interpretation","かいしゃく","抽象・学術語"],["視点","perspective","してん","抽象・学術語"],["現象","phenomenon","げんしょう","抽象・学術語"],["原則","principle","げんそく","抽象・学術語"],["確率","probability","かくりつ","抽象・学術語"],
+    ["規制","regulation","きせい","抽象・学術語"],["革命","revolution","かくめい","抽象・学術語"],["重要性・意義","significance","じゅうようせい|いぎ","抽象・学術語"],["理論","theory","りろん","抽象・学術語"],["福祉","welfare","ふくし","抽象・学術語"]
+  ],
+  b1: [],
+  b2: []
+};
+
+const GENERAL_RADICAL_MORE = {
+  l1: [
+    ["力","ちから","例：力・助"],["刀","かたな","例：刀・切"],["八","はち|は","例：八・公"],["入","いる","例：入・全"],
+    ["方","ほう|ほうへん|かたへん","例：方・旅"],["牛","うし|うしへん","例：牛・物"],["犬","いぬ","例：犬・状"],["鳥","とり","例：鳥・鳴"]
+  ],
+  l2: [
+    ["止","とめる|とめへん","例：止・歩"],["比","ならびひ|くらべる","例：比・毘"],["毛","け","例：毛・毯"],["氏","うじ","例：氏"],
+    ["气","きがまえ","例：気"],["片","かた|かたへん","例：片・版"],["牙","きば","例：牙"],["爪","つめ|つめかんむり|つめがしら","例：爪・爬"]
+  ],
+  l3: [
+    ["玄","げん","例：玄"],["玉","たま|たまへん","例：玉・璧"],["瓜","うり","例：瓜・瓢"],["瓦","かわら","例：瓦・瓶"],
+    ["甘","あまい","例：甘・甚"],["生","うまれる","例：生・甥"],["用","もちいる","例：用"],["矢","や|やへん","例：矢・知"]
+  ],
+  final: [
+    ["鼎","かなえ","例：鼎"],["黽","べんあし","例：黽"],["齒","は|はへん","例：齒"],["龜","かめ","例：龜"],
+    ["龍","りゅう","例：龍"],["齊","せい","例：齊"],["鼓","つづみ","例：鼓"],["鹵","しお","例：鹵"]
+  ],
+  b1: [],
+  b2: []
+};
+
+const GENERAL_MATH_MORE = {
+  l1: [
+    { disp: "(-12)+19", a: "7", cat: "int" },
+    { disp: "34-47", a: "-13", cat: "int" },
+    { disp: "(-6)×(-11)", a: "66", cat: "int" },
+    { disp: "84÷(-12)", a: "-7", cat: "int" },
+    { disp: "7x+5x", a: "12x", cat: "poly" },
+    { disp: "15a-9a", a: "6a", cat: "poly" },
+    { disp: "4y+3-2y+8", a: "2y+11", cat: "poly" },
+    { disp: "-3x+10+7x-4", a: "4x+6", cat: "poly" },
+    { disp: "12x-5-8x+9", a: "4x+4", cat: "poly" },
+    { disp: "-6a+2-5a-7", a: "-11a-5", cat: "poly" }
+  ],
+  l2: [
+    { disp: "7(2x+3y)", a: "14x+21y", cat: "poly" },
+    { disp: "-4(5a-2b)", a: "-20a+8b", cat: "poly" },
+    { disp: "(24x-18y)÷6", a: "4x-3y", cat: "poly" },
+    { disp: "(-21a-14b)÷7", a: "-3a-2b", cat: "poly" },
+    { disp: "4^(3)", a: "64", cat: "int" },
+    { disp: "(-6)^(2)", a: "36", cat: "int" },
+    { disp: "(-2)^(4)×3", a: "48", cat: "int" },
+    { disp: "10×frac(7,25)", a: "14/5", cat: "frac" },
+    { disp: "frac(-9,14)×7", a: "-9/2", cat: "frac" },
+    { disp: "24÷frac(-6,5)", a: "-20", cat: "int" }
+  ],
+  l3: [
+    { disp: "x^(5)×x^(8)", a: "x^13", cat: "poly" },
+    { disp: "(a^(4))^(3)", a: "a^12", cat: "poly" },
+    { disp: "(-3x)^(2)", a: "9x^2", cat: "poly" },
+    { disp: "8a^(3)×(-2a^(2))", a: "-16a^5", cat: "poly" },
+    { disp: "20x^(6)y^(3)÷(5x^(2)y)", a: "4x^4y^2", cat: "poly" },
+    { disp: "sqrt(162)", a: "9√2", cat: "root" },
+    { disp: "sqrt(243)", a: "9√3", cat: "root" },
+    { disp: "sqrt(20)+sqrt(45)", a: "5√5", cat: "root" },
+    { disp: "3sqrt(18)-sqrt(8)", a: "7√2", cat: "root" },
+    { disp: "sqrt(10)(sqrt(40)+sqrt(90))", a: "50", cat: "root" }
+  ],
+  final: [
+    { disp: "2y-3=8x+5", a: "4x+4", cat: "eqn" },
+    { disp: "3y+7=15x-2", a: "5x-3", cat: "eqn" },
+    { disp: "4y-9=12x+7", a: "3x+4", cat: "eqn" },
+    { disp: "5y+8=20x-12", a: "4x-4", cat: "eqn" },
+    { disp: "6y-5x=13x+12", a: "3x+2", cat: "eqn" },
+    { disp: "7y+4x=25x-14", a: "3x-2", cat: "eqn" },
+    { disp: "frac(y,3)-2x=5", a: "6x+15", cat: "eqn" },
+    { disp: "frac(3y,4)=9x-6", a: "12x-8", cat: "eqn" },
+    { disp: "frac(y,6)+2=3x", a: "18x-12", cat: "eqn" },
+    { disp: "frac(2y,3)-4=6x", a: "9x+6", cat: "eqn" }
+  ],
+  b1: [],
+  b2: []
+};
+
+/* ======================================================================
+   追加問題（増量パック）
+   各難易度の母数をさらに増やし、同じ難易度の中でより多彩に出題する。
+   既存データと重複しない語のみを収録している。
+   ====================================================================== */
+const KANJI_MORE2 = {
+  l1: [
+    ["出発","しゅっぱつ"],["到着","とうちゃく"],["練習","れんしゅう"],["試合","しあい"],
+    ["図書","としょ"],["給食","きゅうしょく"],["委員","いいん"],["放送","ほうそう"],
+    ["世界","せかい"],["地図","ちず"],["天気","てんき"],["気温","きおん"],
+    ["台風","たいふう"],["地震","じしん"],["火山","かざん"],["森林","しんりん"],
+    ["銀行","ぎんこう"],["会社","かいしゃ"],["首都","しゅと"],["警察","けいさつ"],
+    ["病院","びょういん"],["公園","こうえん"],["駅前","えきまえ"],["市場","いちば|しじょう"]
+  ],
+  l2: [
+    ["該当","がいとう"],["妥協","だきょう"],["融通","ゆうずう"],["収束","しゅうそく"],
+    ["抑揚","よくよう"],["隆盛","りゅうせい"],["衰退","すいたい"],["顕著","けんちょ"],
+    ["酷似","こくじ"],["匹敵","ひってき"],["周縁","しゅうえん"],["中枢","ちゅうすう"],
+    ["核心","かくしん"],["本質","ほんしつ"],["概略","がいりゃく"],["詳細","しょうさい"],
+    ["顕在","けんざい"],["潜在","せんざい"],["排他","はいた"],["包摂","ほうせつ"],
+    ["逓減","ていげん"],["漸減","ぜんげん"],["累積","るいせき"],["中庸","ちゅうよう"]
+  ],
+  l3: [
+    ["齟齬","そご"],["寡黙","かもく"],["頑迷","がんめい"],["朦朧","もうろう"],
+    ["彷徨","ほうこう"],["逍遥","しょうよう"],["徘徊","はいかい"],["恍惚","こうこつ"],
+    ["憔悴","しょうすい"],["贖罪","しょくざい"],["軋轢","あつれき"],["跋扈","ばっこ"],
+    ["跳梁","ちょうりょう"],["畏怖","いふ"],["畏敬","いけい"],["咀嚼","そしゃく"],
+    ["陶冶","とうや"],["瓦解","がかい"],["払底","ふってい"],["逼塞","ひっそく"],
+    ["静謐","せいひつ"],["峻厳","しゅんげん"]
+  ],
+  final: [
+    ["土産","みやげ"],["田舎","いなか"],["雪崩","なだれ"],["時化","しけ"],
+    ["飛沫","しぶき|ひまつ"],["黄昏","たそがれ"],["曙","あけぼの"],["東風","こち|とうふう"],
+    ["百合","ゆり"],["紫陽花","あじさい"],["蒲公英","たんぽぽ"],["女郎花","おみなえし"],
+    ["石榴","ざくろ"],["無花果","いちじく"],["胡瓜","きゅうり"],["南瓜","かぼちゃ"],
+    ["西瓜","すいか"],["百舌","もず"],["鶯","うぐいす"],["雲雀","ひばり"],
+    ["翡翠","かわせみ|ひすい"],["梟","ふくろう"],["駱駝","らくだ"],["羚羊","かもしか|れいよう"]
+  ],
+  b1: [],
+  b2: []
+};
+
+/* [日本語表示, 英単語, 日本語訳（かな・別解は|区切り）, 分類] */
+const ENGLISH_MORE2 = {
+  l1: [
+    ["卵","egg","たまご","基礎頻出語"],["牛乳","milk","ぎゅうにゅう","基礎頻出語"],["肉","meat","にく","基礎頻出語"],["魚","fish","さかな","基礎頻出語"],
+    ["米","rice","こめ","基礎頻出語"],["花","flower","はな","基礎頻出語"],["木","tree","き","基礎頻出語"],["鳥","bird","とり","基礎頻出語"],
+    ["色","color","いろ","基礎頻出語"],["白い","white","しろい","基礎頻出語"],["黒い","black","くろい","基礎頻出語"],["青い","blue","あおい","基礎頻出語"],
+    ["長い","long","ながい","基礎頻出語"],["短い","short","みじかい","基礎頻出語"],["高い","tall|high","たかい","基礎頻出語"],["低い","low","ひくい","基礎頻出語"],
+    ["暑い・熱い","hot","あつい","基礎頻出語"],["寒い・冷たい","cold","さむい|つめたい","基礎頻出語"],["開ける","open","あける","基礎頻出語"],["閉じる","close","とじる","基礎頻出語"]
+  ],
+  l2: [
+    ["作る","make","つくる","日常・標準"],["使う","use","つかう","日常・標準"],["見つける","find","みつける","日常・標準"],["感じる","feel","かんじる","日常・標準"],
+    ["眠る","sleep","ねむる","日常・標準"],["泳ぐ","swim","およぐ","日常・標準"],["飛ぶ","fly","とぶ","日常・標準"],["歌う","sing","うたう","日常・標準"],
+    ["踊る","dance","おどる","日常・標準"],["笑う","laugh","わらう","日常・標準"],["泣く","cry","なく","日常・標準"],["静かな","quiet","しずかな","日常・標準"],
+    ["賢い","clever","かしこい","日常・標準"],["強い","strong","つよい","日常・標準"],["弱い","weak","よわい","日常・標準"],["豊かな","rich","ゆたかな","日常・標準"],
+    ["貧しい","poor","まずしい","日常・標準"],["安全な","safe","あんぜんな","日常・標準"],["自由な","free","じゆうな","日常・標準"],["満足した","satisfied","まんぞくした","日常・標準"]
+  ],
+  l3: [
+    ["目的","purpose","もくてき","一般教養語"],["結果","result","けっか","一般教養語"],["原因","cause","げんいん","一般教養語"],["過程","process","かてい","一般教養語"],
+    ["目標","goal","もくひょう","一般教養語"],["価値","value","かち","一般教養語"],["利益","benefit","りえき","一般教養語"],["損失","loss","そんしつ","一般教養語"],
+    ["需要","demand","じゅよう","一般教養語"],["供給","supply","きょうきゅう","一般教養語"],["競争","competition","きょうそう","一般教養語"],["協力","cooperation","きょうりょく","一般教養語"],
+    ["交渉","negotiation","こうしょう","一般教養語"],["契約","contract","けいやく","一般教養語"],["予算","budget","よさん","一般教養語"],["投資","investment","とうし","一般教養語"],
+    ["政策","policy","せいさく","一般教養語"],["世代","generation","せだい","一般教養語"],["国境","border","こっきょう","一般教養語"],["貧困","poverty","ひんこん","一般教養語"]
+  ],
+  final: [
+    ["結論","conclusion","けつろん","抽象・学術語"],["前提","premise","ぜんてい","抽象・学術語"],["矛盾","contradiction","むじゅん","抽象・学術語"],["妥当な","valid","だとうな","抽象・学術語"],
+    ["客観的な","objective","きゃっかんてきな","抽象・学術語"],["主観的な","subjective","しゅかんてきな","抽象・学術語"],["普遍的な","universal","ふへんてきな","抽象・学術語"],["相対的な","relative","そうたいてきな","抽象・学術語"],
+    ["絶対的な","absolute","ぜったいてきな","抽象・学術語"],["本質的な","essential","ほんしつてきな","抽象・学術語"],["論理的な","logical","ろんりてきな","抽象・学術語"],["合理的な","rational","ごうりてきな","抽象・学術語"],
+    ["曖昧な","ambiguous","あいまいな","抽象・学術語"],["明白な","obvious","めいはくな","抽象・学術語"],["一貫性","consistency","いっかんせい","抽象・学術語"],["妥協","compromise","だきょう","抽象・学術語"],
+    ["洞察","insight","どうさつ","抽象・学術語"],["直観","intuition","ちょっかん","抽象・学術語"],["偏見","prejudice","へんけん","抽象・学術語"],["共感","empathy","きょうかん","抽象・学術語"]
+  ],
+  b1: [],
+  b2: []
+};
+
+const RADICAL_MORE2 = {
+  l1: [
+    ["夕","ゆうべ|ゆう","例：外・夜"],["大","だい","例：天・太"],["戈","ほこづくり|ほこ","例：戦・成"],["戸","とだれ|とかんむり","例：所・房"],
+    ["斤","おのづくり|きん","例：新・断"],["歹","がつへん|かばねへん","例：死・残"],["毋","なかれ","例：母・毒"],["巛","かわ|まがりがわ","例：州・巡"],
+    ["彐","けいがしら","例：録・帰"],["卜","ぼく|ぼくのと","例：占・外"]
+  ],
+  l2: [
+    ["斗","とます|と","例：料・斜"],["文","ぶんにょう|ぶん","例：文・斑"],["欠","あくび|かける","例：歌・欲"],["水","みず|したみず","例：氷・泉"],
+    ["父","ちち","例：爺・父"],["皮","けがわ|ひのかわ","例：皮・皺"],["皿","さら","例：益・盛"],["矛","ほこへん|むのほこ","例：務・柔"],
+    ["示","しめす","例：祭・禁"],["羽","はね","例：習・翌"],["聿","ふでづくり","例：律・筆"]
+  ],
+  l3: [
+    ["臼","うす","例：興・臼"],["舌","した","例：舎・辞"],["艮","ごん|こんづくり","例：良・限"],["血","ち","例：衆・血"],
+    ["行","ぎょうがまえ|ゆきがまえ","例：術・街"],["衣","ころも","例：裁・装"],["西","にし|おおいかんむり","例：要・覆"],["自","みずから","例：臭・自"],
+    ["至","いたる","例：致・室"],["色","いろ","例：艶・色"],["舛","まいあし","例：舞・傑"],["谷","たに","例：谷・浴"],
+    ["豆","まめ","例：頭・登"]
+  ],
+  final: [
+    ["高","たかい|こう","例：高・稿"],["首","くび","例：首・馗"],["竜","たつ|りゅう","例：竜・滝"],["鹿","しか","例：鹿・麗"],
+    ["麦","むぎ|ばくにょう","例：麦・麺"],["黄","き|おう","例：黄・横"],["黒","くろ","例：黒・黙"],["音","おと|おとへん","例：音・韻"],
+    ["風","かぜ|かぜかんむり","例：風・颯"],["面","めん","例：面・麺"],["辰","しんのたつ","例：辱・農"],["斉","せい","例：斉・斎"]
+  ],
+  b1: [],
+  b2: []
+};
+
+const MATH_MORE2 = {
+  l1: [
+    { disp: "(-8)+15", a: "7", cat: "int" },
+    { disp: "23-40", a: "-17", cat: "int" },
+    { disp: "(-9)×7", a: "-63", cat: "int" },
+    { disp: "(-72)÷(-8)", a: "9", cat: "int" },
+    { disp: "6x+13x", a: "19x", cat: "poly" },
+    { disp: "18a-11a", a: "7a", cat: "poly" },
+    { disp: "5y+9-3y+2", a: "2y+11", cat: "poly" },
+    { disp: "-4x+7+9x-12", a: "5x-5", cat: "poly" },
+    { disp: "10x-8-3x+5", a: "7x-3", cat: "poly" },
+    { disp: "-7a+3-2a-8", a: "-9a-5", cat: "poly" }
+  ],
+  l2: [
+    { disp: "6(3x+4y)", a: "18x+24y", cat: "poly" },
+    { disp: "-5(4a-3b)", a: "-20a+15b", cat: "poly" },
+    { disp: "(20x-35y)÷5", a: "4x-7y", cat: "poly" },
+    { disp: "(-18a-24b)÷(-6)", a: "3a+4b", cat: "poly" },
+    { disp: "11^(2)", a: "121", cat: "int" },
+    { disp: "(-4)^(3)", a: "-64", cat: "int" },
+    { disp: "(-3)^(2)×2^(2)", a: "36", cat: "int" },
+    { disp: "9×frac(4,15)", a: "12/5", cat: "frac" },
+    { disp: "frac(-8,21)×7", a: "-8/3", cat: "frac" },
+    { disp: "30÷(-frac(6,5))", a: "-25", cat: "int" }
+  ],
+  l3: [
+    { disp: "x^(6)×x^(9)", a: "x^15", cat: "poly" },
+    { disp: "(a^(5))^(4)", a: "a^20", cat: "poly" },
+    { disp: "(-4y)^(2)", a: "16y^2", cat: "poly" },
+    { disp: "12a^(4)b÷(3a^(2))", a: "4a^2b", cat: "poly" },
+    { disp: "15x^(5)y^(4)÷(5x^(2)y^(2))", a: "3x^3y^2", cat: "poly" },
+    { disp: "sqrt(75)", a: "5√3", cat: "root" },
+    { disp: "sqrt(48)", a: "4√3", cat: "root" },
+    { disp: "sqrt(12)+sqrt(27)", a: "5√3", cat: "root" },
+    { disp: "sqrt(50)-sqrt(18)", a: "2√2", cat: "root" },
+    { disp: "sqrt(6)(sqrt(24)+sqrt(54))", a: "30", cat: "root" }
+  ],
+  final: [
+    { disp: "y-6=7x", a: "7x+6", cat: "eqn" },
+    { disp: "y+9=4x", a: "4x-9", cat: "eqn" },
+    { disp: "y-8x=15", a: "8x+15", cat: "eqn" },
+    { disp: "3y=12x-18", a: "4x-6", cat: "eqn" },
+    { disp: "5y=25x+40", a: "5x+8", cat: "eqn" },
+    { disp: "2y-7=6x+3", a: "3x+5", cat: "eqn" },
+    { disp: "4y+12x=20x+3y-8", a: "8x-8", cat: "eqn" },
+    { disp: "frac(y,4)=3x", a: "12x", cat: "eqn" },
+    { disp: "frac(y,3)=5x-2", a: "15x-6", cat: "eqn" },
+    { disp: "frac(2y,5)=4x", a: "10x", cat: "eqn" }
+  ],
+  b1: [],
+  b2: []
+};
+
+/* ---- 表示用のトークン ---- */
+const MATH_KEYS_NUM = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", "-", "+"];
+const MATH_KEYS_SYM = ["x", "y", "a", "b", "√", "^", "/"];
+
+function catLead(cat) { return cat === "eqn" ? "y について 解け" : "答えを もとめよ"; }
+function catHint(cat) {
+  return {
+    int: "答えは整数（＋・−の数）",
+    frac: "答えは分数",
+    poly: "答えは文字式",
+    root: "√を使う形（◯√◯ など）",
+    eqn: "◯x（＋◯）の形"
+  }[cat] || "";
+}
+
+/* ---- 数式の描画（disp → HTML） ---- */
+function rootMarkup(value) {
+  return '<span class="root-expr"><span class="root-symbol">√</span><span class="root-radicand">' +
+    value + '</span></span>';
+}
+function powerMarkup(value) { return '<sup class="power">' + value + '</sup>'; }
+const SUPER_DIGITS = { "0":"⁰", "1":"¹", "2":"²", "3":"³", "4":"⁴", "5":"⁵", "6":"⁶", "7":"⁷", "8":"⁸", "9":"⁹", "+":"⁺", "-":"⁻" };
+function toSuperDigits(value) {
+  return String(value).split("").map(ch => SUPER_DIGITS[ch] || ch).join("");
+}
+
+function mathHTML(d) {
+  let s = d;
+  s = s.replace(/\^\(([^()]+)\)/g, (_, value) => powerMarkup(value));
+  s = s.replace(/frac\(([^(),]*),([^(),]*)\)/g,
+    '<span class="fr"><span>$1</span><span>$2</span></span>');
+  s = s.replace(/sqrt\(([^()]*)\)/g, (_, value) => rootMarkup(value));
+  return s;
+}
+/* ---- 答えの描画（a → HTML） ---- */
+function answerHTML(a, cat) {
+  let s = (cat === "eqn") ? ("y=" + a) : a;
+  s = s.replace(/\^(\d+)/g, (_, value) => toSuperDigits(value));
+  s = s.replace(/(-?\d+)\/(\d+)/g,
+    '<span class="fr"><span>$1</span><span>$2</span></span>');
+  s = s.replace(/√(\d+)/g, '<span class="answer-root">√$1</span>');
+  return s;
+}
+
+/* ---- 入力タイルの組み立て ----
+   打った内容（["3","/","2"] など）を、見た目のまとまりへ組み直す。
+   判定用の文字列は元のトークン列のままなので、採点には影響しない。 */
+const MATH_PH = '<i class="ph"></i>';
+function mathEsc(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+
+function mathUnits(toks) {
+  /* 連続する数字をひとまとめに */
+  const runs = [];
+  for (const t of toks) {
+    const last = runs[runs.length - 1];
+    if (/^\d$/.test(t) && last && last.t === "num") last.v += t;
+    else if (/^\d$/.test(t)) runs.push({ t: "num", v: t });
+    else if (t === "^" || t === "/" || t === "√") runs.push({ t: t, v: t });
+    else runs.push({ t: "sym", v: t });
+  }
+  /* 指数は直前へ上付き、分数は直前を分子にして縦に積む、√は中身に覆いを掛ける */
+  const units = [];
+  for (let i = 0; i < runs.length; i++) {
+    const r = runs[i];
+    if (r.t === "√") {
+      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
+      units.push({ k: "root", rad: has ? nx.v : "" });
+      if (has) i++;
+    } else if (r.t === "^") {
+      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
+      const sup = has ? nx.v : "";
+      const last = units[units.length - 1];
+      if (last && last.k === "plain" && !("sup" in last)) last.sup = sup;
+      else units.push({ k: "plain", v: "", sup: sup });
+      if (has) i++;
+    } else if (r.t === "/") {
+      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
+      const den = has ? nx.v : "";
+      const prev = units.length ? units.pop() : { k: "plain", v: "" };
+      units.push({ k: "frac", num: prev, den: den });
+      if (has) i++;
+    } else {
+      units.push({ k: "plain", v: r.v });
+    }
+  }
+  return units;
+}
+function unitHTML(u) {
+  if (u.k === "root") {
+    const rad = u.rad === "" ? MATH_PH : mathEsc(u.rad);
+    return `<span class="answer-root">√${rad}</span>`;
+  }
+  if (u.k === "frac") {
+    const n = unitHTML(u.num);
+    const d = u.den === "" ? MATH_PH : mathEsc(u.den);
+    return `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
+  }
+  let h = u.v === "" ? "" : mathEsc(u.v === "-" ? "−" : u.v);
+  if ("sup" in u) {
+    const exp = u.sup === "" ? MATH_PH : toSuperDigits(mathEsc(u.sup));
+    h += `<span class="answer-power">${exp}</span>`;
+  }
+  return h === "" ? MATH_PH : h;
+}
+
+/* ================= 判定 ================= */
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a; }
+function reduceFrac(n, d) { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d) || 1; return [n / g, d / g]; }
+function sqSimplify(coef, rad) {
+  if (rad <= 0) return [coef, Math.max(rad, 1)];
+  let r = rad, c = coef, f = 2;
+  while (f * f <= r) { while (r % (f * f) === 0) { r /= f * f; c *= f; } f++; }
+  return [c, r];
+}
+
+function normInt(s) {
+  s = String(s).replace(/\s/g, "").replace(/[−ー]/g, "-");
+  if (!/^[-+]?\d+$/.test(s)) return null;
+  return String(parseInt(s, 10));
+}
+function normFrac(s) {
+  s = String(s).replace(/\s/g, "").replace(/[−ー]/g, "-");
+  if (/^[-+]?\d+$/.test(s)) return parseInt(s, 10) + "/1";
+  const m = s.match(/^([-+]?\d+)\/([-+]?\d+)$/);
+  if (!m) return null;
+  const d = parseInt(m[2], 10);
+  if (d === 0) return null;
+  const [a, b] = reduceFrac(parseInt(m[1], 10), d);
+  return a + "/" + b;
+}
+function parsePolyTerms(s) {
+  s = String(s).replace(/\s/g, "").replace(/[−ー]/g, "-").replace(/[×＊]/g, "").replace(/[＋]/g, "+");
+  if (s === "") return null;
+  if (!/^[-+]/.test(s)) s = "+" + s;
+  const map = {};
+  let i = 0;
+  while (i < s.length) {
+    let sign = 1;
+    if (s[i] === "+") i++;
+    else if (s[i] === "-") { sign = -1; i++; }
+    else return null;
+    let j = i, num = "";
+    while (j < s.length && /\d/.test(s[j])) { num += s[j]; j++; }
+    const vars = {};
+    let sawVar = false;
+    while (j < s.length && /[a-z]/.test(s[j])) {
+      const v = s[j]; j++;
+      let exp = 1;
+      if (s[j] === "^") { j++; let e = ""; while (j < s.length && /\d/.test(s[j])) { e += s[j]; j++; } if (e === "") return null; exp = parseInt(e, 10); }
+      vars[v] = (vars[v] || 0) + exp;
+      sawVar = true;
+    }
+    if (num === "" && !sawVar) return null;
+    let coef = (num === "") ? 1 : parseInt(num, 10);
+    coef *= sign;
+    const sig = Object.keys(vars).sort().map(v => vars[v] === 1 ? v : v + "^" + vars[v]).join("");
+    map[sig] = (map[sig] || 0) + coef;
+    i = j;
+  }
+  return map;
+}
+function canonPoly(s) {
+  const m = parsePolyTerms(s);
+  if (!m) return null;
+  const keys = Object.keys(m).filter(k => m[k] !== 0);
+  keys.sort((a, b) => (a === "" ? 1 : b === "" ? -1 : (a < b ? -1 : a > b ? 1 : 0)));
+  if (keys.length === 0) return "0";
+  let out = "";
+  for (const k of keys) {
+    const c = m[k];
+    if (k === "") out += (c > 0 ? "+" : "") + c;
+    else if (c === 1) out += "+" + k;
+    else if (c === -1) out += "-" + k;
+    else out += (c > 0 ? "+" : "") + c + k;
+  }
+  return out[0] === "+" ? out.slice(1) : out;
+}
+function parseRootTerms(s) {
+  s = String(s).replace(/\s/g, "").replace(/[−ー]/g, "-").replace(/√/g, "R");
+  if (s === "") return null;
+  if (!/^[-+]/.test(s)) s = "+" + s;
+  const map = {};
+  let i = 0;
+  while (i < s.length) {
+    let sign = 1;
+    if (s[i] === "+") i++;
+    else if (s[i] === "-") { sign = -1; i++; }
+    else return null;
+    let j = i, num = "";
+    while (j < s.length && /\d/.test(s[j])) { num += s[j]; j++; }
+    let rad = 1, hasRoot = false;
+    if (s[j] === "R") { hasRoot = true; j++; let e = ""; while (j < s.length && /\d/.test(s[j])) { e += s[j]; j++; } if (e === "") return null; rad = parseInt(e, 10); }
+    if (num === "" && !hasRoot) return null;
+    let coef = (num === "") ? 1 : parseInt(num, 10);
+    coef *= sign;
+    const [c2, r2] = sqSimplify(coef, rad);
+    map[r2] = (map[r2] || 0) + c2;
+    i = j;
+  }
+  return map;
+}
+function canonRoot(s) {
+  const m = parseRootTerms(s);
+  if (!m) return null;
+  const keys = Object.keys(m).map(Number).filter(k => m[k] !== 0).sort((a, b) => a - b);
+  if (keys.length === 0) return "0";
+  let out = "";
+  for (const rad of keys) {
+    const c = m[rad];
+    if (rad === 1) out += (c > 0 ? "+" : "") + c;
+    else {
+      const rt = "R" + rad;
+      if (c === 1) out += "+" + rt;
+      else if (c === -1) out += "-" + rt;
+      else out += (c > 0 ? "+" : "") + c + rt;
+    }
+  }
+  return out[0] === "+" ? out.slice(1) : out;
+}
+
+function mathNorm(s, cat) {
+  if (cat === "int") return normInt(s);
+  if (cat === "frac") return normFrac(s);
+  if (cat === "root") return canonRoot(s);
+  return canonPoly(s);   // poly / eqn
+}
+function mathEqual(typed, a, cat) {
+  const u = mathNorm(typed, cat), v = mathNorm(a, cat);
+  return u != null && v != null && u === v;
+}
+
+/* ===== js2_audio.js ===== */
+/* ========== 3. 音（すべてWeb Audioで合成／外部音源なし） ========== */
+const Audio_ = (() => {
+  let ctx = null, master = null, compressor = null, sfxG = null, bgmG = null;
+  let bgmOn = true, timer = null, step = 0, nextT = 0, prof = null;
+  let masterVolume = 0.75;
+  const BGM_LEVEL = 0.46;
+
+  function init() {
+    if (ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = masterVolume;
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -18; compressor.knee.value = 12; compressor.ratio.value = 4;
+    compressor.attack.value = .003; compressor.release.value = .25;
+    master.connect(compressor); compressor.connect(ctx.destination);
+    sfxG = ctx.createGain(); sfxG.gain.value = 0.85; sfxG.connect(master);
+    bgmG = ctx.createGain(); bgmG.gain.value = 0.0; bgmG.connect(master);
+  }
+  function resume() { init(); if (ctx.state === "suspended") ctx.resume(); }
+
+  function osc(freq, dur, type, gain, delay, slideTo, dest) {
+    init();
+    const t = ctx.currentTime + (delay || 0);
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest || sfxG);
+    o.start(t); o.stop(t + dur + 0.05);
+  }
+  function noise(dur, gain, delay, freq, q, type) {
+    init();
+    const t = ctx.currentTime + (delay || 0);
+    const n = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    const b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = ctx.createBufferSource(); s.buffer = b;
+    const f = ctx.createBiquadFilter(); f.type = type || "bandpass";
+    f.frequency.value = freq || 900; f.Q.value = q || 1;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(f); f.connect(g); g.connect(sfxG);
+    s.start(t); s.stop(t + dur + 0.02);
+  }
+
+  function chime(freqs, dur, gain, gap, type) {
+    freqs.forEach((f, i) => {
+      osc(f, dur, type || "triangle", gain, i * (gap || .055));
+      osc(f * 2, dur * .62, "sine", gain * .28, i * (gap || .055) + .012);
+    });
+  }
+  function sparkle(base, count, delay, gain) {
+    for (let i = 0; i < count; i++) {
+      const f = base * Math.pow(2, ([0, 4, 7, 12][i % 4]) / 12);
+      osc(f * (1 + Math.random() * .025), .10 + Math.random() * .14, "sine", gain, (delay || 0) + i * .035);
+    }
+  }
+  function whoosh(from, to, dur, gain, delay) {
+    osc(from, dur, "sawtooth", gain, delay || 0, to);
+    noise(dur * .72, gain * .45, (delay || 0) + dur * .08, Math.max(500, (from + to) / 2), .7, "bandpass");
+  }
+
+  const sfx = {
+    ui() {
+      osc(920, .055, "triangle", .045);
+      osc(1380, .075, "sine", .032, .025);
+    },
+    key() {
+      osc(1320, .045, "triangle", .040);
+      osc(2112, .065, "sine", .026, .012);
+    },
+    del() {
+      osc(720, .09, "triangle", .048, 0, 430);
+      osc(360, .12, "sine", .032, .035, 250);
+    },
+    encounter() {
+      whoosh(90, 720, .95, .10, 0);
+      osc(55, 1.15, "sine", .18, 0, 38);
+      chime([330, 440, 659, 880], .30, .065, .13, "triangle");
+      sparkle(1047, 6, .40, .030);
+    },
+    fire(i) {
+      const d = i * .042;
+      whoosh(520 + i * 70, 1550 + i * 115, .12, .065, d);
+      osc(1040 + i * 85, .10, "sine", .055, d + .025, 2100 + i * 90);
+    },
+    hit() {
+      noise(.22, .14, 0, 1450, .75, "bandpass");
+      osc(105, .34, "sine", .19, 0, 43);
+      chime([784, 1047, 1568], .18, .055, .035, "triangle");
+    },
+    shatter() {
+      noise(.42, .13, 0, 5600, .55, "highpass");
+      noise(.72, .075, .03, 2400, .9, "bandpass");
+      osc(105, .62, "sine", .17, 0, 36);
+      sparkle(1397, 12, .02, .036);
+      chime([523, 659, 784, 1047], .34, .065, .055, "triangle");
+    },
+    correct() {
+      chime([523, 659, 784, 1047, 1319], .34, .095, .065, "triangle");
+      sparkle(1568, 8, .12, .026);
+      noise(.28, .035, .08, 5200, .7, "highpass");
+    },
+    wrong() {
+      whoosh(520, 145, .34, .070, 0);
+      chime([392, 330, 262], .24, .060, .085, "triangle");
+      osc(82, .36, "sine", .11, .08, 48);
+      noise(.14, .045, 0, 900, 1.2, "bandpass");
+    },
+    clang() {
+      const f = 1180;
+      [1, 1.5, 2, 2.52, 3.01, 4.04].forEach((r, i) =>
+        osc(f * r, i < 2 ? .42 : .16, i % 2 ? "sine" : "triangle", .075 / (1 + i * .5), i * .006, f * r * .96));
+      noise(.045, .18, 0, 6800, .8, "highpass");
+      osc(140, .20, "sine", .12, 0, 65);
+      sparkle(1760, 5, .025, .022);
+    },
+    tick() {
+      osc(1420, .055, "triangle", .060);
+      osc(2130, .045, "sine", .035, .012);
+      osc(95, .07, "sine", .045, 0, 60);
+    },
+    pause() {
+      chime([880, 659, 523], .18, .048, .055, "sine");
+      osc(180, .24, "triangle", .045, 0, 120);
+    },
+    resumeGame() {
+      chime([523, 659, 880, 1047], .20, .058, .045, "triangle");
+      whoosh(260, 1080, .24, .038, 0);
+    },
+    quit() {
+      chime([440, 349, 262], .22, .050, .070, "triangle");
+      osc(110, .30, "sine", .070, .04, 58);
+    },
+    beam() {
+      whoosh(210, 1850, .62, .11, 0);
+      whoosh(1100, 75, .72, .085, .16);
+      osc(64, .78, "sine", .19, .26, 30);
+      sparkle(1320, 7, .20, .024);
+    },
+    relay() {
+      chime([659, 784, 988, 1319], .25, .075, .075, "triangle");
+      whoosh(260, 980, .30, .045, 0);
+      sparkle(1568, 5, .16, .020);
+    },
+    swap() {
+      whoosh(380, 1720, .38, .065, 0);
+      chime([880, 1175, 1568, 2093], .20, .060, .045, "sine");
+      sparkle(1760, 6, .10, .022);
+    },
+    bonusIn() {
+      chime([392, 523, 659, 784, 1047, 1319, 1568], .28, .078, .055, "triangle");
+      whoosh(180, 1250, .55, .060, 0);
+      sparkle(2093, 8, .18, .022);
+    },
+    bonusClear() {
+      chime([523, 659, 784, 1047, 1319, 1568, 2093], .48, .105, .085, "triangle");
+      noise(.55, .045, .12, 5200, .8, "highpass");
+      sparkle(2093, 12, .20, .026);
+      osc(98, .65, "sine", .13, 0, 49);
+    },
+    bonusFail() {
+      chime([523, 440, 349, 294], .28, .065, .10, "triangle");
+      whoosh(720, 180, .40, .055, .05);
+      osc(73, .46, "sine", .10, .14, 44);
+    },
+    levelUp() {
+      whoosh(190, 1480, .58, .065, 0);
+      chime([330, 440, 550, 659, 880, 1109, 1320], .34, .085, .065, "triangle");
+      sparkle(1760, 10, .24, .024);
+    },
+    cleared() {
+      whoosh(120, 1680, .82, .085, 0);
+      chime([523, 659, 784, 1047, 1319, 1568, 2093, 2637], .72, .115, .13, "triangle");
+      sparkle(2093, 18, .34, .029);
+      noise(1.0, .055, .28, 5600, .7, "highpass");
+      osc(65, 1.25, "sine", .16, 0, 32);
+    },
+    gameover() {
+      whoosh(480, 92, .72, .070, 0);
+      chime([392, 349, 294, 247, 196], .54, .070, .17, "triangle");
+      osc(73, 1.25, "sine", .13, .15, 36);
+      noise(.65, .040, .18, 700, 1.1, "bandpass");
+      sparkle(988, 4, .72, .015);
+    }
+  };
+
+  /* --- BGM：ステップシーケンサ --- */
+  const SCALE = [0, 3, 5, 7, 10];               // 短調ペンタトニック
+  const SCALE_MAJ = [0, 2, 4, 7, 9];            // 長調ペンタトニック
+  const PROFILES = {
+    l1:    { bpm: 104, root: 55.00, scale: SCALE,     lead: .040, pad: .024, drive: "triangle" },
+    l2:    { bpm: 116, root: 55.00, scale: SCALE,     lead: .045, pad: .026, drive: "sawtooth" },
+    l3:    { bpm: 128, root: 51.91, scale: SCALE,     lead: .048, pad: .028, drive: "sawtooth" },
+    final: { bpm: 144, root: 46.25, scale: SCALE,     lead: .052, pad: .030, drive: "square" },
+    bonus: { bpm: 152, root: 65.41, scale: SCALE_MAJ, lead: .046, pad: .026, drive: "triangle" }
+  };
+
+  function note(i) { const p = prof; return p.root * Math.pow(2, (p.scale[i % p.scale.length] + 12 * Math.floor(i / p.scale.length)) / 12); }
+
+  function bgmTone(freq, t, dur, type, gain, slideTo) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || "sine"; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t + dur);
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(.0002, gain), t + Math.min(.03, dur * .2));
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(bgmG); o.start(t); o.stop(t + dur + .03);
+  }
+  function bgmNoise(t, dur, gain, freq, type) {
+    const n = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    const b = ctx.createBuffer(1, n, ctx.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const src = ctx.createBufferSource(); src.buffer = b;
+    const f = ctx.createBiquadFilter(); f.type = type || "highpass"; f.frequency.value = freq;
+    const g = ctx.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    src.connect(f); f.connect(g); g.connect(bgmG); src.start(t); src.stop(t + dur + .02);
+  }
+
+  function schedule() {
+    const spb = 60 / prof.bpm / 4;   // 16分
+    while (nextT < ctx.currentTime + 0.2) {
+      const t = nextT, s = step % 16;
+      // 重低音とキック：4拍を強く刻む
+      if (s % 4 === 0) {
+        bgmTone(note(s === 8 ? 2 : 0), t, spb * 3.5, "sine", .22);
+        bgmTone(108, t, Math.min(.16, spb * 1.4), "sine", .20, 42);
+      }
+      // スネアとシンバル：緊張感のあるバックビート
+      if (s === 4 || s === 12) {
+        bgmNoise(t, .12, .065, 1900, "bandpass");
+        bgmNoise(t, .05, .035, 6500, "highpass");
+      }
+      // パッドコード：低域から中域を厚くする
+      if (s === 0 || s === 8) {
+        const chord = s === 0 ? [0, 2, 4] : [1, 3, 5];
+        chord.forEach((idx, i) => {
+          bgmTone(note(idx) * 2, t + i * .008, spb * 7.6, i === 1 ? "sine" : "triangle", prof.pad);
+        });
+        bgmTone(note(s === 0 ? 0 : 2) * 2, t, spb * 2.8, "sawtooth", .018);
+      }
+      // 走るアルペジオ
+      if (s % 2 === 0) {
+        const idx = [0, 2, 4, 3, 5, 4, 2, 1][(s / 2) % 8];
+        bgmTone(note(idx) * 4, t, spb * 1.65, prof.drive, prof.lead);
+      }
+      // ハイハット
+      if (s % 2 === 1) {
+        bgmNoise(t, .035, s === 15 ? .055 : .038, 7200, "highpass");
+      }
+      // 小節後半の高音アクセントでハラハラ感を強調
+      if (s === 3 || s === 7 || s === 11 || s === 15) {
+        const idx = [4, 3, 5, 4][(s - 3) / 4];
+        bgmTone(note(idx) * 8, t, spb * .8, "sine", .020);
+      }
+      nextT += spb; step++;
+    }
+  }
+
+  function bgmStart(name) {
+    if (!bgmOn) return;
+    resume();
+    prof = PROFILES[name] || PROFILES.l1;
+    if (timer) clearInterval(timer);
+    step = 0; nextT = ctx.currentTime + 0.06;
+    bgmG.gain.cancelScheduledValues(ctx.currentTime);
+    bgmG.gain.setValueAtTime(0.0001, ctx.currentTime);
+    bgmG.gain.exponentialRampToValueAtTime(BGM_LEVEL, ctx.currentTime + 0.6);
+    timer = setInterval(schedule, 50);
+  }
+  function bgmStop(fade) {
+    if (!ctx) return;
+    if (timer) { clearInterval(timer); timer = null; }   // 先に停止（新BGMのタイマーを誤って消さないため）
+    bgmG.gain.cancelScheduledValues(ctx.currentTime);
+    bgmG.gain.setValueAtTime(Math.max(0.0002, bgmG.gain.value), ctx.currentTime);
+    bgmG.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (fade || 0.05));
+  }
+  function bgmDuck(on) {
+    if (!ctx || !timer) return;
+    bgmG.gain.cancelScheduledValues(ctx.currentTime);
+    bgmG.gain.exponentialRampToValueAtTime(on ? 0.12 : BGM_LEVEL, ctx.currentTime + 0.25);
+  }
+  function setBgmEnabled(v) { bgmOn = v; if (!v) bgmStop(0.3); }
+  function setVolume(v) {
+    masterVolume = Math.max(0, Math.min(1, Number(v)));
+    if (!ctx || !master) return;
+    master.gain.cancelScheduledValues(ctx.currentTime);
+    master.gain.linearRampToValueAtTime(masterVolume, ctx.currentTime + .12);
+  }
+
+  return { resume, sfx, bgmStart, bgmStop, bgmDuck, setBgmEnabled, setVolume };
+})();
+
+/* ===== js3_art.js ===== */
+/* ========== 4. 映像（すべてCanvasで生成／外部画像なし） ========== */
+const Art = (() => {
+  const cv = document.getElementById("bg");
+  const c = cv.getContext("2d");
+  let W = 0, H = 0, dpr = 1, t = 0, raf = null;
+  let fxOn = true;
+
+  const st = {
+    stage: 1, kind: "ruins", accent: "#ffd166", fog: "#b9852e", sky: ["#4b300b", "#9a6b27"],
+    room: 0, level: "l1",
+    show: 0,       // 守護者の出現度 0→1
+    target: 0,
+    hurt: 0,       // 被弾フラッシュ
+    shake: 0,
+    warp: 0,       // 発進演出
+    grow: 0,       // 経過による膨張 0→1
+    flare: 0,      // 撃破の閃光
+    burstR: 60     // 撃破時の半径
+  };
+  const parts = [];   // 破片
+  const waves = [];   // 衝撃波
+  const smoke = [];   // 煙
+  let rays = 0;       // 放射状の光条
+  let bx = 0, by = 0; // 爆心
+
+  const stars = [];
+  for (let i = 0; i < 130; i++) stars.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.5 + .3, s: Math.random() * .6 + .2 });
+  const motes = [];
+  for (let i = 0; i < 60; i++) motes.push({ x: Math.random(), y: Math.random(), r: Math.random() * 2.2 + .6, v: Math.random() * .3 + .06, p: Math.random() * 6.28 });
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  function setStage(n, level, room) {
+    const s = STAGES[n];
+    st.stage = n; st.level = level || "l1";
+    st.accent = s.accent; st.fog = s.fog; st.sky = s.sky;
+    st.kind = (n === 5) ? MIRAGE_ORDER[st.level] : s.kind;
+    if (room != null) st.room = room;
+    document.documentElement.style.setProperty("--stage-accent", s.accent);
+    document.documentElement.style.setProperty("--stage-fog", s.fog);
+  }
+  function setLevel(level) { st.level = level; if (st.stage === 5) st.kind = MIRAGE_ORDER[level]; }
+  function appear() { st.target = 1; st.show = 0; }
+  function vanish() { st.target = 0; }
+  function hurt() { st.hurt = 1; if (fxOn) st.shake = 1; }
+
+  function guardR() {
+    const lv = lvIdx[st.level] || 0;
+    return Math.min(W, H) * (0.16 + lv * 0.028) * (1 + st.grow * .10) * Math.max(st.show, .3);
+  }
+  /* 正解＝問題が爆発する（cx,cy を渡すと爆心を指定できる） */
+  function burst(cx, cy, R) {
+    cx = (cx == null) ? W / 2 : cx;
+    cy = (cy == null) ? H * 0.40 : cy;
+    R = R || guardR();
+    st.burstR = R; bx = cx; by = cy;
+
+    const N = fxOn ? 84 : 26;
+    for (let i = 0; i < N; i++) {
+      const a = Math.random() * 6.283;
+      const sp = (0.8 + Math.random() * 4.0) * R * 0.034;
+      const ember = Math.random();
+      parts.push({
+        x: cx + Math.cos(a) * R * .3 * Math.random(),
+        y: cy + Math.sin(a) * R * .3 * Math.random(),
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 0.6,
+        s: R * (0.02 + Math.random() * 0.07),
+        rot: Math.random() * 6.283, vr: (Math.random() - .5) * .3,
+        life: 1, dec: 0.010 + Math.random() * 0.014,
+        col: ember < .30 ? "#ffffff" : (ember < .48 ? "#ffd48a" : st.accent)
+      });
+    }
+    if (parts.length > 260) parts.splice(0, parts.length - 260);
+
+    waves.push({ x: cx, y: cy, r: R * .30, v: R * .115, life: 1, w: 8 });
+    waves.push({ x: cx, y: cy, r: R * .10, v: R * .060, life: 1, w: 3 });
+
+    const M = fxOn ? 7 : 3;
+    for (let i = 0; i < M; i++) {
+      const a = Math.random() * 6.283, d = Math.random() * R * .4;
+      smoke.push({
+        x: cx + Math.cos(a) * d, y: cy + Math.sin(a) * d,
+        vx: Math.cos(a) * R * .012, vy: -R * (.008 + Math.random() * .012),
+        r: R * (.18 + Math.random() * .22), gr: R * .012, life: 1, dec: .010 + Math.random() * .006
+      });
+    }
+
+    st.flare = 1; rays = 1; st.target = 0;
+    if (fxOn) st.shake = 1.9;
+  }
+
+  /* 不正解＝弾かれる。守護者は消さず、衝突点に火花だけを散らす */
+  function spark(cx, cy, R) {
+    bx = cx; by = cy; st.burstR = R;
+    const pal = ["#ffffff", "#cfd6e0", "#9fb4c8"];
+    const N = fxOn ? 36 : 12;
+    for (let i = 0; i < N; i++) {
+      const a = (Math.random() < .25) ? Math.random() * 6.283 : Math.random() * Math.PI; // 主に下方へ
+      const sp = (1.2 + Math.random() * 3.2) * R * 0.05;
+      parts.push({
+        x: cx + (Math.random() - .5) * R * .55,
+        y: cy + (Math.random() - .5) * R * .22,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .9 - .9,
+        s: R * (0.018 + Math.random() * 0.042),
+        rot: Math.random() * 6.283, vr: (Math.random() - .5) * .5,
+        life: 1, dec: .030 + Math.random() * .030,
+        col: pal[(Math.random() * 3) | 0]
+      });
+    }
+    if (parts.length > 260) parts.splice(0, parts.length - 260);
+    waves.push({ x: cx, y: cy, r: R * .08, v: R * .075, life: 1, w: 3, col: "#dfe6ef" });
+    st.flare = Math.max(st.flare, .34);
+    if (fxOn) st.shake = Math.max(st.shake, .7);
+  }
+
+  function fxLayer() {
+    const cx = bx, cy = by, R = st.burstR;
+
+    // 煙（先に、暗く）
+    for (let i = smoke.length - 1; i >= 0; i--) {
+      const m = smoke[i];
+      c.save(); c.globalAlpha = Math.max(0, m.life) * .30;
+      const g = c.createRadialGradient(m.x, m.y, 1, m.x, m.y, m.r);
+      g.addColorStop(0, "rgba(24,20,16,.9)"); g.addColorStop(1, "rgba(24,20,16,0)");
+      c.fillStyle = g; c.beginPath(); c.arc(m.x, m.y, m.r, 0, 6.283); c.fill();
+      c.restore();
+      m.x += m.vx; m.y += m.vy; m.r += m.gr; m.vy *= .985; m.life -= m.dec;
+      if (m.life <= 0) smoke.splice(i, 1);
+    }
+
+    if (st.flare > .01) {
+      const rr = R * 2.6 * (1.35 - st.flare * .35);
+      const g = c.createRadialGradient(cx, cy, 1, cx, cy, rr);
+      g.addColorStop(0, `rgba(255,255,255,${(st.flare * .95).toFixed(3)})`);
+      g.addColorStop(.18, `rgba(255,226,168,${(st.flare * .70).toFixed(3)})`);
+      g.addColorStop(.40, hexA(st.accent, st.flare * .45));
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      c.fillStyle = g; c.beginPath(); c.arc(cx, cy, rr, 0, 6.283); c.fill();
+    }
+    if (rays > .01) {
+      c.save(); c.globalAlpha = rays * .9; c.strokeStyle = "#fff"; c.lineCap = "round";
+      for (let i = 0; i < 10; i++) {
+        const a = i * .6283 + .21;
+        c.lineWidth = Math.max(1, R * .022 * rays);
+        const len = R * (1.3 + (i % 3) * .55) * (1.7 - rays);
+        c.beginPath();
+        c.moveTo(cx + Math.cos(a) * R * .18, cy + Math.sin(a) * R * .18);
+        c.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len);
+        c.stroke();
+      }
+      c.restore();
+      rays -= .065;
+    }
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const w = waves[i];
+      c.save(); c.globalAlpha = Math.max(0, w.life) * .8;
+      const wc = w.col || st.accent;
+      c.strokeStyle = wc; c.lineWidth = Math.max(.5, w.w * w.life);
+      c.shadowBlur = 18; c.shadowColor = wc;
+      c.beginPath(); c.arc(w.x, w.y, w.r, 0, 6.283); c.stroke();
+      c.restore();
+      w.r += w.v; w.v *= .96; w.life -= .028;
+      if (w.life <= 0) waves.splice(i, 1);
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      c.save(); c.globalAlpha = Math.max(0, p.life);
+      c.translate(p.x, p.y); c.rotate(p.rot);
+      c.fillStyle = p.col; c.shadowBlur = 12; c.shadowColor = p.col;
+      c.fillRect(-p.s / 2, -p.s / 6, p.s, p.s / 3);
+      c.restore();
+      p.x += p.vx; p.y += p.vy; p.vy += .13; p.vx *= .985; p.vy *= .985;
+      p.rot += p.vr; p.life -= p.dec;
+      if (p.life <= 0) parts.splice(i, 1);
+    }
+  }
+  function setGrow(p) { st.grow = p; }
+  function setFx(v) { fxOn = v; }
+  function warp(v) { st.warp = v; }
+
+  const lvIdx = { l1: 0, l2: 1, l3: 2, final: 3 };
+
+  /* --- 背景 --- */
+  function bg() {
+    const g = c.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, st.sky[0]); g.addColorStop(1, st.sky[1]);
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+
+    // 中心のもや
+    const cx = W / 2, cy = H * .42;
+    const rg = c.createRadialGradient(cx, cy, 10, cx, cy, Math.max(W, H) * .62);
+    rg.addColorStop(0, hexA(st.fog, .55));
+    rg.addColorStop(.5, hexA(st.fog, .12));
+    rg.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = rg; c.fillRect(0, 0, W, H);
+
+    if (st.stage === 7 || st.stage === 5) {
+      c.save();
+      for (const s of stars) {
+        const a = .3 + .7 * Math.abs(Math.sin(t * s.s + s.x * 30));
+        c.globalAlpha = a * .8;
+        c.fillStyle = "#fff";
+        c.beginPath(); c.arc(s.x * W, s.y * H * .8, s.r, 0, 6.283); c.fill();
+      }
+      c.restore();
+    }
+
+    // 遠景シルエット
+    c.save();
+    c.globalAlpha = .5;
+    c.fillStyle = shade(st.sky[0], -14);
+    const seed = st.stage * 7 + (st.room || 0);
+    silhouette(seed, H * .72, 120);
+    c.globalAlpha = .75;
+    c.fillStyle = shade(st.sky[0], -26);
+    silhouette(seed + 3, H * .84, 190);
+    c.restore();
+
+    // 学舎：部屋ごとの小物
+    if (st.stage === 6) room();
+
+    // 塵
+    c.save();
+    for (const m of motes) {
+      const y = ((m.y + t * m.v * .05) % 1);
+      c.globalAlpha = .18 + .2 * Math.abs(Math.sin(t + m.p));
+      c.fillStyle = st.accent;
+      c.beginPath(); c.arc(m.x * W, (1 - y) * H, m.r, 0, 6.283); c.fill();
+    }
+    c.restore();
+
+    // 発進中のスピードライン
+    if (st.warp > 0.01) {
+      c.save();
+      c.globalAlpha = Math.min(1, st.warp);
+      c.strokeStyle = "rgba(255,255,255,.55)"; c.lineCap = "round";
+      for (let i = 0; i < 90; i++) {
+        const a = (i * 2.399 + t * 2) % 6.283;
+        const p = ((i * 37 % 101) / 101 + t * 1.7) % 1;
+        const r0 = 40 + p * p * Math.max(W, H) * .8;
+        const len = 20 + p * 120 * st.warp;
+        c.lineWidth = .6 + p * 2.2;
+        c.beginPath();
+        c.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0 * .7);
+        c.lineTo(cx + Math.cos(a) * (r0 + len), cy + Math.sin(a) * (r0 + len) * .7);
+        c.stroke();
+      }
+      c.restore();
+    }
+  }
+
+  function silhouette(seed, baseY, amp) {
+    let r = seed * 9301;
+    const rnd = () => { r = (r * 9301 + 49297) % 233280; return r / 233280; };
+    c.beginPath(); c.moveTo(0, H);
+    const n = 14;
+    for (let i = 0; i <= n; i++) {
+      const x = (i / n) * W;
+      const k = st.kind;
+      let y = baseY;
+      if (k === "ruins" || k === "foundry") y = baseY - (i % 2 ? amp * (.4 + rnd() * .7) : amp * .18);
+      else if (k === "canopy") y = baseY - amp * (.3 + rnd() * .8);
+      else if (k === "abyss") y = baseY - amp * .25 * (1 + Math.sin(i * 1.3 + seed));
+      else if (k === "academy") y = baseY - (i % 3 === 0 ? amp * .5 : amp * .12);
+      else y = baseY - amp * (.2 + rnd() * .5);
+      c.lineTo(x, y);
+    }
+    c.lineTo(W, H); c.closePath(); c.fill();
+  }
+
+  function room() {
+    const cx = W / 2, base = H * .82, s = Math.min(W, H) * .12;
+    c.save(); c.globalAlpha = .35; c.strokeStyle = st.accent; c.lineWidth = 2;
+    if (st.room === 0) {           // 保健室：ベッド
+      c.strokeRect(cx - s * 1.6, base - s * .5, s * 3.2, s * .8);
+      c.strokeRect(cx - s * 1.6, base - s * .9, s * .8, s * .4);
+    } else if (st.room === 1) {    // 音楽室：鍵盤
+      for (let i = 0; i < 12; i++) c.strokeRect(cx - s * 1.8 + i * s * .3, base - s * .4, s * .28, s * .6);
+    } else {                        // 理科室：フラスコ
+      for (let i = -1; i <= 1; i++) {
+        c.beginPath();
+        c.moveTo(cx + i * s * 1.1 - s * .18, base - s * .8);
+        c.lineTo(cx + i * s * 1.1 - s * .18, base - s * .45);
+        c.lineTo(cx + i * s * 1.1 - s * .42, base);
+        c.lineTo(cx + i * s * 1.1 + s * .42, base);
+        c.lineTo(cx + i * s * 1.1 + s * .18, base - s * .45);
+        c.lineTo(cx + i * s * 1.1 + s * .18, base - s * .8);
+        c.stroke();
+      }
+    }
+    c.restore();
+  }
+
+  /* --- 守護者 --- */
+  function guardian() {
+    if (st.show < 0.01) return;
+    const lv = lvIdx[st.level] || 0;
+    const base = Math.min(W, H);
+    const R = base * (0.16 + lv * 0.028) * (1 + st.grow * .10) * st.show;
+    const cx = W / 2 + (st.shake ? (Math.random() - .5) * 14 * st.shake : 0);
+    const cy = H * 0.40 + (st.shake ? (Math.random() - .5) * 14 * st.shake : 0);
+
+    c.save();
+    c.globalAlpha = st.show;
+    c.translate(cx, cy);
+    const A = st.accent;
+
+    if (st.hurt > 0.01) { c.shadowBlur = 60 * st.hurt; c.shadowColor = "#fff"; }
+    else { c.shadowBlur = 26; c.shadowColor = A; }
+
+    const K = st.kind;
+    if (K === "ruins") drawRuins(R, A, lv);
+    else if (K === "abyss") drawAbyss(R, A, lv);
+    else if (K === "canopy") drawCanopy(R, A, lv);
+    else if (K === "foundry") drawFoundry(R, A, lv);
+    else if (K === "mirage") drawMirage(R, A, lv);
+    else if (K === "academy") drawAcademy(R, A, lv);
+    else drawZenith(R, A, lv);
+
+    if (st.hurt > 0.01) {
+      c.globalAlpha = st.hurt * .55; c.fillStyle = "#fff";
+      c.beginPath(); c.arc(0, 0, R * 1.05, 0, 6.283); c.fill();
+    }
+    c.restore();
+  }
+
+  function eye(x, y, r, col) {
+    c.fillStyle = col; c.beginPath(); c.arc(x, y, r, 0, 6.283); c.fill();
+    c.fillStyle = "#0a0d13"; c.beginPath(); c.arc(x, y, r * .42, 0, 6.283); c.fill();
+  }
+  function drawRuins(R, A, lv) {
+    c.strokeStyle = A; c.lineWidth = R * .045; c.fillStyle = "rgba(20,15,7,.85)";
+    const bob = Math.sin(t * 1.6) * R * .04;
+    const blocks = [[0, -.75, .5, .34], [0, -.35, .78, .42], [0, .18, .62, .5], [-.72, -.28, .26, .30], [.72, -.28, .26, .30]];
+    for (const [x, y, w, h] of blocks) {
+      c.save(); c.translate(x * R, y * R + bob); c.rotate(Math.sin(t * .8 + x) * .03);
+      c.fillRect(-w * R / 2, -h * R / 2, w * R, h * R);
+      c.strokeRect(-w * R / 2, -h * R / 2, w * R, h * R);
+      c.restore();
+    }
+    eye(0, -.35 * R + bob, R * .13, A);
+    c.globalAlpha *= .5;
+    for (let i = 0; i < 6; i++) {
+      const a = t * .5 + i * 1.05, r = R * (1.15 + .1 * Math.sin(t * 2 + i));
+      c.fillStyle = A;
+      c.fillRect(Math.cos(a) * r, Math.sin(a) * r * .6, R * .07, R * .07);
+    }
+  }
+  function drawAbyss(R, A, lv) {
+    const bob = Math.sin(t * 1.1) * R * .05;
+    c.strokeStyle = A; c.lineWidth = R * .035;
+    c.fillStyle = "rgba(5,30,48,.8)";
+    c.beginPath(); c.ellipse(0, -.2 * R + bob, R * .72, R * .6, 0, Math.PI, 0); c.fill(); c.stroke();
+    for (let i = 0; i < 7; i++) {
+      const x = (-.6 + i * .2) * R;
+      c.beginPath(); c.moveTo(x, -.2 * R + bob);
+      for (let s = 1; s <= 5; s++) {
+        const yy = -.2 * R + bob + s * R * .22;
+        c.lineTo(x + Math.sin(t * 2.4 + s * .8 + i) * R * .09, yy);
+      }
+      c.stroke();
+    }
+    for (let i = 0; i < 8; i++) {
+      const a = -Math.PI + i * (Math.PI / 7);
+      c.fillStyle = A; c.globalAlpha *= .999;
+      c.beginPath(); c.arc(Math.cos(a) * R * .55, -.2 * R + bob + Math.sin(a) * R * .42, R * .045 * (1 + .4 * Math.sin(t * 3 + i)), 0, 6.283); c.fill();
+    }
+    eye(-.22 * R, -.42 * R + bob, R * .1, A); eye(.22 * R, -.42 * R + bob, R * .1, A);
+  }
+  function drawCanopy(R, A, lv) {
+    const bob = Math.sin(t * 1.4) * R * .04;
+    c.save(); c.translate(0, bob);
+    c.strokeStyle = A; c.lineWidth = R * .03;
+    for (let i = 0; i < 9; i++) {
+      const a = t * .3 + i * (6.283 / 9);
+      c.save(); c.rotate(a);
+      c.fillStyle = "rgba(15,50,26,.85)";
+      c.beginPath(); c.moveTo(0, 0);
+      c.quadraticCurveTo(R * .5, -R * .28, R * 1.05, 0);
+      c.quadraticCurveTo(R * .5, R * .28, 0, 0);
+      c.fill(); c.stroke();
+      c.restore();
+    }
+    c.fillStyle = "rgba(10,30,16,.95)";
+    c.beginPath(); c.arc(0, 0, R * .48, 0, 6.283); c.fill(); c.stroke();
+    eye(-.16 * R, -.06 * R, R * .1, A); eye(.16 * R, -.06 * R, R * .1, A);
+    c.restore();
+  }
+  function drawFoundry(R, A, lv) {
+    c.strokeStyle = A; c.lineWidth = R * .05;
+    for (let k = 0; k < 3; k++) {
+      const rr = R * (.5 + k * .26), dir = k % 2 ? -1 : 1, teeth = 10 + k * 4;
+      c.save(); c.rotate(t * (.4 + k * .18) * dir);
+      c.beginPath();
+      for (let i = 0; i < teeth; i++) {
+        const a = i * 6.283 / teeth;
+        c.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+        c.lineTo(Math.cos(a) * rr * 1.13, Math.sin(a) * rr * 1.13);
+      }
+      c.stroke();
+      c.globalAlpha *= .9;
+      c.beginPath(); c.arc(0, 0, rr, 0, 6.283); c.stroke();
+      c.restore();
+    }
+    const pulse = .8 + .2 * Math.sin(t * 5);
+    const g = c.createRadialGradient(0, 0, 1, 0, 0, R * .42 * pulse);
+    g.addColorStop(0, "#fff"); g.addColorStop(.4, A); g.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R * .42 * pulse, 0, 6.283); c.fill();
+  }
+  function drawMirage(R, A, lv) {
+    for (let k = 0; k < 3; k++) {
+      c.save();
+      c.globalAlpha *= .55;
+      c.rotate(t * (.5 + k * .3) + k * 2.09);
+      c.strokeStyle = A; c.lineWidth = R * .04;
+      c.fillStyle = "rgba(42,18,64,.55)";
+      c.beginPath();
+      for (let i = 0; i < 3; i++) {
+        const a = i * 2.094 - 1.57, r = R * (.9 - k * .16);
+        i ? c.lineTo(Math.cos(a) * r, Math.sin(a) * r) : c.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      c.closePath(); c.fill(); c.stroke();
+      c.restore();
+    }
+    const p = .8 + .2 * Math.sin(t * 4);
+    c.fillStyle = A; c.beginPath(); c.arc(0, 0, R * .14 * p, 0, 6.283); c.fill();
+  }
+  function drawAcademy(R, A, lv) {
+    const bob = Math.sin(t * 1.2) * R * .05;
+    c.save(); c.translate(0, bob); c.rotate(Math.sin(t * .7) * .05);
+    c.fillStyle = "rgba(20,24,30,.9)"; c.strokeStyle = A; c.lineWidth = R * .035;
+    c.fillRect(-R * .8, -R * .55, R * 1.6, R * 1.1);
+    c.strokeRect(-R * .8, -R * .55, R * 1.6, R * 1.1);
+    c.globalAlpha *= .7;
+    for (let i = 0; i < 4; i++) {
+      c.beginPath();
+      c.moveTo(-R * .6, -R * .3 + i * R * .22);
+      c.lineTo(-R * .6 + R * (.5 + .6 * Math.abs(Math.sin(t + i))), -R * .3 + i * R * .22);
+      c.stroke();
+    }
+    c.restore();
+    c.globalAlpha *= .9;
+    for (let i = 0; i < 5; i++) {
+      const a = t * 1.1 + i * 1.257, r = R * 1.2;
+      c.fillStyle = A;
+      c.beginPath(); c.arc(Math.cos(a) * r, Math.sin(a) * r * .5, R * .05, 0, 6.283); c.fill();
+    }
+    eye(0, bob, R * .12, A);
+  }
+  function drawZenith(R, A, lv) {
+    for (let k = 0; k < 3; k++) {
+      c.save();
+      c.rotate(t * (.3 + k * .25) + k * 1.05);
+      c.strokeStyle = A; c.lineWidth = R * .03; c.globalAlpha *= .8;
+      c.beginPath(); c.ellipse(0, 0, R * (1.05 - k * .12), R * (.32 + k * .1), 0, 0, 6.283); c.stroke();
+      c.restore();
+    }
+    const p = .85 + .15 * Math.sin(t * 3);
+    const g = c.createRadialGradient(0, 0, 1, 0, 0, R * .6 * p);
+    g.addColorStop(0, "#fff"); g.addColorStop(.35, A); g.addColorStop(1, "rgba(0,0,0,0)");
+    c.fillStyle = g; c.beginPath(); c.arc(0, 0, R * .6 * p, 0, 6.283); c.fill();
+    c.globalAlpha *= .8;
+    for (let i = 0; i < 12; i++) {
+      const a = i * .5236 + t * .6;
+      c.strokeStyle = A; c.lineWidth = R * .015;
+      c.beginPath();
+      c.moveTo(Math.cos(a) * R * .7, Math.sin(a) * R * .7);
+      c.lineTo(Math.cos(a) * R * (1 + .15 * Math.sin(t * 4 + i)), Math.sin(a) * R * (1 + .15 * Math.sin(t * 4 + i)));
+      c.stroke();
+    }
+  }
+
+  /* --- 色ユーティリティ --- */
+  function hexA(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+  }
+  function shade(hex, d) {
+    const n = parseInt(hex.slice(1), 16);
+    const f = v => Math.max(0, Math.min(255, v + d));
+    return `rgb(${f(n >> 16 & 255)},${f(n >> 8 & 255)},${f(n & 255)})`;
+  }
+
+  function loop() {
+    raf = requestAnimationFrame(loop);
+    t += 1 / 60;
+    st.show += (st.target - st.show) * (st.flare > .05 ? .22 : .09);
+    st.hurt *= .90;
+    st.shake *= .86;
+    st.warp *= .965;
+    st.flare *= .90;
+    c.clearRect(0, 0, W, H);
+    bg();
+    guardian();
+    fxLayer();
+  }
+  loop();
+
+  return { setStage, setLevel, appear, vanish, hurt, burst, spark, setGrow, setFx, warp };
+})();
+
+/* ===== js4_game.js ===== */
+/* ========== 5. ゲーム ========== */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+const motionOK = () => !!CFG.fx && !RMQ.matches;
+
+const CFG = { mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1 };
+const isMath = () => CFG.mode === "math";
+const isEnglish = () => CFG.mode === "english";
+const answersInEnglish = () => isEnglish() && CFG.engAnswer === "en";
+const isRadical = () => CFG.mode === "radical";
+const QUESTION_KEYS = ["l1", "l2", "l3", "final", "b1", "b2"];
+function mergeRawSets(base, extra) {
+  return Object.fromEntries(QUESTION_KEYS.map(k => [k, [...base[k], ...(extra[k] || [])]]));
+}
+function mergeObjectSets(base, extra) {
+  return Object.fromEntries(QUESTION_KEYS.map(k => [k, [...base[k], ...(extra[k] || [])]]));
+}
+function englishWordDisplay(word) { return word.split("|").join(" / ").toUpperCase(); }
+function englishExtraRaw(source, reverse) {
+  return Object.fromEntries(QUESTION_KEYS.map(k => [k, (source[k] || []).map(row => {
+    const [jp, en, ja, sub] = row;
+    if (k === "b1") return reverse ? [englishWordDisplay(en), sub, ja] : [jp, sub, en];
+    return reverse ? [englishWordDisplay(en), ja, `日本語訳・${sub}`] : [jp, en, sub];
+  })]));
+}
+/* 旧データの「最終」はB1前後の一般語が中心なので、発展帯へ移して再分類する。 */
+function relevelEnglishBase(base) {
+  const moved = base.final.map(row => [row[0], row[1], String(row[2]).startsWith("日本語訳") ? "日本語訳・発展" : "発展単語"]);
+  return { ...base, l3: [...base.l3, ...moved], final: [] };
+}
+/* 数学は単元名ではなく、必要な計算手順数で再分類する。
+   1手の式変形は標準、整数係数の複数手順は発展、分数を含む式変形を最難関とする。 */
+function buildMathMainSet() {
+  return {
+    l1: [...MATH_Q.l1, ...MATH_EXTRA_Q.l1, ...GENERAL_MATH_MORE.l1, ...MATH_MORE2.l1],
+    l2: [...MATH_Q.l2, ...MATH_EXTRA_Q.l2, ...GENERAL_MATH_MORE.l2, ...MATH_Q.final.slice(0, 16), ...MATH_MORE2.l2],
+    l3: [...MATH_Q.l3, ...MATH_EXTRA_Q.l3, ...GENERAL_MATH_MORE.l3,
+      ...MATH_EXTRA_Q.final.slice(0, 10), ...GENERAL_MATH_MORE.final.slice(0, 6), ...MATH_MORE2.l3],
+    final: [...MATH_Q.final.slice(16), ...MATH_EXTRA_Q.final.slice(10), ...GENERAL_MATH_MORE.final.slice(6), ...MATH_MORE2.final],
+    b1: [...MATH_Q.b1, ...MATH_EXTRA_Q.b1, ...GENERAL_MATH_MORE.b1],
+    b2: [...MATH_Q.b2, ...MATH_EXTRA_Q.b2, ...GENERAL_MATH_MORE.b2]
+  };
+}
+const KANJI_RAW = mergeRawSets(mergeRawSets(mergeRawSets(DEFAULT_Q, KANJI_EXTRA_Q), GENERAL_KANJI_MORE), KANJI_MORE2);
+const MSET = buildMathMainSet();
+let QSET = normalizeQ(KANJI_RAW);
+const ESET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_Q), englishExtraRaw(ENGLISH_EXTRA, false)), englishExtraRaw(GENERAL_ENGLISH_MORE, false)), englishExtraRaw(ENGLISH_MORE2, false)));
+const EJSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_JA_Q), englishExtraRaw(ENGLISH_EXTRA, true)), englishExtraRaw(GENERAL_ENGLISH_MORE, true)), englishExtraRaw(ENGLISH_MORE2, true)));
+const RSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(RADICAL_Q, RADICAL_EXTRA_Q), GENERAL_RADICAL_MORE), RADICAL_MORE2));
+function activeSet() {
+  if (isMath()) return MSET;
+  if (isEnglish()) return answersInEnglish() ? ESET : EJSET;
+  if (isRadical()) return RSET;
+  return QSET;
+}
+
+/* 航路ごとの難度構成。出題数に合わせて最大剰余法で整数化し、易→難の順に並べる。 */
+const ROUTE_MIX = {
+  1: { l1: 1 },
+  2: { l1: .75, l2: .25 },
+  3: { l1: .5, l2: .5 },
+  4: { l1: .25, l2: .5, l3: .25 },
+  5: { l2: .5, l3: .5 },
+  6: { l2: .25, l3: .5, final: .25 },
+  7: { l3: .25, final: .75 }
+};
+const POOL_ORDER = ["l1", "l2", "l3", "final"];
+const ROUTE_DIFFICULTY = {
+  1: "入門", 2: "初級", 3: "初中級", 4: "中級", 5: "中上級", 6: "上級", 7: "最難関"
+};
+const ROUTE_MIX_SHORT = {
+  1: "基100", 2: "基75 標25", 3: "基50 標50", 4: "基25 標50 発25",
+  5: "標50 発50", 6: "標25 発50 最25", 7: "発25 最75"
+};
+const ROUTE_MIX_LABEL = {
+  1: "基礎100%", 2: "基礎75%・標準25%", 3: "基礎50%・標準50%",
+  4: "基礎25%・標準50%・発展25%", 5: "標準50%・発展50%",
+  6: "標準25%・発展50%・最難関25%", 7: "発展25%・最難関75%"
+};
+function buildRoutePlan(stage, count) {
+  const mix = ROUTE_MIX[stage] || ROUTE_MIX[1];
+  const parts = POOL_ORDER.filter(k => mix[k]).map(k => {
+    const exact = mix[k] * count;
+    return { key: k, count: Math.floor(exact), fraction: exact - Math.floor(exact) };
+  });
+  let left = count - parts.reduce((sum, part) => sum + part.count, 0);
+  const byRemainder = [...parts].sort((a, b) =>
+    b.fraction - a.fraction || POOL_ORDER.indexOf(b.key) - POOL_ORDER.indexOf(a.key)
+  );
+  for (let i = 0; i < left; i++) byRemainder[i % byRemainder.length].count++;
+  return POOL_ORDER.flatMap(key => {
+    const part = parts.find(p => p.key === key);
+    return Array(part ? part.count : 0).fill(key);
+  });
+}
+function routePoolName() {
+  return G.routePlan[Math.min(G.correct, Math.max(0, G.routePlan.length - 1))] || "l1";
+}
+
+const G = {
+  stage: 1, level: "l1", correct: 0, combo: 0, lives: 5, swaps: 0,
+  q: null, kata: false, used: {}, rooms: [], routePlan: [],
+  state: "idle", judging: false, timeUp: false, resolve: null,
+  timing: false, raf: 0, tStart: 0, tTotal: 0, lastSec: 99,
+  paused: false, pauseElapsed: 0, pauseWasTiming: false, cancelled: false, quitWasPaused: false,
+  tagKind: null, hintOn: false, bonusMode: null, pending: null
+};
+const IN = { kana: [], romaji: "" };
+
+function normalizeQ(s) {
+  return {
+    l1: s.l1.map(x => ({ q: x[0], a: x[1], sub: x[2] || "" })),
+    l2: s.l2.map(x => ({ q: x[0], a: x[1], sub: x[2] || "" })),
+    l3: s.l3.map(x => ({ q: x[0], a: x[1], sub: x[2] || "" })),
+    final: s.final.map(x => ({ q: x[0], a: x[1], sub: x[2] || "" })),
+    b1: s.b1.map(x => ({ q: x[0], sub: x[1], a: x[2] })),
+    b2: s.b2.map(x => ({ q: x[0], a: x[1], sub: x[2] || "" }))
+  };
+}
+
+/* ---------- 設定画面 ---------- */
+const OPTS = [
+  { k: "mode", label: "モード", vals: [["kanji", "漢字の読み"], ["math", "数学"], ["english", "英語"], ["radical", "部首"]] },
+  { k: "engAnswer", label: "英語の答え方", vals: [["en", "英単語を答える"], ["ja", "日本語訳を答える"]] },
+  { k: "input", label: "入力方法", vals: [[0, "画面キーボード"], [1, "PCキーボード"]] },
+  { k: "N", label: "問題数", vals: [[7, "7問"], [10, "10問"], [13, "13問"], [15, "15問"], [20, "20問"]] },
+  { k: "mult", label: "1問の持ち時間", vals: [[0.5, "15秒"], [0.75, "20秒"], [1, "25秒"], [2, "45秒"]] },
+  { k: "lives", label: "読み手の人数", vals: [[1, "1"], [2, "2"], [3, "3"], [4, "4"], [5, "5"]] },
+  { k: "hint", label: "ヒント", vals: [[0, "なし"], [1, "あり"]] },
+  { k: "bonus", label: "ボーナス", vals: [["0", "なし"], ["1", "部首"], ["2", "カタカナ語"], ["1・2", "両方"]] },
+  { k: "bgm", label: "BGM", vals: [[0, "切"], [1, "入"]] },
+  { k: "volume", label: "全体音量", vals: [] },
+  { k: "fx", label: "画面演出", vals: [[0, "控えめ"], [1, "標準"]] }
+];
+
+function syncVolumeControls() {
+  const pct = Math.round(CFG.volume * 100);
+  for (const [sliderId, valueId] of [["setupVolumeSlider", "setupVolumeValue"], ["pauseVolumeSlider", "pauseVolumeValue"]]) {
+    const slider = $(sliderId), value = $(valueId);
+    if (slider) { slider.value = String(pct); slider.style.setProperty("--volume-pct", pct + "%"); }
+    if (value) value.textContent = pct + "%";
+  }
+}
+function setGameVolume(percent, preview) {
+  const pct = Math.max(0, Math.min(100, Number(percent)));
+  CFG.volume = pct / 100;
+  Audio_.setVolume(CFG.volume);
+  syncVolumeControls();
+  if (preview) Audio_.sfx.ui();
+}
+function createVolumeGauge(sliderId, valueId) {
+  const gauge = document.createElement("div"); gauge.className = "volume-gauge";
+  gauge.innerHTML = `<div class="volume-row"><label for="${sliderId}">音量ゲージ</label><output id="${valueId}"></output></div>
+    <input id="${sliderId}" type="range" min="0" max="100" step="5" aria-label="全体音量">`;
+  const slider = gauge.querySelector("input");
+  slider.oninput = () => setGameVolume(slider.value, false);
+  slider.onchange = () => setGameVolume(slider.value, true);
+  return gauge;
+}
+
+function buildSetup() {
+  const wrap = $("stages");
+  wrap.innerHTML = "";
+  const list = [1, 2, 3, 4, 5, 6, 7];
+  for (const n of list) {
+    const b = document.createElement("button");
+    b.className = "stage-chip";
+    b.title = `航路${n}：${ROUTE_DIFFICULTY[n]}（${ROUTE_MIX_LABEL[n]}）`;
+    b.setAttribute("aria-label", b.title);
+    b.innerHTML = `<div class="n">${n}</div><div class="nm">${STAGES[n].jp}</div><div class="df">${ROUTE_MIX_SHORT[n]}</div>`;
+    b.onclick = () => { CFG.stage = n; Audio_.sfx.ui(); paintStages(); previewStage(n); };
+    wrap.appendChild(b);
+  }
+  const r = document.createElement("button");
+  r.className = "stage-chip";
+  r.innerHTML = `<div class="n">?</div><div class="nm">おまかせ</div><div class="df">難度ランダム</div>`;
+  r.onclick = () => { CFG.stage = "?"; Audio_.sfx.ui(); paintStages(); previewStage(1 + Math.floor(Math.random() * 7)); };
+  wrap.appendChild(r);
+
+  const bonusLabels = isMath()
+    ? { "0": "なし", "1": "整数", "2": "平方根", "1・2": "両方" }
+    : isEnglish()
+      ? { "0": "なし", "1": "基本英語", "2": "発展英語", "1・2": "両方" }
+      : isRadical()
+        ? { "0": "なし", "1": "基本部首", "2": "発展部首", "1・2": "両方" }
+        : null;
+  const o = $("opts"); o.innerHTML = "";
+  for (const opt of OPTS) {
+    if (opt.k === "input" && isMath()) continue;   // 数学は専用キーパッド固定
+    if (opt.k === "engAnswer" && !isEnglish()) continue;
+    const d = document.createElement("div"); d.className = "opt";
+    if (opt.k === "volume") {
+      d.innerHTML = `<span>${opt.label}</span>`;
+      d.appendChild(createVolumeGauge("setupVolumeSlider", "setupVolumeValue"));
+      o.appendChild(d); syncVolumeControls();
+      continue;
+    }
+    const seg = document.createElement("div"); seg.className = "seg";
+    for (const [v, lb] of opt.vals) {
+      const b = document.createElement("button");
+      b.textContent = (opt.k === "bonus" && bonusLabels) ? bonusLabels[String(v)] : lb;
+      b.dataset.k = opt.k; b.dataset.v = String(v);
+      b.onclick = () => {
+        CFG[opt.k] = (typeof opt.vals[0][0] === "number") ? Number(v) : v;
+        if (opt.k === "volume") Audio_.setVolume(CFG.volume);
+        Audio_.sfx.ui();
+        if (opt.k === "fx") Art.setFx(motionOK());
+        if (opt.k === "bgm") Audio_.setBgmEnabled(!!CFG.bgm);
+        if (opt.k === "mode") buildSetup(); else paintOpts();
+      };
+      seg.appendChild(b);
+    }
+    d.innerHTML = `<span>${opt.label}</span>`;
+    d.appendChild(seg); o.appendChild(d);
+  }
+  const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
+  paintStages(); paintOpts(); previewStage(1);
+}
+function paintStages() {
+  [...$("stages").children].forEach((el, i) => {
+    const v = i < 7 ? i + 1 : "?";
+    el.classList.toggle("sel", String(CFG.stage) === String(v));
+  });
+}
+function paintOpts() {
+  $("opts").querySelectorAll("button").forEach(b => {
+    b.classList.toggle("sel", String(CFG[b.dataset.k]) === b.dataset.v);
+  });
+}
+function previewStage(n) { Art.setStage(n, "l1", Math.floor(Math.random() * 3)); }
+
+/* ---------- キーボード ---------- */
+function buildKeyboard() {
+  const area = $("kbdArea");
+  area.innerHTML = "";
+  if (isMath()) { buildMathPad(area); return; }
+  if (answersInEnglish()) {
+    if (CFG.input === 1) {
+      area.innerHTML = `<div class="romaji-note">英字で入力 ―― 決定 <b>Enter</b>　一字消す <b>Back space</b></div>`;
+    } else {
+      buildEnglishPad(area);
+    }
+    return;
+  }
+  if (CFG.input === 1) {
+    const guide = isEnglish() ? "ローマ字で日本語訳を入力" : "ローマ字で入力";
+    area.innerHTML = `<div class="romaji-note">${guide} ―― 決定 <b>Enter</b>　一字消す <b>Back space</b></div>`;
+    return;
+  }
+  const main = document.createElement("div"); main.className = "kbd";
+  for (let r = 0; r < 5; r++) for (let col = 0; col < 10; col++) {
+    const ch = KANA_COLS[col][r];
+    const b = document.createElement("button");
+    if (!ch) { b.className = "void"; b.disabled = true; }
+    else { b.textContent = disp(ch); b.onclick = () => pressKana(ch); }
+    b.style.gridColumn = col + 1; b.style.gridRow = r + 1;
+    main.appendChild(b);
+  }
+  area.appendChild(main);
+
+  const ex = document.createElement("div"); ex.className = "kbd"; ex.style.marginTop = "4px";
+  for (const ch of KANA_EXTRA) {
+    const b = document.createElement("button");
+    b.textContent = (ch === "゛" || ch === "゜") ? ch : disp(ch);
+    if (ch === "゛" || ch === "゜") b.className = "mod";
+    b.onclick = () => pressKana(ch);
+    ex.appendChild(b);
+  }
+  area.appendChild(ex);
+}
+function buildEnglishPad(area) {
+  const main = document.createElement("div"); main.className = "alpha-kbd";
+  const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+  rows.forEach((row, ri) => {
+    const offset = ri === 1 ? 1 : ri === 2 ? 2 : 0;
+    [...row].forEach((ch, ci) => {
+      const b = document.createElement("button");
+      b.textContent = ch.toUpperCase();
+      b.style.gridColumn = offset + ci + 1;
+      b.style.gridRow = ri + 1;
+      b.onclick = () => pressEnglish(ch);
+      main.appendChild(b);
+    });
+  });
+  area.appendChild(main);
+}
+const MATH_KEY_ICON = {
+  "/": '<span class="fr"><span><i class="ph"></i></span><span><i class="ph"></i></span></span>',
+  "^": '<i class="ph"></i><sup class="power"><i class="ph"></i></sup>'
+};
+function buildMathPad(area) {
+  const wrap = document.createElement("div"); wrap.className = "mathpad";
+  const num = document.createElement("div"); num.className = "mkeys num";
+  for (const t of MATH_KEYS_NUM) {
+    const b = document.createElement("button");
+    b.textContent = t === "-" ? "−" : t;
+    b.onclick = () => pressMath(t);
+    num.appendChild(b);
+  }
+  const sym = document.createElement("div"); sym.className = "mkeys sym";
+  for (const t of MATH_KEYS_SYM) {
+    const b = document.createElement("button"); b.className = "op";
+    if (MATH_KEY_ICON[t]) { b.innerHTML = MATH_KEY_ICON[t]; b.classList.add("icon"); }
+    else b.textContent = t;
+    b.setAttribute("aria-label", t === "/" ? "分数" : t === "^" ? "指数" : t);
+    b.onclick = () => pressMath(t);
+    sym.appendChild(b);
+  }
+  wrap.appendChild(num); wrap.appendChild(sym);
+  area.appendChild(wrap);
+}
+function pressMath(tok) {
+  if (G.state !== "answer" || G.judging) return;
+  Audio_.resume();
+  if (IN.kana.length >= 20) return;
+  IN.kana.push(tok);
+  Audio_.sfx.key(); renderSlots();
+}
+function pressEnglish(ch) {
+  if (!answersInEnglish() || G.state !== "answer" || G.judging || !/^[a-z]$/i.test(ch)) return;
+  Audio_.resume();
+  if (IN.kana.length >= 20) return;
+  IN.kana.push(ch.toLowerCase());
+  Audio_.sfx.key(); renderSlots();
+}
+function disp(ch) { return G.kata ? toKata(ch) : ch; }
+
+function pressKana(ch) {
+  if (G.state !== "answer" || G.judging) return;
+  Audio_.resume();
+  if (ch === "゛" || ch === "゜") {
+    if (!IN.kana.length) return;
+    const last = IN.kana[IN.kana.length - 1];
+    const h = toHira(last);
+    const from = ch === "゛" ? DAKU_FROM : HAN_FROM;
+    const to = ch === "゛" ? DAKU_TO : HAN_TO;
+    const i = from.indexOf(h);
+    if (i < 0) { Audio_.sfx.wrong(); return; }
+    IN.kana[IN.kana.length - 1] = G.kata ? toKata(to[i]) : to[i];
+    Audio_.sfx.key(); renderSlots(); return;
+  }
+  if (IN.kana.length >= 15) return;
+  IN.kana.push(disp(ch));
+  Audio_.sfx.key(); renderSlots();
+}
+function pressRomaji(ch) {
+  IN.romaji += ch;
+  const [kana, rest] = romajiConsume(IN.romaji, false);
+  IN.romaji = rest;
+  for (const k of kana) { if (IN.kana.length < 15) IN.kana.push(G.kata ? toKata(k) : k); }
+  if (kana) Audio_.sfx.key();
+  renderSlots();
+}
+function backspace() {
+  if (G.state !== "answer" || G.judging) return;
+  if (IN.romaji) IN.romaji = IN.romaji.slice(0, -1);
+  else if (IN.kana.length) IN.kana.pop();
+  else return;
+  Audio_.sfx.del(); renderSlots();
+}
+function clearInput() { IN.kana = []; IN.romaji = ""; renderSlots(); }
+
+function renderSlots() {
+  const s = $("slots");
+  s.className = "slots";
+  s.innerHTML = "";
+  if (isMath()) {
+    if (G.q && G.q.cat === "eqn") {
+      const p = document.createElement("div"); p.className = "eqpre"; p.textContent = "y="; s.appendChild(p);
+    }
+    for (const u of mathUnits(IN.kana)) {
+      const d = document.createElement("div");
+      d.className = "slot math" + (u.k === "frac" ? " wide" : u.k === "root" ? " root" : "sup" in u ? " power-unit" : "");
+      d.innerHTML = `<span class="math-inline">${unitHTML(u)}</span>`;
+      s.appendChild(d);
+    }
+    if (!IN.kana.length) { const d = document.createElement("div"); d.className = "slot math ghost"; s.appendChild(d); }
+    $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
+    return;
+  }
+  if (answersInEnglish()) s.classList.add("english");
+  for (const k of IN.kana) {
+    const d = document.createElement("div"); d.className = "slot"; d.textContent = k; s.appendChild(d);
+  }
+  if (IN.romaji) {
+    const d = document.createElement("div"); d.className = "slot ghost";
+    d.style.fontFamily = "var(--latin)"; d.style.fontSize = "15px";
+    d.textContent = IN.romaji; s.appendChild(d);
+  }
+  if (!IN.kana.length && !IN.romaji) {
+    const d = document.createElement("div"); d.className = "slot ghost"; s.appendChild(d);
+  }
+  $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
+}
+
+/* ---------- HUD ---------- */
+function renderHud() {
+  const s = STAGES[G.stage];
+  $("stgName").textContent = (G.stage === 6) ? `学舎 ― ${ROOMS[G.rooms[lvIndex(G.level)] || 0]}` : s.jp;
+  $("lvName").textContent = G.bonusMode
+    ? `BONUS · ${ROUTE_DIFFICULTY[G.stage]}`
+    : `${LV_LABEL[G.level]} · ${ROUTE_DIFFICULTY[G.stage]} · ${ROUTE_MIX_SHORT[G.stage]}`;
+
+  const b = BOUNDS[CFG.N];
+  const p = $("pips"); p.innerHTML = "";
+  for (let i = 0; i < CFG.N; i++) {
+    const d = document.createElement("div");
+    d.className = "pip" + (i < G.correct ? " done" : "") + (i === CFG.N - 1 ? " final" : "");
+    const b1 = (CFG.bonus === "1" || CFG.bonus === "1・2") && i === b[0] - 1;
+    const b2 = (CFG.bonus === "2" || CFG.bonus === "1・2") && i === b[1] - 1;
+    if ((b1 || b2) && i >= G.correct) d.classList.add("bonus");
+    p.appendChild(d);
+  }
+  const cw = $("crew"); cw.innerHTML = "";
+  for (let i = 0; i < CFG.lives; i++) {
+    const e = document.createElement("i");
+    if (i >= G.lives) e.className = "lost";
+    else if (i === G.lives - 1) e.className = "now";
+    cw.appendChild(e);
+  }
+  $("swapBtn").hidden = !(G.swaps > 0) || !!G.bonusMode;
+  $("swapN").textContent = G.swaps;
+  $("swapBtn").disabled = !(G.state === "answer" && !G.bonusMode && G.swaps > 0);
+}
+function lvIndex(l) { return { l1: 0, l2: 1, l3: 2, final: 3 }[l] || 0; }
+
+/* ---------- タイマー ---------- */
+const RING_C = 2 * Math.PI * 84;
+function startTimer(total) {
+  G.tTotal = total; G.tStart = performance.now(); G.timeUp = false; G.lastSec = 99; G.pauseElapsed = 0;
+  $("ringFg").style.strokeDasharray = RING_C;
+  cancelAnimationFrame(G.raf);
+  if (G.paused) {
+    G.timing = false; G.pauseWasTiming = true;
+    $("ringFg").style.strokeDashoffset = 0;
+    $("timerBar").style.transform = "scaleX(1)";
+    $("timerNum").textContent = total.toFixed(1);
+    return;
+  }
+  G.timing = true;
+  tick();
+}
+function tick() {
+  if (!G.timing) return;
+  G.raf = requestAnimationFrame(tick);
+  const el = (performance.now() - G.tStart) / 1000;
+  const rem = Math.max(0, G.tTotal - el);
+  const ratio = rem / G.tTotal;
+  $("ringFg").style.strokeDashoffset = RING_C * (1 - ratio);
+  $("timerBar").style.transform = `scaleX(${ratio})`;
+  $("timerNum").textContent = rem.toFixed(1);
+  $("seal").classList.toggle("warn", rem <= 6);
+  $("timer").classList.toggle("warn", rem <= 6);
+  Art.setGrow(Math.min(1, el / G.tTotal));
+  const sec = Math.ceil(rem);
+  if (sec <= 5 && sec >= 1 && sec !== G.lastSec) { G.lastSec = sec; bigCount(sec); Audio_.sfx.tick(); }
+  if (rem <= 0) {
+    if (G.judging) { G.timeUp = true; }
+    else { G.timing = false; cancelAnimationFrame(G.raf); finish("timeout"); }
+  }
+}
+function stopTimer() {
+  G.timing = false; G.pauseWasTiming = false; G.pauseElapsed = 0;
+  cancelAnimationFrame(G.raf); $("seal").classList.remove("warn"); $("timer").classList.remove("warn");
+}
+function pauseGame() {
+  if (G.paused || G.cancelled || !$("play").classList.contains("on")) return;
+  Audio_.sfx.pause();
+  G.paused = true;
+  G.pauseWasTiming = G.timing;
+  if (G.timing) G.pauseElapsed = Math.min(G.tTotal, (performance.now() - G.tStart) / 1000);
+  G.timing = false; cancelAnimationFrame(G.raf);
+  Audio_.bgmStop(0.15);
+  syncVolumeControls();
+  $("pauseScreen").classList.add("on");
+}
+function resumeGame() {
+  if (!G.paused || G.cancelled) return;
+  Audio_.sfx.resumeGame();
+  G.paused = false;
+  $("pauseScreen").classList.remove("on");
+  if (G.pauseWasTiming) {
+    G.tStart = performance.now() - G.pauseElapsed * 1000;
+    G.pauseWasTiming = false; G.timing = true; tick();
+  }
+  if (CFG.bgm) Audio_.bgmStart(G.bonusMode ? "bonus" : (G.stage === 7 ? "final" : G.level));
+}
+function requestQuit() {
+  if (G.cancelled || !$("play").classList.contains("on")) return;
+  G.quitWasPaused = G.paused;
+  if (!G.paused) pauseGame();
+  $("quitConfirm").classList.add("on");
+}
+function cancelQuit() {
+  $("quitConfirm").classList.remove("on");
+  if (!G.quitWasPaused) resumeGame();
+}
+function confirmQuit() {
+  Audio_.sfx.quit();
+  G.cancelled = true; G.paused = false;
+  $("quitConfirm").classList.remove("on"); $("pauseScreen").classList.remove("on");
+  stopTimer(); Audio_.bgmStop(0.2);
+  if (G.resolve) { const done = G.resolve; G.resolve = null; done("quit"); }
+  else G.pending = "quit";
+  toSetup();
+}
+function bigCount(n) {
+  if (!motionOK()) return;
+  const e = $("bigcount"); e.textContent = n; e.classList.remove("on"); void e.offsetWidth; e.classList.add("on");
+}
+function finish(r) {
+  if (G.resolve) { const f = G.resolve; G.resolve = null; G.state = "wait"; f(r); }
+  else { G.pending = r; }            // 解説中などに時間切れが来た場合は保留
+}
+function awaitAnswer() {
+  if (G.pending) { const p = G.pending; G.pending = null; return Promise.resolve(p); }
+  return new Promise(res => { G.resolve = res; });
+}
+
+/* ---------- 演出 ---------- */
+function flash(kind) {
+  if (!motionOK()) return;
+  const f = $("flash"); f.className = ""; void f.offsetWidth; f.className = kind;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function answerDisplay() {
+  if (isMath()) return answerHTML(G.q.a, G.q.cat);
+  const answer = G.q.a.split("|")[0];
+  return escapeHtml(answersInEnglish() ? answer.toUpperCase() : answer);
+}
+
+/* 数式は常に一行。円からはみ出す長い式は文字サイズを詰めて収める */
+function fitMathText() {
+  const t = $("qText"), seal = $("seal");
+  const sealW = seal.clientWidth;
+  t.style.fontSize = "";
+  if (!sealW) return;
+  const maxW = sealW * 0.76;
+  const natural = t.scrollWidth;
+  if (natural <= maxW) return;
+  const base = parseFloat(getComputedStyle(t).fontSize) || 32;
+  t.style.fontSize = Math.max(12, base * maxW / natural) + "px";
+}
+let _fitRAF = 0;
+window.addEventListener("resize", () => {
+  if ((!isMath() && !(isEnglish() && !answersInEnglish())) || !$("play").classList.contains("on") || !G.q) return;
+  cancelAnimationFrame(_fitRAF);
+  _fitRAF = requestAnimationFrame(fitMathText);
+});
+
+function showReveal(html, mid) {
+  const r = $("reveal");
+  r.innerHTML = html;
+  r.classList.remove("on"); r.classList.toggle("mid", !!mid);
+  void r.offsetWidth; r.classList.add("on");
+}
+function hideReveal() { $("reveal").classList.remove("on"); }
+
+function showHint() {
+  if (!G.q) return;
+  const box = $("hintBox"); box.hidden = false;
+  if (isMath()) { box.innerHTML = catHint(G.q.cat); return; }
+  const a = G.q.a.split("|")[0];
+  if (answersInEnglish()) {
+    box.innerHTML = `<b>${escapeHtml(a[0].toUpperCase())}</b>${a.length} LETTERS`;
+    return;
+  }
+  if (isEnglish()) {
+    box.innerHTML = `<b>${a.length}</b>文字（ひらがな）`;
+    return;
+  }
+  if (isRadical()) {
+    box.innerHTML = `<b>${a.length}</b>文字`;
+    return;
+  }
+  box.innerHTML = G.kata
+    ? `<b>${a[0]}</b>${a.length} 文字`
+    : `<b>${a.length}</b>文字`;
+}
+function hideHint() { $("hintBox").hidden = true; }
+
+/* ---------- オーバーレイ ---------- */
+function showOv(cls, html) { $("ovIn").innerHTML = html; $("ov").className = "on " + (cls || ""); }
+function hideOv() { $("ov").className = ""; }
+function waitPress() {
+  return new Promise(res => {
+    const h = e => {
+      if (e.type === "keydown" && !["Space", "Enter", "NumpadEnter"].includes(e.code)) return;
+      if (e.type === "keydown") e.preventDefault();
+      window.removeEventListener("keydown", h); window.removeEventListener("pointerdown", h);
+      res();
+    };
+    setTimeout(() => { window.addEventListener("keydown", h); window.addEventListener("pointerdown", h); }, 400);
+  });
+}
+
+/* ---------- 出題 ----------
+   同じ難易度の中では「シャッフルの袋（シャッフルバッグ）」方式で出題する。
+   その難易度の問題を一度ランダムに並べ替え、全問を出し切るまで重複させない。
+   袋はゲームをまたいで保持するので、続けて遊んでも同じ問題が固まって出にくい。 */
+const PICK_BAGS = new Map();
+function shuffledIndices(n) {
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function drawFromBag(key, len) {
+  if (len <= 0) return 0;
+  let bag = PICK_BAGS.get(key);
+  if (!bag || bag.len !== len) { bag = { len, order: shuffledIndices(len), pos: 0 }; PICK_BAGS.set(key, bag); }
+  if (bag.pos >= bag.order.length) {
+    const last = bag.order[bag.order.length - 1];
+    bag.order = shuffledIndices(len);
+    if (len > 1 && bag.order[0] === last) {
+      const j = 1 + Math.floor(Math.random() * (len - 1));
+      [bag.order[0], bag.order[j]] = [bag.order[j], bag.order[0]];
+    }
+    bag.pos = 0;
+  }
+  return bag.order[bag.pos++];
+}
+function activeSetTag() {
+  if (isMath()) return "M";
+  if (isEnglish()) return answersInEnglish() ? "E" : "EJ";
+  if (isRadical()) return "R";
+  return "K";
+}
+function pick(poolName) {
+  const full = activeSet()[poolName];
+  let pool = full, keySuffix = "";
+  if ((poolName === "b1" || poolName === "b2") && full.length > 8) {
+    const windowSize = Math.max(8, Math.ceil(full.length * .5));
+    const maxStart = Math.max(0, full.length - windowSize);
+    const start = Math.round(((G.stage - 1) / 6) * maxStart);
+    pool = full.slice(start, start + windowSize);
+    keySuffix = "#" + start;
+  }
+  const i = drawFromBag(activeSetTag() + ":" + poolName + keySuffix, pool.length);
+  return pool[i];
+}
+function modeLead(finalQuestion) {
+  if (isEnglish()) {
+    if (answersInEnglish()) return finalQuestion ? "最後の英単語" : "英単語で こたえよ";
+    return finalQuestion ? "最後の日本語訳" : "日本語訳を ひらがなで";
+  }
+  if (isRadical()) return finalQuestion ? "最後の部首" : "部首の名を こたえよ";
+  return finalQuestion ? "最後の一問" : "よみを こたえよ";
+}
+function renderQ(q, kata, lead) {
+  G.q = q; G.kata = !!kata && CFG.mode === "kanji";
+  $("seal").classList.remove("burst", "correct", "reject");
+  $("shock").classList.remove("on");
+  $("guard").classList.remove("on");
+  $("boom").innerHTML = "";
+  $("qText").style.visibility = ""; $("qSub").style.visibility = "";
+  const t = $("qText");
+  if (isMath()) {
+    $("qLead").textContent = catLead(q.cat);
+    t.classList.remove("small", "english-prompt"); t.classList.add("math");
+    t.innerHTML = mathHTML(q.disp);
+    $("qSub").textContent = "";
+    fitMathText();
+  } else {
+    $("qLead").textContent = lead;
+    t.classList.remove("math"); t.style.fontSize = "";
+    t.classList.toggle("english-prompt", isEnglish() && !answersInEnglish());
+    t.textContent = q.q;
+    t.classList.toggle("small", q.q.length > 4);
+    $("qSub").textContent = q.sub || "";
+    if (isEnglish() && !answersInEnglish()) fitMathText();
+  }
+  clearInput();
+  buildKeyboard();
+  if (G.hintOn) showHint(); else hideHint();
+  hideReveal();
+}
+
+async function runQuestion() {
+  const b = BOUNDS[CFG.N];
+  G.level = levelOf(G.correct);
+  Art.setLevel(G.level);
+  if (G.stage === 6) Art.setStage(6, G.level, G.rooms[lvIndex(G.level)]);
+
+  // ボーナスの札：直前も正解している場合のみ、その級の最終問題に付く
+  G.tagKind = null;
+  const wantB1 = (CFG.bonus === "1" || CFG.bonus === "1・2") && G.correct === b[0] - 1;
+  const wantB2 = (CFG.bonus === "2" || CFG.bonus === "1・2") && G.correct === b[1] - 1;
+  if ((wantB1 || wantB2) && G.combo >= 1) G.tagKind = wantB1 ? "1" : "2";
+  $("bonusTag").hidden = !G.tagKind;
+
+  renderQ(pick(routePoolName()), false, modeLead(G.level === "final"));
+  renderHud();
+  Art.appear(); Audio_.sfx.encounter();
+  await sleep(650);
+
+  G.pending = null;
+  G.state = "answer"; renderSlots(); renderHud();
+  startTimer(20 * CFG.mult + 5);
+  return awaitAnswer();
+}
+
+function levelOf(cor) {
+  const b = BOUNDS[CFG.N];
+  if (cor < b[0]) return "l1";
+  if (cor < b[1]) return "l2";
+  if (cor < b[2]) return "l3";
+  return "final";
+}
+
+/* ---------- 判定 ---------- */
+function fire() {
+  if (G.state !== "answer" || G.judging || !IN.kana.length) return;
+  Audio_.resume();
+  G.judging = true; G.state = "judge";
+  $("fireBtn").disabled = true;
+  const n = IN.kana.length;
+  for (let i = 0; i < n; i++) Audio_.sfx.fire(i);
+  $("slots").classList.add("fly");
+  flash("fire");
+  setTimeout(() => {
+    const typed = IN.kana.join("");
+    const ok = isMath()
+      ? mathEqual(typed, G.q.a, G.q.cat)
+      : G.q.a.split("|").map(s => answersInEnglish() ? s.trim().toLowerCase() : s.trim())
+        .includes(answersInEnglish() ? typed.toLowerCase() : typed);
+    if (ok) {
+      G.judging = false;
+      if (!G.bonusMode) stopTimer();   // ボーナスは3問で1本のタイマー
+      breakSeal();
+      finish("correct");
+    } else {
+      deflect();
+      setTimeout(() => {
+        G.judging = false;
+        clearInput();
+        if (G.timeUp) { G.timing = false; cancelAnimationFrame(G.raf); finish("timeout"); }
+        else { G.state = "answer"; renderSlots(); }
+      }, 560);
+    }
+  }, 340);
+}
+
+/* 正解＝問題そのものが爆発し、封印が砕ける */
+function explodeQuestion() {
+  const t = $("qText"), layer = $("boom");
+  layer.innerHTML = "";
+  const r = t.getBoundingClientRect();
+  if (!r.width || !r.height) return null;
+
+  const center = { x: r.left + r.width / 2, y: r.top + r.height / 2, R: Math.max(72, Math.max(r.width, r.height) * .95) };
+  if (RMQ.matches) { t.style.visibility = "hidden"; $("qSub").style.visibility = "hidden"; return center; }
+
+  const cs = getComputedStyle(t);
+  const N = CFG.fx ? 12 : 5;
+
+  // 中心から放射状に、角度をゆらした楔形へ切り分ける
+  const angs = [];
+  for (let i = 0; i <= N; i++) {
+    const base = i / N * 360;
+    angs.push(i === 0 || i === N ? base : base + (Math.random() - .5) * (360 / N) * .55);
+  }
+  for (let i = 0; i < N; i++) {
+    const a0 = angs[i], a1 = angs[i + 1];
+    const pts = ["50% 50%"];
+    for (let k = 0; k <= 3; k++) {
+      const a = (a0 + (a1 - a0) * k / 3) * Math.PI / 180;
+      pts.push(`${(50 + 95 * Math.cos(a)).toFixed(1)}% ${(50 + 95 * Math.sin(a)).toFixed(1)}%`);
+    }
+    const el = document.createElement("div");
+    el.className = "shard";
+    el.textContent = t.textContent;
+    el.style.left = r.left + "px"; el.style.top = r.top + "px";
+    el.style.width = r.width + "px"; el.style.height = r.height + "px";
+    el.style.fontFamily = cs.fontFamily; el.style.fontSize = cs.fontSize;
+    el.style.fontWeight = cs.fontWeight; el.style.lineHeight = cs.lineHeight;
+    el.style.letterSpacing = cs.letterSpacing; el.style.color = cs.color;
+    el.style.clipPath = `polygon(${pts.join(",")})`;
+    layer.appendChild(el);
+
+    const mid = (a0 + a1) / 2 * Math.PI / 180;
+    const dist = (70 + Math.random() * 170) * (CFG.fx ? 1 : .55);
+    const dx = Math.cos(mid) * dist, dy = Math.sin(mid) * dist;
+    const rot = (Math.random() - .5) * 170;
+    el.animate([
+      { transform: "translate(0,0) rotate(0deg) scale(1)", opacity: 1, filter: "brightness(7)" },
+      { transform: `translate(${dx * .3}px,${dy * .3 - 18}px) rotate(${rot * .25}deg) scale(1.08)`, opacity: 1, filter: "brightness(2)", offset: .16 },
+      { transform: `translate(${dx}px,${dy + 110}px) rotate(${rot}deg) scale(.68)`, opacity: 0, filter: "brightness(1)" }
+    ], { duration: 820 + Math.random() * 340, easing: "cubic-bezier(.15,.6,.35,1)", fill: "forwards" });
+  }
+  t.style.visibility = "hidden";
+  $("qSub").style.visibility = "hidden";
+  setTimeout(() => { layer.innerHTML = ""; }, 1500);
+  return center;
+}
+
+function breakSeal() {
+  const seal = $("seal"), shock = $("shock"), slots = $("slots");
+  seal.classList.remove("warn");
+  slots.classList.remove("fly"); slots.classList.add("gone");
+  const c = explodeQuestion();
+  Art.hurt();
+  if (c) Art.burst(c.x, c.y, c.R); else Art.burst();
+  flash("kill");
+  shakeScreen();
+  Audio_.sfx.hit();
+  setTimeout(() => Audio_.sfx.shatter(), 60);
+  setTimeout(() => Audio_.sfx.correct(), 280);
+  seal.classList.add("correct", "burst");
+  shock.classList.remove("on"); void shock.offsetWidth; shock.classList.add("on");
+  setTimeout(() => seal.classList.remove("correct"), 520);
+}
+function shakeScreen(small) {
+  if (!motionOK()) return;
+  const p = $("play"), cl = small ? "shake-s" : "shake";
+  p.classList.remove("shake", "shake-s"); void p.offsetWidth; p.classList.add(cl);
+  setTimeout(() => p.classList.remove(cl), small ? 320 : 560);
+}
+
+/* 不正解＝札が封印に弾き返される */
+function deflect() {
+  const seal = $("seal"), guard = $("guard"), slots = $("slots");
+  Audio_.sfx.clang();
+  const r = seal.getBoundingClientRect();
+  Art.spark(r.left + r.width / 2, r.bottom - r.height * .06, Math.max(46, r.width * .22));
+
+  guard.classList.remove("on"); void guard.offsetWidth; guard.classList.add("on");
+  seal.classList.add("reject");
+  setTimeout(() => seal.classList.remove("reject"), 400);
+  shakeScreen(true);
+
+  // 札ごとに跳ね返る向きを散らす
+  const kids = [...slots.children].filter(el => !el.classList.contains("eqpre"));
+  kids.forEach((el, i) => {
+    const off = i - (kids.length - 1) / 2;
+    el.style.setProperty("--dx", (off * 24 + (Math.random() - .5) * 34).toFixed(0) + "px");
+    el.style.setProperty("--spin", ((Math.random() - .5) * 280).toFixed(0) + "deg");
+  });
+  slots.classList.remove("fly");
+  slots.classList.add("rej");
+}
+
+function swap() {
+  if (G.state !== "answer" || G.bonusMode || G.swaps <= 0) return;
+  G.swaps--; G.combo = 0; G.tagKind = null; $("bonusTag").hidden = true;
+  Audio_.sfx.swap();
+  renderQ(pick(routePoolName()), false, modeLead(G.level === "final"));
+  G.pending = null;
+  G.state = "answer";
+  renderHud(); renderSlots();
+  startTimer(20 * CFG.mult + 5);
+}
+
+/* ---------- ボーナス ---------- */
+async function runBonus(kind) {
+  G.bonusMode = kind;
+  stopTimer(); Art.vanish();
+  Audio_.bgmStop(0.4);
+  Audio_.sfx.bonusIn();
+  const bsub = isMath()
+    ? (kind === "1" ? "整数の四則" : "平方根の値")
+    : isEnglish()
+      ? (kind === "1" ? "基本英単語" : "発展英単語")
+      : isRadical()
+        ? (kind === "1" ? "基本部首" : "発展部首")
+        : (kind === "1" ? "部首の名" : "カタカナ語");
+  showOv("good", `<h2>BONUS</h2><div class="sub">${bsub}</div>
+    <p>40秒で3問。突破すると<b style="color:var(--midori)">問題入替</b>を1回もらえます。<br>まちがえても人数は減りません。</p>`);
+  await sleep(2200); hideOv();
+  if (G.cancelled) return;
+  Audio_.bgmStart("bonus");
+
+  const pool = kind === "1" ? "b1" : "b2";
+  let count = 0, failed = false;
+  startTimer(40);
+  while (count < 3) {
+    if (G.cancelled) return;
+    // 解説の表示中に時間切れが来ていた場合もここで拾う
+    if (!G.timing || G.pending === "timeout") { G.pending = null; failed = true; break; }
+    const bonusLead = isEnglish()
+      ? (answersInEnglish() ? "英単語で こたえよ" : "日本語訳を ひらがなで")
+      : isRadical()
+        ? "部首の名を こたえよ"
+        : (kind === "1" ? "部首の名を こたえよ" : "カタカナ語で こたえよ");
+    renderQ(pick(pool), kind === "2", bonusLead);
+    if ((isMath() || isEnglish() || isRadical()) ? CFG.hint : kind === "2") showHint(); else hideHint();
+    $("lvName").textContent = `BONUS ${count + 1} / 3`;
+    G.state = "answer"; renderSlots();
+    const r = await awaitAnswer();
+    if (r === "quit" || G.cancelled) return;
+    if (r === "timeout") { failed = true; break; }
+    count++;
+    if (count >= 3) stopTimer();
+    showReveal(answerDisplay(), true);
+    await sleep(900); hideReveal();
+  }
+  if (failed) {
+    stopTimer(); hideReveal();
+    Audio_.sfx.bonusFail(); flash("beam");
+    Audio_.bgmStop(0.3);
+    showOv("bad", `<h2>MISS</h2><div class="sub">突破ならず</div><div class="big">${answerDisplay()}</div>`);
+    await sleep(2600); hideOv();
+  }
+  if (count >= 3) {
+    G.swaps++;
+    Audio_.bgmStop(0.3); Audio_.sfx.bonusClear(); flash("hit");
+    showOv("good", `<h2>CLEAR</h2><div class="sub">問題入替 ＋1</div>
+      <p>答えにくい問題を、いつでも1回だけ引き直せます。</p>`);
+    await sleep(2600); hideOv();
+  }
+  stopTimer(); hideHint();
+  G.pending = null; G.bonusMode = null; G.kata = false;
+  renderHud();
+}
+
+/* ---------- 交代・結末 ---------- */
+async function pilotChange() {
+  const crew = [...Array(CFG.lives)].map((_, i) =>
+    `<i class="${i >= G.lives ? "lost" : (i === G.lives - 1 ? "now" : "")}"></i>`).join("");
+  Audio_.sfx.relay();
+  showOv("", `<h2>RELAY</h2><div class="sub">読み手 交代</div>
+    <div class="crewlarge">${crew}</div>
+    <p>残り <b style="color:var(--kin);font-size:20px">${G.lives}</b> 人<br>次の読み手が席につきました</p>
+    <div class="acts"><span class="btn" style="pointer-events:none">クリック か Space で再開</span></div>`);
+  await waitPress();
+  hideOv();
+}
+
+async function levelBanner(level) {
+  Art.setLevel(level);
+  if (G.stage === 6) Art.setStage(6, level, G.rooms[lvIndex(level)]);
+  Audio_.sfx.levelUp();
+  Audio_.bgmStop(0.3);
+  showOv("gold", `<h2>${LV_LABEL[level]}</h2><div class="sub">${STAGES[G.stage].jp} ${level === "final" ? "最深部" : "第" + (lvIndex(level) + 1) + "層"} ／ ${ROUTE_DIFFICULTY[G.stage]}</div>`);
+  await sleep(1600); hideOv();
+  Audio_.bgmStart(G.stage === 7 ? "final" : level);
+}
+
+async function gameCleared() {
+  stopTimer(); Art.vanish(); Audio_.bgmStop(0.5);
+  await sleep(500); Audio_.sfx.cleared(); flash("hit");
+  showOv("good", `<h2>ALL CLEAR</h2><div class="sub">${STAGES[G.stage].jp} 突破</div>
+    <p>全 ${CFG.N} 問 正解　／　読み手 ${G.lives} 人 生還</p>
+    <div class="acts">
+      <button class="btn primary" id="againBtn">もう一度</button>
+      <button class="btn" id="backBtn">設定へ戻る</button>
+    </div>`);
+  $("againBtn").onclick = () => { hideOv(); start(); };
+  $("backBtn").onclick = () => { hideOv(); toSetup(); };
+}
+async function gameOver() {
+  stopTimer(); Audio_.bgmStop(0.4);
+  Art.vanish();
+  await sleep(900); Audio_.sfx.gameover();
+  showOv("bad", `<h2>GAME OVER</h2><div class="sub">読み手 全滅</div>
+    <p>${CFG.N} 問中 ${G.correct} 問 正解</p>
+    <div class="acts">
+      <button class="btn primary" id="againBtn">もう一度</button>
+      <button class="btn" id="backBtn">設定へ戻る</button>
+    </div>`);
+  $("againBtn").onclick = () => { hideOv(); start(); };
+  $("backBtn").onclick = () => { hideOv(); toSetup(); };
+}
+
+/* ---------- 本編ループ ---------- */
+async function mainLoop() {
+  const b = BOUNDS[CFG.N];
+  Audio_.bgmStart(G.stage === 7 ? "final" : "l1");
+  while (true) {
+    if (G.cancelled) return;
+    const before = G.level;
+    const r = await runQuestion();
+    if (r === "quit" || G.cancelled) return;
+
+    if (r === "correct") {
+      G.correct++;
+      G.combo = Math.max(G.combo, 0) + 1;
+      G.hintOn = false; hideHint();
+      showReveal(answerDisplay(), true);
+      Art.vanish();
+      renderHud();
+      await sleep(1600);
+      if (G.cancelled) return;
+      hideReveal();
+      $("bonusTag").hidden = true;
+
+      if (G.tagKind) { await runBonus(G.tagKind); G.tagKind = null; }
+      if (G.cancelled) return;
+
+      if (G.correct >= b[3]) { await gameCleared(); return; }
+      const next = levelOf(G.correct);
+      if (next !== before) await levelBanner(next);
+      else await sleep(200);
+
+    } else {
+      G.lives--;
+      G.combo = Math.min(G.combo, 0) - 1;
+      Audio_.sfx.beam(); flash("beam"); Art.hurt();
+      renderHud();
+      showReveal(answerDisplay());
+      Audio_.bgmDuck(true);
+      await sleep(2400);
+      if (G.cancelled) return;
+      hideReveal(); Art.vanish();
+      Audio_.bgmDuck(false);
+
+      if (G.lives <= 0) { await gameOver(); return; }
+      if (G.combo === -2 && CFG.hint) { G.hintOn = true; }
+      await pilotChange();
+      if (G.cancelled) return;
+    }
+  }
+}
+
+/* ---------- 起動 ---------- */
+function toSetup() {
+  stopTimer(); Audio_.bgmStop(0.3); Art.vanish();
+  G.state = "idle"; G.paused = false;
+  $("pauseScreen").classList.remove("on"); $("quitConfirm").classList.remove("on"); hideOv();
+  $("setup").classList.add("on"); $("play").classList.remove("on"); $("launch").classList.remove("on");
+  buildSetup();
+}
+
+async function start() {
+  G.cancelled = false; G.paused = false; G.pauseWasTiming = false; G.pauseElapsed = 0;
+  $("pauseScreen").classList.remove("on"); $("quitConfirm").classList.remove("on");
+  Audio_.setVolume(CFG.volume);
+  Audio_.resume();
+  Audio_.setBgmEnabled(!!CFG.bgm);
+  Art.setFx(motionOK());
+
+  G.stage = CFG.stage === "?" ? 1 + Math.floor(Math.random() * 7) : Number(CFG.stage);
+  G.level = "l1"; G.correct = 0; G.combo = 0; G.lives = CFG.lives; G.swaps = 0;
+  G.used = {}; G.hintOn = false; G.tagKind = null; G.bonusMode = null; G.kata = false;
+  G.routePlan = buildRoutePlan(G.stage, CFG.N);
+  G.rooms = [0, 1, 2].sort(() => Math.random() - .5).concat([0, 1, 2]);
+
+  Art.setStage(G.stage, "l1", G.rooms[0]);
+  Art.vanish();
+
+  $("setup").classList.remove("on");
+  $("play").classList.remove("on");
+  $("launch").classList.add("on");
+
+  const cd = $("cdText");
+  for (const n of ["3", "2", "1"]) {
+    cd.className = "cd"; cd.textContent = n; void cd.offsetWidth; cd.classList.add("pulse");
+    Audio_.sfx.tick(); Audio_.sfx.ui();
+    await sleep(820);
+  }
+  cd.className = "cd go"; cd.textContent = "発　進"; void cd.offsetWidth; cd.classList.add("pulse");
+  Audio_.sfx.beam(); Art.warp(1); flash("fire");
+  await sleep(900);
+
+  $("launch").classList.remove("on");
+  $("play").classList.add("on");
+  buildKeyboard(); renderSlots(); renderHud();
+  mainLoop();
+}
+
+/* ---------- 入力イベント ---------- */
+async function toggleFullscreen() {
+  Audio_.sfx.ui();
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen({ navigationUI: "hide" });
+    } else {
+      throw new Error("Fullscreen API is unavailable");
+    }
+  } catch (_) {
+    alert("この表示環境では全画面APIが制限されています。WindowsはF11キー、MacはControl＋Command＋Fをお使いください。");
+  }
+}
+
+$('fullscreenBtn').onclick = toggleFullscreen;
+$("pauseBtn").onclick = pauseGame;
+$("resumeBtn").onclick = resumeGame;
+$("quitBtn").onclick = requestQuit;
+$("pauseQuitBtn").onclick = requestQuit;
+$("cancelQuitBtn").onclick = cancelQuit;
+$("confirmQuitBtn").onclick = confirmQuit;
+$("pauseVolumeSlider").oninput = e => setGameVolume(e.target.value, false);
+$("pauseVolumeSlider").onchange = e => setGameVolume(e.target.value, true);
+$("fireBtn").onclick = fire;
+$("delBtn").onclick = backspace;
+$("swapBtn").onclick = swap;
+$("goBtn").onclick = () => start();
+
+window.addEventListener("keydown", e => {
+  if ($("quitConfirm").classList.contains("on")) {
+    if (e.code === "Escape") { e.preventDefault(); cancelQuit(); }
+    return;
+  }
+  if (G.paused) {
+    if (e.code === "Escape" || e.code === "Space") { e.preventDefault(); resumeGame(); }
+    return;
+  }
+  if ($("edit").classList.contains("on")) return;
+  if ($("ov").classList.contains("on")) return;
+  if (!$("play").classList.contains("on")) return;
+  if (e.code === "Backspace") { e.preventDefault(); backspace(); return; }
+  if (e.code === "Enter" || e.code === "NumpadEnter") {
+    e.preventDefault();
+    if (CFG.input === 1 && IN.romaji) {
+      const [k, rest] = romajiConsume(IN.romaji, true);
+      IN.romaji = rest;
+      for (const ch of k) if (IN.kana.length < 15) IN.kana.push(G.kata ? toKata(ch) : ch);
+      renderSlots();
+    }
+    fire(); return;
+  }
+  if (isMath()) {
+    if (G.state === "answer" && !G.judging && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const k = e.key, low = k.toLowerCase();
+      let tok = null;
+      if (/^[0-9]$/.test(k)) tok = k;
+      else if ("+-/^".includes(k)) tok = k;
+      else if ("xyab".includes(low)) tok = low;
+      else if (low === "r") tok = "√";
+      if (tok) { e.preventDefault(); pressMath(tok); }
+    }
+    return;
+  }
+  if (answersInEnglish()) {
+    if (CFG.input === 1 && G.state === "answer" && !G.judging && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const ch = e.key.toLowerCase();
+      if (/^[a-z]$/.test(ch)) { e.preventDefault(); pressEnglish(ch); }
+    }
+    return;
+  }
+  if (CFG.input === 1 && G.state === "answer" && !G.judging && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    const ch = e.key.toLowerCase();
+    if (/^[a-z]$/.test(ch)) { e.preventDefault(); pressRomaji(ch); }
+    else if (ch === "-") { e.preventDefault(); pressRomaji("-"); }
+  }
+});
+
+/* ---------- 問題編集 ---------- */
+let editSrc = JSON.parse(JSON.stringify(KANJI_RAW));
+$("editBtn").onclick = () => { $("editArea").value = JSON.stringify(editSrc, null, 1); $("edit").classList.add("on"); };
+$("editClose").onclick = () => $("edit").classList.remove("on");
+$("editReset").onclick = () => { $("editArea").value = JSON.stringify(KANJI_RAW, null, 1); $("editMsg").textContent = "増量済みの初期問題を読み込みました。「この内容で使う」を押してください。"; };
+$("editApply").onclick = () => {
+  try {
+    const o = JSON.parse($("editArea").value);
+    for (const k of ["l1", "l2", "l3", "final", "b1", "b2"]) {
+      if (!Array.isArray(o[k]) || !o[k].length) throw new Error(k + " が空です");
+      const need = k === "b1" ? 3 : 2;
+      for (const row of o[k]) if (!Array.isArray(row) || row.length < need) throw new Error(k + " の書式が違います");
+    }
+    QSET = normalizeQ(o); editSrc = o; PICK_BAGS.clear();
+    $("editMsg").textContent = "反映しました。";
+    Audio_.sfx.swap();
+  } catch (err) { $("editMsg").textContent = "読み込めません：" + err.message; }
+};
+$("editDl").onclick = () => {
+  const blob = new Blob([$("editArea").value], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "five-readers-questions.json"; a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("editUp").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $("editArea").value = await f.text();
+  $("editMsg").textContent = "読み込みました。「この内容で使う」を押してください。";
+  e.target.value = "";
+};
+
+buildSetup();
+
+</script>
+</body>
+</html>
