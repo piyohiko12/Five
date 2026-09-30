@@ -224,6 +224,13 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 }
 .seal .kanji.small{font-size:clamp(17px,4.4vh,30px);letter-spacing:.02em;line-height:1.5}
 .seal .kanji.oneline{white-space:nowrap}
+/* 英単語を答える問題の日本語：意味の切れ目（「・」の後、先頭の（）の後）だけで折り返し、行の長さをそろえる */
+.seal .core.wide{width:80%}   /* 切れ目でしか折り返さない問題文は、円の幅いっぱいを使って並べる */
+.seal .kanji.jpq{text-wrap:balance}
+.seal .kanji.jpq .jseg{white-space:nowrap}
+/* 長いまとまりが入りきらないときだけ、まとまりの中の文節の切れ目（.jph の間）でも折り返す */
+.seal .kanji.jpq.fine .jseg{white-space:normal}
+.seal .kanji.jpq .jph,.seal .kanji.jpq.fine .jseg.keep{white-space:nowrap}
 .seal .lead{font-size:12px;letter-spacing:.24em;color:#e3eefa;margin-bottom:10px;text-shadow:0 0 3px rgba(4,17,33,.95),0 0 8px rgba(4,17,33,.85)}
 .seal .qsub{font-size:12px;letter-spacing:.12em;color:#d6e5f5;margin-top:12px;min-height:1em;text-shadow:0 0 3px rgba(4,17,33,.95),0 0 8px rgba(4,17,33,.85)}
 /* 問題の後ろだけを暗いガラスのように沈め、背景の絵や光を少しぼかす（白くは塗らない）。
@@ -5507,23 +5514,89 @@ function fitMathText() {
   const base = parseFloat(getComputedStyle(t).fontSize) || 32;
   t.style.fontSize = Math.max(12, base * maxW / natural) + "px";
 }
-/* 何行にもなる長い問題文（英語の日本語の意味など）は、封印円の中ほどに収まるまで文字を縮める */
+/* 何行にもなる長い問題文（英語の日本語の意味など）は、封印円の中ほどに収まるまで文字を縮める。
+   意味の切れ目でしか折り返さない問題文は、いちばん長いまとまりが1行に収まるまで縮める */
 function fitBlockText() {
+  const t = $("qText");
+  if (!t.classList.contains("jpq")) return shrinkBlockText();
+  t.classList.remove("fine");
+  t.innerHTML = jpChunksHTML(t.dataset.jp, false);
+  t.style.fontSize = "";
+  const base = parseFloat(getComputedStyle(t).fontSize) || 24;
+  const coarse = shrinkBlockText();
+  if (coarse >= base * 0.6) return;
+  t.classList.add("fine");
+  t.innerHTML = jpChunksHTML(t.dataset.jp, true);
+  const fine = shrinkBlockText();
+  if (fine < coarse * 1.15) {   // あまり大きくならないなら、意味のまとまりで折り返す方を使う
+    t.classList.remove("fine");
+    t.innerHTML = jpChunksHTML(t.dataset.jp, false);
+    shrinkBlockText();
+  }
+}
+function shrinkBlockText() {
   const t = $("qText"), seal = $("seal");
   t.style.fontSize = "";
   const sealW = seal.clientWidth;
-  if (!sealW || !t.classList.contains("small")) return;
+  if (!sealW || !t.classList.contains("small")) return parseFloat(getComputedStyle(t).fontSize) || 0;
   const maxH = sealW * 0.42;
+  const tooBig = () => t.scrollHeight > maxH || t.scrollWidth > t.clientWidth + 1;
   let size = parseFloat(getComputedStyle(t).fontSize) || 24;
-  for (let i = 0; i < 14 && t.scrollHeight > maxH && size > 13; i++) {
+  const base = size;
+  for (let i = 0; i < 14 && tooBig() && size > 13; i++) {
     size *= 0.9;
     t.style.fontSize = size + "px";
   }
+  /* 意味の切れ目で折り返す問題文は、少し小さくすると（もとの7割まで）行数が減るなら、そのうち一番大きい文字にする */
+  if (t.classList.contains("jpq")) {
+    const lines = () => new Set([...t.querySelectorAll(".jseg")].flatMap(e => [...e.getClientRects()].map(r => Math.round(r.top)))).size;
+    let best = size, bestLines = lines();
+    for (let f = 0.95; f >= 0.69 && bestLines > 1; f -= 0.05) {
+      t.style.fontSize = size * f + "px";
+      const n = lines();
+      if (n < bestLines && !tooBig() && size * f >= base * 0.7) { best = size * f; bestLines = n; }
+    }
+    t.style.fontSize = best + "px";
+    size = best;
+  }
+  return size;
 }
 function fitQuestion() {
   const t = $("qText");
   if (isMath() || (isEnglish() && !answersInEnglish()) || t.classList.contains("oneline")) fitMathText();
   else fitBlockText();
+}
+/* 日本語の意味を、折り返してよい切れ目ごとのまとまりに分ける。
+   切れ目は「・」の直後と、後ろに言葉が続く「）」の直後（例：（計画などを）｜放棄する・｜見捨てる） */
+function jpChunksHTML(text, fine) {
+  const chunks = []; let cur = "";
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i], next = text[i + 1];
+    cur += ch;
+    if (next !== undefined && (ch === "・" || (ch === "）" && next !== "・" && next !== "）"))) { chunks.push(cur); cur = ""; }
+  }
+  if (cur) chunks.push(cur);
+  // かっこ書きだけのまとまり（（計画などを） など）は、細かく折り返すときも切らない
+  const paren = c => /^（[^（）]*）$/.test(c);
+  const inner = c => fine && !paren(c) ? jpPhrases(c).map(x => `<span class="jph">${escapeHtml(x)}</span>`).join("<wbr>") : escapeHtml(c);
+  const cls = c => fine && paren(c) ? "jseg keep" : "jseg";
+  return chunks.map(c => `<span class="${cls(c)}">${inner(c)}</span>`).join("<wbr>");
+}
+/* 長いまとまりを文節ほどの単位に分ける簡易な区切り（どのブラウザでも同じ結果になるように自前で行う）：
+   ひらがなの後に漢字・カタカナが来るところと、「ば」「て」の後にひらがなが続くところで区切る。
+   2字未満のかたまりは作らない（「〜」だけが1行になるのを防ぐ） */
+function jpPhrases(chunk) {
+  const hira = c => /[ぁ-ゖ]/.test(c), kanjiKana = c => /[一-龥々ァ-ヺ（〜]/.test(c);
+  const out = []; let cur = "";
+  for (let i = 0; i < chunk.length; i++) {
+    const ch = chunk[i];
+    let j = i - 1; while (j >= 0 && chunk[j] === "ー") j--;   // のばし棒は前の字と同じ種類として扱う
+    const prev = chunk[j];
+    if (cur.length >= 2 && prev && ((hira(prev) && kanjiKana(ch)) || ((prev === "ば" || prev === "て") && hira(ch)))) { out.push(cur); cur = ""; }
+    cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
 }
 let _fitRAF = 0;
 window.addEventListener("resize", () => {
@@ -5649,7 +5722,8 @@ function renderQ(q, kata, lead) {
   const t = $("qText");
   if (isMath()) {
     $("qLead").textContent = mathLead(q);
-    t.classList.remove("small", "english-prompt", "oneline"); t.classList.add("math");
+    t.classList.remove("small", "english-prompt", "oneline", "jpq"); t.classList.add("math");
+    t.parentElement.classList.remove("wide");
     t.classList.toggle("wordq", !!q.txt);
     t.classList.toggle("figq", !!q.fig);
     if (q.fig) t.innerHTML = figHTML(q.fig);
@@ -5662,7 +5736,10 @@ function renderQ(q, kata, lead) {
     $("qLead").textContent = lead;
     t.classList.remove("math", "wordq", "figq", "oneline"); t.style.fontSize = "";
     t.classList.toggle("english-prompt", isEnglish() && !answersInEnglish());
-    t.textContent = q.q;
+    const jpq = answersInEnglish() && q.q.length > 4;   // 英単語を答える問題の、長めの日本語
+    t.classList.toggle("jpq", jpq);
+    t.parentElement.classList.toggle("wide", jpq);
+    if (jpq) { t.dataset.jp = q.q; t.innerHTML = jpChunksHTML(q.q, false); } else t.textContent = q.q;
     t.classList.toggle("small", q.q.length > 4);
     /* 短い問題文は1行で（「りん／ご」のような折り返しを防ぐ）。漢字の4字熟語だけは2字ずつ2行で大きく */
     t.classList.toggle("oneline", q.q.length <= 3 || (q.q.length === 4 && CFG.mode !== "kanji"));
