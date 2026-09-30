@@ -85,7 +85,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .btn:disabled{opacity:.32;cursor:default}
 
 /* ---------- 設定画面 ---------- */
-#setup{max-width:940px}
+/* 項目が増えても画面に収まるよう、設定画面だけは縦にスクロールできる */
+#setup{max-width:940px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}
 .title{text-align:center;margin-bottom:26px}
 .title h1{
   font-family:var(--latin);font-size:clamp(30px,6vw,58px);font-weight:200;
@@ -124,6 +125,27 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .seg button:last-child{border-right:none}
 .seg button.sel{background:var(--kin);color:#1a1408;font-weight:700}
 .seg button:hover:not(.sel){color:var(--shironeri)}
+
+/* 数学の出題範囲・難易度 */
+.mathopts{margin-top:18px;padding-top:16px;border-top:1px solid rgba(240,236,225,.16)}
+.mathopts[hidden]{display:none}
+.mrange-head{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.mrange-head>span{font-size:11px;letter-spacing:.24em;color:var(--haiiro)}
+.mrange-quick{display:flex;gap:6px;flex-wrap:wrap}
+.mrange-quick button{border:1px solid rgba(240,236,225,.28);padding:5px 10px;font-size:11px;letter-spacing:.1em;color:var(--haiiro);transition:.14s}
+.mrange-quick button:hover,.mrange-quick button:focus-visible{border-color:var(--kin);color:var(--kin);outline:none}
+.mrange-ch{font-family:var(--mincho);font-size:12px;letter-spacing:.14em;color:var(--kin);margin:12px 0 6px}
+.mrange{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px}
+.unit-chip{position:relative;border:1px solid rgba(240,236,225,.2);padding:9px 6px 7px;text-align:center;color:var(--haiiro);transition:.14s}
+.unit-chip .nm{display:block;font-family:var(--mincho);font-size:13px;letter-spacing:.06em;white-space:nowrap}
+.unit-chip .ct{display:block;font-family:var(--latin);font-size:10px;letter-spacing:.12em;margin-top:3px;opacity:.7}
+.unit-chip:hover,.unit-chip:focus-visible{border-color:rgba(240,236,225,.5);color:var(--shironeri);outline:none}
+.unit-chip.sel{border-color:var(--kin);background:rgba(255,209,102,.16);color:var(--shironeri)}
+.unit-chip.sel .ct{color:var(--kin);opacity:1}
+.unit-chip.sel::before{content:"✓";position:absolute;top:3px;left:6px;font-size:10px;color:var(--kin)}
+.mdiff{margin-top:16px}
+.mdiff .seg button:first-child{flex:1.6}
+.mrange-note{margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--haiiro)}
 
 .setup-foot{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap}
 .hintline{font-size:12px;color:var(--haiiro);letter-spacing:.06em}
@@ -356,7 +378,32 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .root-symbol{display:inline-block;font-size:1.24em;line-height:.86;transform:translateY(.12em);margin-right:-.05em}
 .root-radicand{display:inline-block;min-width:.62em;border-top:1.6px solid currentColor;padding:.08em .12em 0 .09em;line-height:1;text-align:center}
 .power{display:inline-block;font-size:.6em;line-height:1;font-weight:600;vertical-align:baseline;position:relative;top:-.58em;margin-left:.04em}
-.eqpre{font-family:"Georgia","Cambria",var(--mincho);font-size:22px;color:var(--haiiro);padding:0 3px 0 1px;align-self:center;letter-spacing:.02em}
+.eqpre{font-family:"Georgia","Cambria",var(--mincho);font-size:22px;color:var(--haiiro);padding:0 3px 0 1px;align-self:center;letter-spacing:.02em;white-space:nowrap}
+.equnit{font-family:"Georgia","Cambria",var(--mincho);font-size:19px;color:var(--haiiro);padding-left:4px;align-self:center;white-space:nowrap}
+.ans-pre{margin-right:.08em}
+.ans-unit{font-size:.72em;margin-left:.3em;letter-spacing:.04em}
+/* 文章題（単位の換算・オームの法則など） */
+.seal .kanji.math.wordq{
+  font-family:var(--mincho);white-space:pre;font-size:clamp(16px,3.5vh,25px);
+  line-height:1.45;letter-spacing:.04em;
+}
+/* 図（直角三角形・回路）。大きさは問題文の文字サイズに連動する */
+.seal .kanji.math.figq{line-height:1;white-space:normal}
+.mfig{position:relative;display:block;margin:0 auto;font-size:.4em;font-weight:500}
+.mfig svg{display:block;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.seal .mfig svg{position:relative;inset:auto}   /* 封印円の輪（.seal svg）用の絶対配置を打ち消す */
+.mfig.tri{width:10.5em;height:6.6em;margin-bottom:1.35em}
+.mfig.tri svg path{stroke-width:1.2;opacity:.8}
+.mfig .lb{position:absolute;transform:translate(-50%,-50%);font-size:1.35em;line-height:1;white-space:nowrap;font-family:"Georgia","Cambria",var(--mincho)}
+.mfig .lb-b{transform:translate(0,-50%)}
+.mfig .lb-c{transform:translate(-78%,-50%)}
+.mfig .lb.ask{color:var(--stage-accent);font-style:italic;font-weight:700}
+.mfig .lb.th{font-size:1.05em;color:var(--haiiro)}
+.mfig.ckt{width:min(var(--ckt-w),14em)}
+.mfig.ckt svg{height:auto;stroke-width:1.3}
+.mfig.ckt text{fill:currentColor;stroke:none;font-size:11px;text-anchor:middle;font-family:"Georgia","Cambria",var(--mincho)}
+.mfig.ckt circle{fill:currentColor;stroke:none}
+.hintbox.math{max-width:min(44%,230px);white-space:pre-line;letter-spacing:.06em;line-height:1.6}
 .mathpad{display:flex;gap:9px;justify-content:center;max-width:560px;margin:0 auto;flex-wrap:wrap}
 .mkeys{display:grid;gap:5px}
 .mkeys.num{grid-template-columns:repeat(3,minmax(52px,1fr))}
@@ -572,8 +619,10 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
     <div class="opts" id="opts"></div>
 
+    <div class="mathopts" id="mathOpts" hidden></div>
+
     <div class="setup-foot">
-      <div class="hintline">基＝基礎、標＝標準、発＝発展、最＝最難関。表示比率で配分し、後半ほど難しく出題します。</div>
+      <div class="hintline" id="hintLine"></div>
       <div style="display:flex;gap:10px">
         <button class="btn" id="editBtn">問題を編集</button>
         <button class="btn primary" id="goBtn">出　発</button>
@@ -1191,314 +1240,579 @@ function romajiConsume(buf, final) {
 
 /* ===== js1b_math.js ===== */
 /* ========== 6. 数学モード ==========
-   出典：中学数学の基礎（整数の四則／文字式／指数／平方根／式の変形）。
-   各問は { disp, a, cat } で持つ。
+   出典：『工業高校生のための基礎数学』
+     第1章 数学の基礎（整数の四則／文字式／指数／平方根／式の変形／一次方程式／三平方の定理／三角比）
+     第2章 工業科のための数学（量とSI単位／長さ・面積・体積／時間・速さ・加速度／密度／オームの法則／合成抵抗）
+   単元（＝出題範囲）ごとに、l1 基礎 / l2 標準 / l3 発展 / final 最難関 の4段階で持つ。
+   各問は { disp, a, cat } を基本とし、必要に応じて次を足す。
      disp … 画面に出す式（下記の軽量マークアップ）
-       ^(...)     指数         例 2^(3), x^(20)
+       ^(...)     指数         例 2^(3), x^(-7)
        sqrt(...)  平方根       例 sqrt(45)
        frac(a,b)  分数         例 frac(y,5)
        × ÷ ( ) -  はそのまま
-     a   … 答え（半角。指数は ^、平方根は √、分数は / を使う）
-     cat … 判定方法 int / frac / poly / root / eqn
+     txt  … 文章題（disp の代わりに出す。改行は \n）
+     fig  … 図（{ tri } 直角三角形 / { ckt } 抵抗の回路）
+     a    … 答え（半角。指数は ^、平方根は √、分数は /、小数は . を使う）
+     cat  … 判定方法 int / frac / poly / root / eqn / val
        eqn は「y＝◯」の右辺だけを答える（y＝ は画面が出す）
+       val は値で判定する（小数・分数・√ の混じった数。3/5 と 0.6 はどちらも正解）
+     lead … 問いかけ（省略時は cat から決める）
+     pre  … 回答欄の前に出す文字（例 "x="）
+     unit … 回答欄の後ろに出す単位（例 "m/s"）
+     note … 補足（例 "sin36.9°＝0.6 とする"）
+     hint … ヒント（省略時は cat から決める）
 */
 
-const MATH_Q = {
-  /* ---- LEVEL1：整数の四則計算＋文字式の加減 ---- */
-  l1: [
-    { disp: "(-2)+(-4)", a: "-6", cat: "int" },
-    { disp: "(-6)+(-3)", a: "-9", cat: "int" },
-    { disp: "(-9)+6", a: "-3", cat: "int" },
-    { disp: "8+(-5)", a: "3", cat: "int" },
-    { disp: "(-4)+(-9)", a: "-13", cat: "int" },
-    { disp: "(-7)+(-5)", a: "-12", cat: "int" },
-    { disp: "14-(+2)", a: "12", cat: "int" },
-    { disp: "4-(+3)", a: "1", cat: "int" },
-    { disp: "(-4)-(-7)", a: "3", cat: "int" },
-    { disp: "3-7", a: "-4", cat: "int" },
-    { disp: "(-6)-12", a: "-18", cat: "int" },
-    { disp: "(-10)-5", a: "-15", cat: "int" },
-    { disp: "5×(-7)", a: "-35", cat: "int" },
-    { disp: "(-5)×(-9)", a: "45", cat: "int" },
-    { disp: "(-8)×4", a: "-32", cat: "int" },
-    { disp: "8×(-2)", a: "-16", cat: "int" },
-    { disp: "(-24)÷(-6)", a: "4", cat: "int" },
-    { disp: "12÷(-3)", a: "-4", cat: "int" },
-    { disp: "(-36)÷4", a: "-9", cat: "int" },
-    { disp: "8÷(-4)", a: "-2", cat: "int" },
-    { disp: "2x+9x", a: "11x", cat: "poly" },
-    { disp: "4x-3x", a: "x", cat: "poly" },
-    { disp: "5x+x", a: "6x", cat: "poly" },
-    { disp: "9x+3-4x+7", a: "5x+10", cat: "poly" },
-    { disp: "4x-5+8x-9", a: "12x-14", cat: "poly" },
-    { disp: "-3x-6+4x+2", a: "x-4", cat: "poly" },
-    { disp: "6x-9+2x-7", a: "8x-16", cat: "poly" },
-    { disp: "2x+6-8x-3", a: "-6x+3", cat: "poly" },
-    { disp: "-4x-5-7x-2", a: "-11x-7", cat: "poly" },
-    { disp: "-8x-2+7x+4", a: "-x+2", cat: "poly" }
-  ],
-  /* ---- LEVEL2：文字式の乗除（分配）＋指数計算＋分数 ---- */
-  l2: [
-    { disp: "3(2x+7y)", a: "6x+21y", cat: "poly" },
-    { disp: "5(3x-9y)", a: "15x-45y", cat: "poly" },
-    { disp: "-8(5x+2y)", a: "-40x-16y", cat: "poly" },
-    { disp: "-4(6a-3b)", a: "-24a+12b", cat: "poly" },
-    { disp: "(6a-4b)÷2", a: "3a-2b", cat: "poly" },
-    { disp: "(9a-3b)÷3", a: "3a-b", cat: "poly" },
-    { disp: "(12x+4y)÷(-4)", a: "-3x-y", cat: "poly" },
-    { disp: "(6x+15y)÷(-3)", a: "-2x-5y", cat: "poly" },
-    { disp: "(-8a-6b)÷(-2)", a: "4a+3b", cat: "poly" },
-    { disp: "-2(9a-6b)", a: "-18a+12b", cat: "poly" },
-    { disp: "2^(3)", a: "8", cat: "int" },
-    { disp: "3^(5)", a: "243", cat: "int" },
-    { disp: "(-3)^(2)", a: "9", cat: "int" },
-    { disp: "-4^(3)", a: "-64", cat: "int" },
-    { disp: "(-5)^(3)", a: "-125", cat: "int" },
-    { disp: "(-2)^(3)×3^(2)", a: "-72", cat: "int" },
-    { disp: "-3^(3)+(-4)^(2)×5", a: "53", cat: "int" },
-    { disp: "-3^(3)-(-5)", a: "-22", cat: "int" },
-    { disp: "-(-2)^(4)+((-4)^(2)-8)", a: "-8", cat: "int" },
-    { disp: "7×frac(3,14)", a: "3/2", cat: "frac" },
-    { disp: "frac(-3,10)×(-5)", a: "3/2", cat: "frac" },
-    { disp: "(-10)÷(-frac(5,7))", a: "14", cat: "int" },
-    { disp: "21÷(-frac(7,2))", a: "-6", cat: "int" },
-    { disp: "4×(-frac(7,2))", a: "-14", cat: "int" }
-  ],
-  /* ---- LEVEL3：指数法則＋平方根 ---- */
-  l3: [
-    { disp: "a^(3)×a^(8)", a: "a^11", cat: "poly" },
-    { disp: "x^(2)×x^(7)", a: "x^9", cat: "poly" },
-    { disp: "(x^(4))^(5)", a: "x^20", cat: "poly" },
-    { disp: "(a^(3))^(2)", a: "a^6", cat: "poly" },
-    { disp: "(x^(7))^(3)", a: "x^21", cat: "poly" },
-    { disp: "(3y)^(2)", a: "9y^2", cat: "poly" },
-    { disp: "6x^(2)×(-2x)", a: "-12x^3", cat: "poly" },
-    { disp: "(-3a)^(3)×(-ab)", a: "27a^4b", cat: "poly" },
-    { disp: "4ab^(2)×(-3a^(2)b)", a: "-12a^3b^3", cat: "poly" },
-    { disp: "10ab÷(5a)", a: "2b", cat: "poly" },
-    { disp: "6x^(5)÷(2x^(2))", a: "3x^3", cat: "poly" },
-    { disp: "12a^(3)b^(2)÷(4ab)", a: "3a^2b", cat: "poly" },
-    { disp: "sqrt(16)", a: "4", cat: "root" },
-    { disp: "sqrt(25)", a: "5", cat: "root" },
-    { disp: "sqrt(81)", a: "9", cat: "root" },
-    { disp: "sqrt(49)", a: "7", cat: "root" },
-    { disp: "sqrt(5^(2)×3)", a: "5√3", cat: "root" },
-    { disp: "sqrt(16×5)", a: "4√5", cat: "root" },
-    { disp: "sqrt(45)", a: "3√5", cat: "root" },
-    { disp: "sqrt(72)", a: "6√2", cat: "root" },
-    { disp: "sqrt(3)×sqrt(7)", a: "√21", cat: "root" },
-    { disp: "sqrt(4)×sqrt(5)", a: "2√5", cat: "root" },
-    { disp: "sqrt(24)÷sqrt(4)", a: "√6", cat: "root" },
-    { disp: "sqrt(72)÷sqrt(9)", a: "2√2", cat: "root" },
-    { disp: "3sqrt(7)+2sqrt(7)", a: "5√7", cat: "root" },
-    { disp: "5sqrt(3)+6sqrt(3)", a: "11√3", cat: "root" },
-    { disp: "8sqrt(2)-4sqrt(2)", a: "4√2", cat: "root" },
-    { disp: "3sqrt(8)+4sqrt(8)-5sqrt(8)", a: "4√2", cat: "root" },
-    { disp: "2sqrt(3)+sqrt(48)", a: "6√3", cat: "root" },
-    { disp: "sqrt(63)-2sqrt(7)", a: "√7", cat: "root" },
-    { disp: "sqrt(3)(2sqrt(5)+sqrt(45))", a: "5√15", cat: "root" },
-    { disp: "sqrt(7)(6sqrt(2)+sqrt(32))", a: "10√14", cat: "root" }
-  ],
-  /* ---- FINAL：式の変形（移項・乗算変形・除算変形） ---- */
-  final: [
-    { disp: "y-2=4x", a: "4x+2", cat: "eqn" },
-    { disp: "y+7=9x", a: "9x-7", cat: "eqn" },
-    { disp: "y-11=9x", a: "9x+11", cat: "eqn" },
-    { disp: "y-5x=8", a: "5x+8", cat: "eqn" },
-    { disp: "y+14x=-2", a: "-14x-2", cat: "eqn" },
-    { disp: "y-10=2x+5", a: "2x+15", cat: "eqn" },
-    { disp: "y+5=8x-6", a: "8x-11", cat: "eqn" },
-    { disp: "2y+3=5x+y-7", a: "5x-10", cat: "eqn" },
-    { disp: "4y+7x=6x+3y-9", a: "-x-9", cat: "eqn" },
-    { disp: "5x+2y=3y-9+6x", a: "-x+9", cat: "eqn" },
-    { disp: "7y=14x", a: "2x", cat: "eqn" },
-    { disp: "5y=20x", a: "4x", cat: "eqn" },
-    { disp: "2y=4(x+5)", a: "2x+10", cat: "eqn" },
-    { disp: "6y=24(2x-6)", a: "8x-24", cat: "eqn" },
-    { disp: "8y=16x+40", a: "2x+5", cat: "eqn" },
-    { disp: "9y=9x-81", a: "x-9", cat: "eqn" },
-    { disp: "3y-12=18x+9", a: "6x+7", cat: "eqn" },
-    { disp: "7y+24=14x+3", a: "2x-3", cat: "eqn" },
-    { disp: "frac(y,5)=x", a: "5x", cat: "eqn" },
-    { disp: "frac(y,3)=-7x", a: "-21x", cat: "eqn" },
-    { disp: "frac(2y,3)=4x", a: "6x", cat: "eqn" },
-    { disp: "frac(3y,6)=-2x", a: "-4x", cat: "eqn" },
-    { disp: "frac(y,7)=9x+2", a: "63x+14", cat: "eqn" },
-    { disp: "frac(y,2)=2(x+3)", a: "4x+12", cat: "eqn" },
-    { disp: "frac(y,6)=-(x+2)", a: "-6x-12", cat: "eqn" },
-    { disp: "frac(y,5)=6x+1", a: "30x+5", cat: "eqn" },
-    { disp: "frac(2y,3)=4x-8", a: "6x-12", cat: "eqn" },
-    { disp: "frac(y,7)+3x=9x+2", a: "42x+14", cat: "eqn" },
-    { disp: "frac(y,2)+8=2(x+3)", a: "4x-4", cat: "eqn" },
-    { disp: "frac(5y,6)=-(x+2)+y", a: "6x+12", cat: "eqn" }
-  ],
-  /* ---- ボーナス1（LEVEL1の後）：整数四則の早撃ち ---- */
-  b1: [
-    { disp: "(-3)+(-8)", a: "-11", cat: "int" },
-    { disp: "(-9)+(-4)", a: "-13", cat: "int" },
-    { disp: "7+(-12)", a: "-5", cat: "int" },
-    { disp: "(-15)+6", a: "-9", cat: "int" },
-    { disp: "(-4)-(-9)", a: "5", cat: "int" },
-    { disp: "6-14", a: "-8", cat: "int" },
-    { disp: "(-7)-8", a: "-15", cat: "int" },
-    { disp: "(-6)×5", a: "-30", cat: "int" },
-    { disp: "(-4)×(-8)", a: "32", cat: "int" },
-    { disp: "9×(-3)", a: "-27", cat: "int" },
-    { disp: "(-48)÷6", a: "-8", cat: "int" },
-    { disp: "(-42)÷(-7)", a: "6", cat: "int" },
-    { disp: "36÷(-9)", a: "-4", cat: "int" },
-    { disp: "(-30)÷(-5)", a: "6", cat: "int" }
-  ],
-  /* ---- ボーナス2（LEVEL2の後）：平方根の値の早撃ち ---- */
-  b2: [
-    { disp: "sqrt(4)", a: "2", cat: "root" },
-    { disp: "sqrt(9)", a: "3", cat: "root" },
-    { disp: "sqrt(36)", a: "6", cat: "root" },
-    { disp: "sqrt(64)", a: "8", cat: "root" },
-    { disp: "sqrt(100)", a: "10", cat: "root" },
-    { disp: "sqrt(121)", a: "11", cat: "root" },
-    { disp: "sqrt(144)", a: "12", cat: "root" },
-    { disp: "sqrt(8)", a: "2√2", cat: "root" },
-    { disp: "sqrt(12)", a: "2√3", cat: "root" },
-    { disp: "sqrt(18)", a: "3√2", cat: "root" },
-    { disp: "sqrt(20)", a: "2√5", cat: "root" },
-    { disp: "sqrt(50)", a: "5√2", cat: "root" },
-    { disp: "sqrt(32)", a: "4√2", cat: "root" },
-    { disp: "sqrt(27)", a: "3√3", cat: "root" }
-  ]
-};
+/* ---- 単元（出題範囲） ---- */
+const MATH_CHAPTERS = { 1: "第1章 数学の基礎", 2: "第2章 工業科のための数学" };
+const MATH_UNITS = [
+  { id: "int",   ch: 1, name: "整数の四則" },
+  { id: "poly",  ch: 1, name: "文字式" },
+  { id: "pow",   ch: 1, name: "指数" },
+  { id: "root",  ch: 1, name: "平方根" },
+  { id: "trans", ch: 1, name: "式の変形" },
+  { id: "lin",   ch: 1, name: "一次方程式" },
+  { id: "pyth",  ch: 1, name: "三平方の定理" },
+  { id: "trig",  ch: 1, name: "三角比" },
+  { id: "si",    ch: 2, name: "単位・SI接頭語" },
+  { id: "phys",  ch: 2, name: "速さ・密度" },
+  { id: "elec",  ch: 2, name: "オームの法則" }
+];
 
-const MATH_EXTRA_Q = {
-  l1: [
-    { disp: "(-18)+7", a: "-11", cat: "int" },
-    { disp: "25+(-16)", a: "9", cat: "int" },
-    { disp: "(-14)-(-9)", a: "-5", cat: "int" },
-    { disp: "11-23", a: "-12", cat: "int" },
-    { disp: "(-7)×(-6)", a: "42", cat: "int" },
-    { disp: "(-9)×5", a: "-45", cat: "int" },
-    { disp: "56÷(-7)", a: "-8", cat: "int" },
-    { disp: "(-72)÷(-9)", a: "8", cat: "int" },
-    { disp: "(-24)+(-17)", a: "-41", cat: "int" },
-    { disp: "32-(-15)", a: "47", cat: "int" },
-    { disp: "3x+8x", a: "11x", cat: "poly" },
-    { disp: "12x-5x", a: "7x", cat: "poly" },
-    { disp: "-6x+9x", a: "3x", cat: "poly" },
-    { disp: "7a+4a", a: "11a", cat: "poly" },
-    { disp: "10y-13y", a: "-3y", cat: "poly" },
-    { disp: "5x+2-3x+7", a: "2x+9", cat: "poly" },
-    { disp: "-2x+8+6x-3", a: "4x+5", cat: "poly" },
-    { disp: "9a-4+2a-6", a: "11a-10", cat: "poly" },
-    { disp: "-5y+7-3y+2", a: "-8y+9", cat: "poly" },
-    { disp: "4x-11-9x+6", a: "-5x-5", cat: "poly" }
-  ],
-  l2: [
-    { disp: "4(3x+2y)", a: "12x+8y", cat: "poly" },
-    { disp: "-3(4a-5b)", a: "-12a+15b", cat: "poly" },
-    { disp: "6(2x-3y)", a: "12x-18y", cat: "poly" },
-    { disp: "-5(3a+2b)", a: "-15a-10b", cat: "poly" },
-    { disp: "(15x-10y)÷5", a: "3x-2y", cat: "poly" },
-    { disp: "(-18a+12b)÷(-6)", a: "3a-2b", cat: "poly" },
-    { disp: "(21x+14y)÷7", a: "3x+2y", cat: "poly" },
-    { disp: "(-16a-20b)÷4", a: "-4a-5b", cat: "poly" },
-    { disp: "2^(5)", a: "32", cat: "int" },
-    { disp: "5^(3)", a: "125", cat: "int" },
-    { disp: "(-4)^(2)", a: "16", cat: "int" },
-    { disp: "(-2)^(5)", a: "-32", cat: "int" },
-    { disp: "3^(3)×2^(2)", a: "108", cat: "int" },
-    { disp: "(-3)^(2)×(-2)^(3)", a: "-72", cat: "int" },
-    { disp: "8×frac(3,16)", a: "3/2", cat: "frac" },
-    { disp: "frac(-5,12)×6", a: "-5/2", cat: "frac" },
-    { disp: "18÷frac(3,2)", a: "12", cat: "int" },
-    { disp: "(-15)÷frac(5,3)", a: "-9", cat: "int" },
-    { disp: "frac(7,9)×frac(3,14)", a: "1/6", cat: "frac" },
-    { disp: "frac(-8,15)÷frac(4,5)", a: "-2/3", cat: "frac" }
-  ],
-  l3: [
-    { disp: "x^(4)×x^(6)", a: "x^10", cat: "poly" },
-    { disp: "a^(2)×a^(9)", a: "a^11", cat: "poly" },
-    { disp: "(x^(3))^(4)", a: "x^12", cat: "poly" },
-    { disp: "(a^(5))^(3)", a: "a^15", cat: "poly" },
-    { disp: "(2x)^(3)", a: "8x^3", cat: "poly" },
-    { disp: "(-2x)^(3)", a: "-8x^3", cat: "poly" },
-    { disp: "3a^(2)×4a^(3)", a: "12a^5", cat: "poly" },
-    { disp: "-5x^(4)×2x^(2)", a: "-10x^6", cat: "poly" },
-    { disp: "15a^(4)b^(3)÷(5a^(2)b)", a: "3a^2b^2", cat: "poly" },
-    { disp: "18x^(5)y^(2)÷(6x^(2)y)", a: "3x^3y", cat: "poly" },
-    { disp: "sqrt(98)", a: "7√2", cat: "root" },
-    { disp: "sqrt(108)", a: "6√3", cat: "root" },
-    { disp: "sqrt(147)", a: "7√3", cat: "root" },
-    { disp: "sqrt(200)", a: "10√2", cat: "root" },
-    { disp: "sqrt(12)×sqrt(6)", a: "6√2", cat: "root" },
-    { disp: "sqrt(75)÷sqrt(3)", a: "5", cat: "root" },
-    { disp: "4sqrt(5)-sqrt(5)", a: "3√5", cat: "root" },
-    { disp: "2sqrt(12)+sqrt(27)", a: "7√3", cat: "root" },
-    { disp: "sqrt(50)+3sqrt(8)", a: "11√2", cat: "root" },
-    { disp: "sqrt(6)(sqrt(24)-sqrt(6))", a: "6", cat: "root" }
-  ],
-  final: [
-    { disp: "2y=6x+8", a: "3x+4", cat: "eqn" },
-    { disp: "3y=12x-15", a: "4x-5", cat: "eqn" },
-    { disp: "4y+8=20x", a: "5x-2", cat: "eqn" },
-    { disp: "5y-10=15x+5", a: "3x+3", cat: "eqn" },
-    { disp: "6y+18=24x-6", a: "4x-4", cat: "eqn" },
-    { disp: "7y-14=21x+7", a: "3x+3", cat: "eqn" },
-    { disp: "8y+16=32x-8", a: "4x-3", cat: "eqn" },
-    { disp: "9y-27=18x+9", a: "2x+4", cat: "eqn" },
-    { disp: "2y+5=8x-3", a: "4x-4", cat: "eqn" },
-    { disp: "3y-7=15x+2", a: "5x+3", cat: "eqn" },
-    { disp: "4y+3x=7x+12", a: "x+3", cat: "eqn" },
-    { disp: "5y-2x=13x-10", a: "3x-2", cat: "eqn" },
-    { disp: "6y+4x=22x+12", a: "3x+2", cat: "eqn" },
-    { disp: "frac(y,4)=3x-2", a: "12x-8", cat: "eqn" },
-    { disp: "frac(y,8)=2x+5", a: "16x+40", cat: "eqn" },
-    { disp: "frac(3y,4)=6x-9", a: "8x-12", cat: "eqn" },
-    { disp: "frac(2y,5)=4x+6", a: "10x+15", cat: "eqn" },
-    { disp: "frac(y,3)+2=5x", a: "15x-6", cat: "eqn" },
-    { disp: "frac(y,6)-x=3x+2", a: "24x+12", cat: "eqn" },
-    { disp: "frac(y,5)+4x=10x-3", a: "30x-15", cat: "eqn" }
-  ],
-  b1: [
-    { disp: "(-19)+8", a: "-11", cat: "int" },
-    { disp: "17+(-29)", a: "-12", cat: "int" },
-    { disp: "(-21)-(-13)", a: "-8", cat: "int" },
-    { disp: "14-31", a: "-17", cat: "int" },
-    { disp: "(-8)×7", a: "-56", cat: "int" },
-    { disp: "(-9)×(-6)", a: "54", cat: "int" },
-    { disp: "72÷(-8)", a: "-9", cat: "int" },
-    { disp: "(-81)÷(-9)", a: "9", cat: "int" },
-    { disp: "(-12)+(-25)", a: "-37", cat: "int" },
-    { disp: "43-(-18)", a: "61", cat: "int" },
-    { disp: "(-11)×12", a: "-132", cat: "int" },
-    { disp: "144÷(-12)", a: "-12", cat: "int" },
-    { disp: "(-35)-27", a: "-62", cat: "int" },
-    { disp: "68+(-47)", a: "21", cat: "int" },
-    { disp: "(-96)÷8", a: "-12", cat: "int" },
-    { disp: "13×(-9)", a: "-117", cat: "int" }
-  ],
-  b2: [
-    { disp: "sqrt(169)", a: "13", cat: "root" },
-    { disp: "sqrt(196)", a: "14", cat: "root" },
-    { disp: "sqrt(225)", a: "15", cat: "root" },
-    { disp: "sqrt(256)", a: "16", cat: "root" },
-    { disp: "sqrt(288)", a: "12√2", cat: "root" },
-    { disp: "sqrt(300)", a: "10√3", cat: "root" },
-    { disp: "sqrt(125)", a: "5√5", cat: "root" },
-    { disp: "sqrt(180)", a: "6√5", cat: "root" },
-    { disp: "sqrt(242)", a: "11√2", cat: "root" },
-    { disp: "sqrt(192)", a: "8√3", cat: "root" },
-    { disp: "sqrt(245)", a: "7√5", cat: "root" },
-    { disp: "sqrt(363)", a: "11√3", cat: "root" },
-    { disp: "sqrt(432)", a: "12√3", cat: "root" },
-    { disp: "sqrt(500)", a: "10√5", cat: "root" },
-    { disp: "sqrt(675)", a: "15√3", cat: "root" },
-    { disp: "sqrt(800)", a: "20√2", cat: "root" }
-  ]
+/* ---- 問題を組み立てる小道具 ---- */
+function mathCatOf(a) {
+  if (/[a-z]/.test(a)) return "poly";
+  if (a.includes("√")) return "root";
+  if (a.includes("/")) return "frac";
+  if (a.includes(".")) return "val";
+  return "int";
+}
+/* [式, 答え] の並びを問題にする。o で cat などを上書きする */
+function mrows(list, o) { return list.map(([disp, a]) => ({ disp, a, cat: mathCatOf(a), ...o })); }
+/* 計算で出した小数の誤差（0.30000000000000004 など）を丸めて文字列にする */
+function mnum(x) { return String(Number(x.toPrecision(12))); }
+
+/* 単位 → [基本単位に直す倍率, 量の種類] */
+const MU = {
+  "mm": [1e-3, "len"], "cm": [1e-2, "len"], "m": [1, "len"], "km": [1e3, "len"],
+  "mm²": [1e-6, "area"], "cm²": [1e-4, "area"], "m²": [1, "area"],
+  "mm³": [1e-9, "vol"], "cm³": [1e-6, "vol"], "m³": [1, "vol"], "mL": [1e-6, "vol"], "L": [1e-3, "vol"],
+  "mg": [1e-6, "mass"], "g": [1e-3, "mass"], "kg": [1, "mass"], "t": [1e3, "mass"],
+  "ms": [1e-3, "time"], "s": [1, "time"], "min": [60, "time"], "h": [3600, "time"], "d": [86400, "time"],
+  "m/s": [1, "speed"], "m/min": [1 / 60, "speed"], "km/h": [1000 / 3600, "speed"],
+  "kg/m³": [1, "dens"], "g/cm³": [1e3, "dens"],
+  "μA": [1e-6, "cur"], "mA": [1e-3, "cur"], "A": [1, "cur"],
+  "mV": [1e-3, "volt"], "V": [1, "volt"], "kV": [1e3, "volt"],
+  "mΩ": [1e-3, "res"], "Ω": [1, "res"], "kΩ": [1e3, "res"], "MΩ": [1e6, "res"]
+};
+const MU_HINT = {
+  len: "1 km＝1000 m\n1 m＝100 cm＝1000 mm",
+  area: "1 m²＝10⁴ cm²\n1 m²＝10⁶ mm²",
+  vol: "1 m³＝10⁶ cm³\n1 L＝1000 cm³＝1000 mL",
+  mass: "1 t＝1000 kg\n1 kg＝1000 g",
+  time: "1 h＝60 min＝3600 s\n1 s＝1000 ms",
+  speed: "1 km/h＝1000 m÷3600 s\n時速÷3.6＝秒速",
+  dens: "1 g/cm³＝1000 kg/m³",
+  cur: "1 A＝1000 mA\n1 mA＝1000 μA",
+  volt: "1 kV＝1000 V\n1 V＝1000 mV",
+  res: "1 MΩ＝10⁶ Ω　1 kΩ＝1000 Ω\n1 Ω＝1000 mΩ"
+};
+/* 「240 mA」「1.2kΩ」→ 基本単位での値 */
+function mval(s) {
+  const m = /^([\d.]+)\s*(\S+)$/.exec(s);
+  return parseFloat(m[1]) * MU[m[2]][0];
+}
+/* 単位の換算：cv(1530, "mm", "m") → 1.53 */
+function cvt(txt, base, to) {
+  return { txt, a: mnum(base / MU[to][0]), cat: "val", lead: `〔${to}〕に 換算せよ`, unit: to, hint: MU_HINT[MU[to][1]] };
+}
+function cv(v, from, to) { return cvt(`${v} ${from}`, v * MU[from][0], to); }
+/* 10ⁿ の指数を答える */
+function pn(disp, n) { return { disp, a: String(n), cat: "int", lead: "□ に入る数を こたえよ", pre: "□=", hint: "10ᵐ×10ⁿ＝10ᵐ⁺ⁿ\n1/10ⁿ＝10⁻ⁿ" }; }
+/* 文章題（答えは式で計算して入れる） */
+function wq(txt, a, o) { return { txt, a: typeof a === "number" ? mnum(a) : a, cat: "val", ...o }; }
+
+/* 直角三角形：a＝底辺、b＝高さ、c＝斜辺（θ は底辺と斜辺の間） */
+const SIDE_NAME = { a: "底辺 a", b: "高さ b", c: "斜辺 c" };
+const TRIG_FN = { sin: ["b", "c"], cos: ["a", "c"], tan: ["b", "a"] };
+const TRIG_HINT = "sinθ＝b/c　cosθ＝a/c\ntanθ＝b/a";
+/* 三平方：わからない辺を "" にする */
+function py(a, b, c, ans) {
+  const ask = !a ? "a" : !b ? "b" : "c";
+  const s = { a, b, c }; s[ask] = ask;
+  return { fig: { tri: { ...s, ask } }, a: ans, cat: "root", lead: `${SIDE_NAME[ask]} を もとめよ`, pre: ask + "=", hint: "a²＋b²＝c²" };
+}
+function pw(txt, ans) { return { txt, a: ans, cat: "root", lead: "長さを もとめよ", hint: "a²＋b²＝c²" }; }
+/* 三角比の値 */
+function tr(fn, a, b, c, ans) {
+  return { fig: { tri: { a, b, c, th: "θ" } }, a: ans, cat: "val", lead: `${fn} θ を もとめよ`, pre: fn + "θ=", hint: TRIG_HINT };
+}
+/* 三角比で辺を求める。given（例 "sin36.9°=0.6"）があれば答えはそこから計算する */
+function ts(ask, known, len, deg, given, ans) {
+  const s = { a: "", b: "", c: "" }; s[known] = len; s[ask] = ask;
+  if (given) {
+    const [, fn, v] = /^(sin|cos|tan)[\d.]+°=([\d.]+)$/.exec(given);
+    const [num, den] = TRIG_FN[fn], val = parseFloat(v), side = parseFloat(len);
+    ans = mnum(ask === num ? val * side : side / val);
+  }
+  return {
+    fig: { tri: { ...s, th: deg + "°", ask } }, a: ans, cat: "val",
+    lead: `${SIDE_NAME[ask]} を もとめよ`, pre: ask + "=",
+    note: given ? given.replace("=", "＝") + " とする" : "",
+    hint: given ? TRIG_HINT : "30°・45°・60° の\n三角定規の辺の比"
+  };
+}
+
+/* 抵抗の回路：["s", …] は直列、["p", …] は並列、文字列は抵抗1本（"4Ω" "1.2kΩ"） */
+function ckR(n) {
+  if (typeof n === "string") return mval(n);
+  const rs = n.slice(1).map(ckR);
+  return n[0] === "s" ? rs.reduce((x, y) => x + y, 0) : 1 / rs.reduce((x, y) => x + 1 / y, 0);
+}
+const CKT_HINT = "直列 R₁＋R₂\n並列 R₁R₂÷(R₁＋R₂)";
+function ckt(tree, unit) {
+  return { fig: { ckt: tree }, a: mnum(ckR(tree) / MU[unit][0]), cat: "val", lead: `合成抵抗〔${unit}〕を もとめよ`, pre: "R₀=", unit, hint: CKT_HINT };
+}
+function cktI(tree, volt) {
+  return { fig: { ckt: tree }, a: mnum(mval(volt) / ckR(tree)), cat: "val", lead: "流れる電流〔A〕を もとめよ", pre: "I=", unit: "A", note: `電源の電圧 ${volt}`, hint: "合成抵抗 R₀ を出してから\nI＝V÷R₀" };
+}
+/* オームの法則：ohm("I", { V: "12 V", R: "150 Ω" }, "A") */
+const OHM_NAME = { I: "電流 I", V: "電圧 V", R: "抵抗 R" };
+const OHM_HINT = { I: "I＝V÷R", V: "V＝R×I", R: "R＝V÷I" };
+function ohm(ask, given, unit) {
+  const b = {};
+  for (const k in given) b[k] = mval(given[k]);
+  const base = ask === "I" ? b.V / b.R : ask === "V" ? b.R * b.I : b.V / b.I;
+  return {
+    txt: Object.keys(given).map(k => `${k}＝${given[k]}`).join("\n"),
+    a: mnum(base / MU[unit][0]), cat: "val", lead: `${OHM_NAME[ask]}〔${unit}〕を もとめよ`,
+    pre: ask + "=", unit, hint: OHM_HINT[ask]
+  };
+}
+
+/* 速さ・密度の問いかけ */
+const SPD = u => ({ lead: `速さ〔${u}〕を もとめよ`, pre: "v=", unit: u, hint: "速さ＝距離÷時間" });
+const DIST = u => ({ lead: `進む距離〔${u}〕を もとめよ`, unit: u, hint: "距離＝速さ×時間" });
+const ACC = { lead: "加速度〔m/s²〕を もとめよ", pre: "a=", unit: "m/s²", hint: "a＝(v−v₀)÷t\n時速÷3.6＝秒速" };
+const VEL = { lead: "速度〔m/s〕を もとめよ", pre: "v=", unit: "m/s", hint: "v＝v₀＋at" };
+const DEN = u => ({ lead: `密度〔${u}〕を もとめよ`, pre: "ρ=", unit: u, hint: "ρ＝m÷V\n1 kg＝1000 g" });
+const MASS = u => ({ lead: `質量〔${u}〕を もとめよ`, pre: "m=", unit: u, hint: "m＝ρ×V\n1 L＝1000 cm³" });
+const LIN = { cat: "val", pre: "x=", lead: "x について 解け", hint: "x＝（整数か分数）" };
+const SPECIAL = { cat: "val", lead: "値を もとめよ", hint: "30°・45°・60° の\n三角定規の辺の比" };
+
+/* ================= 問題バンク ================= */
+const MATH_BANK = {
+  /* ---- 整数の四則計算 ---- */
+  int: {
+    /* 基礎：1回の加減乗除 */
+    l1: mrows([
+      ["(-2)+(-4)", "-6"], ["(-6)+(-3)", "-9"], ["0+(-5)", "-5"], ["(-9)+6", "-3"], ["8+(-5)", "3"],
+      ["(-7)+(-5)", "-12"], ["(-4)+(-9)", "-13"], ["14-(+2)", "12"], ["4-(+3)", "1"], ["6-(+4)", "2"],
+      ["(-4)-(-7)", "3"], ["(-2)-(-8)", "6"], ["3-7", "-4"], ["5×7", "35"], ["5×(-7)", "-35"],
+      ["(-5)×(-9)", "45"], ["(-4)×7", "-28"], ["(-8)×4", "-32"], ["8×(-2)", "-16"], ["8÷4", "2"],
+      ["(-24)÷(-6)", "4"], ["(-6)÷2", "-3"], ["12÷(-3)", "-4"], ["(-36)÷4", "-9"], ["8÷(-4)", "-2"]
+    ]),
+    /* 標準：2けたの計算・3つの数の加減 */
+    l2: mrows([
+      ["(-18)+7", "-11"], ["25+(-16)", "9"], ["(-14)-(-9)", "-5"], ["11-23", "-12"], ["(-7)×(-6)", "42"],
+      ["(-9)×5", "-45"], ["56÷(-7)", "-8"], ["(-72)÷(-9)", "8"], ["(-24)+(-17)", "-41"], ["32-(-15)", "47"],
+      ["(-12)+19", "7"], ["34-47", "-13"], ["(-6)×(-11)", "66"], ["84÷(-12)", "-7"], ["(-8)+15", "7"],
+      ["23-40", "-17"], ["(-9)×7", "-63"], ["(-72)÷(-8)", "9"], ["(-6)-12", "-18"], ["(-10)-5", "-15"],
+      ["(-4)+8+(-5)", "-1"], ["(-5)+7+9", "11"], ["(-6)-12-4", "-22"], ["(-10)-5-1", "-16"],
+      ["7-(-3)+(-12)", "-2"], ["(-15)+(-8)-(-20)", "-3"]
+    ]),
+    /* 発展：四則の混じった計算・分数でわる */
+    l3: mrows([
+      ["(-10)÷(-frac(5,7))", "14"], ["21÷(-frac(7,2))", "-6"], ["4×(-frac(7,2))", "-14"], ["18÷frac(3,2)", "12"],
+      ["(-15)÷frac(5,3)", "-9"], ["24÷frac(-6,5)", "-20"], ["30÷(-frac(6,5))", "-25"], ["(-12)÷(-frac(6,9))", "18"],
+      ["(-49)÷frac(7,3)", "-21"], ["frac(9,6)×(-4)", "-6"], ["3×(-4)+10", "-2"], ["(-18)÷3-(-7)", "1"],
+      ["5-(-2)×6", "17"], ["(-3)×(-4)-20÷(-5)", "16"], ["24÷(-6)×(-3)", "12"], ["(-2)×(3-8)", "10"],
+      ["(-36)÷(4-(-5))", "-4"], ["(7-12)×(-3)+(-8)", "7"]
+    ]),
+    /* 最難関：答えが分数になる計算・分数どうしの計算 */
+    final: mrows([
+      ["7×frac(3,14)", "3/2"], ["frac(-3,10)×(-5)", "3/2"], ["8×frac(3,16)", "3/2"], ["frac(-5,12)×6", "-5/2"],
+      ["frac(7,9)×frac(3,14)", "1/6"], ["frac(-8,15)÷frac(4,5)", "-2/3"], ["10×frac(7,25)", "14/5"],
+      ["frac(-9,14)×7", "-9/2"], ["9×frac(4,15)", "12/5"], ["frac(-8,21)×7", "-8/3"], ["frac(5,6)-frac(1,4)", "7/12"],
+      ["frac(2,3)+(-frac(3,4))", "-1/12"], ["(-frac(3,4))×frac(8,9)÷(-2)", "1/3"], ["frac(-6,7)÷(-frac(9,14))", "4/3"],
+      ["3-frac(5,2)×4", "-7"], ["frac(1,2)-frac(2,3)×frac(9,4)", "-1"], ["frac(3,5)÷frac(9,10)-1", "-1/3"]
+    ])
+  },
+
+  /* ---- 文字式の四則計算 ---- */
+  poly: {
+    /* 基礎：同類項をまとめる */
+    l1: mrows([
+      ["2x+9x", "11x"], ["4x-3x", "x"], ["5x+x", "6x"], ["5x+7x", "12x"], ["3x+8x", "11x"], ["12x-5x", "7x"],
+      ["-6x+9x", "3x"], ["7a+4a", "11a"], ["10y-13y", "-3y"], ["7x+5x", "12x"], ["15a-9a", "6a"], ["6x+13x", "19x"],
+      ["18a-11a", "7a"], ["9x+3-4x+7", "5x+10"], ["4x-5+8x-9", "12x-14"], ["-3x-6+4x+2", "x-4"], ["6x-9+2x-7", "8x-16"],
+      ["2x+6-8x-3", "-6x+3"], ["-4x-5-7x-2", "-11x-7"], ["-8x-2+7x+4", "-x+2"], ["5x+2-3x+7", "2x+9"],
+      ["-2x+8+6x-3", "4x+5"], ["9a-4+2a-6", "11a-10"], ["-5y+7-3y+2", "-8y+9"], ["4x-11-9x+6", "-5x-5"],
+      ["4y+3-2y+8", "2y+11"], ["-3x+10+7x-4", "4x+6"], ["12x-5-8x+9", "4x+4"], ["-6a+2-5a-7", "-11a-5"],
+      ["5y+9-3y+2", "2y+11"], ["-4x+7+9x-12", "5x-5"], ["10x-8-3x+5", "7x-3"], ["-7a+3-2a-8", "-9a-5"]
+    ]),
+    /* 標準：カッコをはずす・分配法則 */
+    l2: mrows([
+      ["6x+(3x-1)", "9x-1"], ["9x+5-(4x-8)", "5x+13"], ["6x-9+(2x-7)", "8x-16"], ["-8x-2+(7x+4)", "-x+2"],
+      ["2x+6-(8x-3)", "-6x+9"], ["-4x-5-(7x-2)", "-11x-3"], ["3(2x+7y)", "6x+21y"], ["5(3x-9y)", "15x-45y"],
+      ["-8(5x+2y)", "-40x-16y"], ["-4(6a-3b)", "-24a+12b"], ["5(9a+2b)", "45a+10b"], ["-8(4a+7b)", "-32a-56b"],
+      ["-2(9a-6b)", "-18a+12b"], ["4(3x+2y)", "12x+8y"], ["-3(4a-5b)", "-12a+15b"], ["6(2x-3y)", "12x-18y"],
+      ["-5(3a+2b)", "-15a-10b"], ["7(2x+3y)", "14x+21y"], ["-4(5a-2b)", "-20a+8b"], ["6(3x+4y)", "18x+24y"],
+      ["-5(4a-3b)", "-20a+15b"]
+    ]),
+    /* 発展：式をわる */
+    l3: mrows([
+      ["(6a-4b)÷2", "3a-2b"], ["(9a-3b)÷3", "3a-b"], ["(12x+4y)÷(-4)", "-3x-y"], ["(6x+15y)÷(-3)", "-2x-5y"],
+      ["(-8a-6b)÷(-2)", "4a+3b"], ["(15x-10y)÷5", "3x-2y"], ["(-18a+12b)÷(-6)", "3a-2b"], ["(21x+14y)÷7", "3x+2y"],
+      ["(-16a-20b)÷4", "-4a-5b"], ["(24x-18y)÷6", "4x-3y"], ["(-21a-14b)÷7", "-3a-2b"], ["(20x-35y)÷5", "4x-7y"],
+      ["(-18a-24b)÷(-6)", "3a+4b"], ["-(8a-6b)÷(-2)", "4a-3b"], ["-2(9a-6b)÷6", "-3a+2b"]
+    ]),
+    /* 最難関：2つのカッコを展開してまとめる */
+    final: mrows([
+      ["3(2x-y)-2(x-4y)", "4x+5y"], ["4(a+2b)-(3a-b)", "a+9b"], ["2(3x+5)+3(x-4)", "9x-2"],
+      ["-5(x-2)+4(2x-3)", "3x-2"], ["6(a-2b)-4(2a-3b)", "-2a"], ["(8x-12y)÷4-(3x-5y)", "-x+2y"],
+      ["3(x+2y)+(6x-9y)÷3", "5x+3y"], ["-2(3a-b)+(10a-15b)÷5", "-4a-b"], ["7(x-y)-3(2x-3y)", "x+2y"],
+      ["2(4x-3)-3(2x-5)+x", "3x+9"], ["(12a-18b)÷(-6)+2(a+b)", "5b"], ["5(2x+y)-3(x-4y)", "7x+17y"]
+    ])
+  },
+
+  /* ---- 指数計算・指数法則 ---- */
+  pow: {
+    /* 基礎：累乗の値・同じ文字のかけ算 */
+    l1: mrows([
+      ["2^(3)", "8"], ["5^(2)", "25"], ["3^(5)", "243"], ["(-3)^(2)", "9"], ["2^(5)", "32"], ["5^(3)", "125"],
+      ["(-4)^(2)", "16"], ["4^(3)", "64"], ["(-6)^(2)", "36"], ["11^(2)", "121"], ["10^(3)", "1000"], ["5^(4)", "625"],
+      ["a^(4)×a^(2)", "a^6"], ["a^(3)×a^(8)", "a^11"], ["x^(2)×x^(7)", "x^9"], ["x^(4)×x^(6)", "x^10"],
+      ["a^(2)×a^(9)", "a^11"], ["x^(5)×x^(8)", "x^13"], ["x^(6)×x^(9)", "x^15"]
+    ]),
+    /* 標準：符号に注意・(aᵐ)ⁿ・(ab)ⁿ */
+    l2: mrows([
+      ["-4^(3)", "-64"], ["(-5)^(3)", "-125"], ["(-2)^(5)", "-32"], ["(-4)^(3)", "-64"], ["-3^(2)", "-9"],
+      ["-(-2)^(3)", "8"], ["(x^(4))^(5)", "x^20"], ["(a^(3))^(2)", "a^6"], ["(x^(7))^(3)", "x^21"], ["(x^(3))^(4)", "x^12"],
+      ["(a^(5))^(3)", "a^15"], ["(a^(4))^(3)", "a^12"], ["(a^(5))^(4)", "a^20"], ["(3y)^(2)", "9y^2"], ["(2x)^(3)", "8x^3"],
+      ["(-3x)^(2)", "9x^2"], ["(-4y)^(2)", "16y^2"], ["(-2x)^(3)", "-8x^3"]
+    ]),
+    /* 発展：累乗をふくむ四則・単項式の乗除 */
+    l3: mrows([
+      ["(-2)^(3)×3^(2)", "-72"], ["3^(3)×2^(2)", "108"], ["(-3)^(2)×(-2)^(3)", "-72"], ["(-2)^(4)×3", "48"],
+      ["(-3)^(2)×2^(2)", "36"], ["-3^(3)-(-5)", "-22"], ["(-4)^(3)+(-2)^(2)", "-60"], ["a^(2)×(a^(3))^(3)", "a^11"],
+      ["(x^(5)×x^(3))^(2)", "x^16"], ["6x^(2)×(-2x)", "-12x^3"], ["3a^(2)×4a^(3)", "12a^5"], ["-5x^(4)×2x^(2)", "-10x^6"],
+      ["8a^(3)×(-2a^(2))", "-16a^5"], ["10ab÷(5a)", "2b"], ["6x^(5)÷(2x^(2))", "3x^3"], ["12a^(4)b÷(3a^(2))", "4a^2b"]
+    ]),
+    /* 最難関：いくつもの法則を組み合わせる・負の指数 */
+    final: [
+      ...mrows([
+        ["-3^(3)+(-4)^(2)×5", "53"], ["-(-2)^(4)+((-4)^(2)-8)", "-8"], ["-3^(3)-(-5)^(3)", "98"],
+        ["(-3a)^(3)×(-ab)", "27a^4b"], ["4ab^(2)×(-3a^(2)b)", "-12a^3b^3"], ["12a^(3)b^(2)÷(4ab)", "3a^2b"],
+        ["15a^(4)b^(3)÷(5a^(2)b)", "3a^2b^2"], ["18x^(5)y^(2)÷(6x^(2)y)", "3x^3y"], ["20x^(6)y^(3)÷(5x^(2)y)", "4x^4y^2"],
+        ["15x^(5)y^(4)÷(5x^(2)y^(2))", "3x^3y^2"], ["(2a^(2)b)^(3)", "8a^6b^3"], ["9x^(2)y÷(-3xy)", "-3x"]
+      ]),
+      ...mrows([["x^(2)×x^(-7)", "x^-5"], ["a^(-3)×a^(5)", "a^2"], ["(x^(-2))^(3)", "x^-6"]],
+        { hint: "負の指数は ^ のあと − を打つ\n例 x^−5" })
+    ]
+  },
+
+  /* ---- 平方根 ---- */
+  root: {
+    /* 基礎：√ をはずす・√ どうしのかけ算とわり算 */
+    l1: mrows([
+      ["sqrt(16)", "4"], ["sqrt(25)", "5"], ["sqrt(81)", "9"], ["sqrt(49)", "7"], ["sqrt(9)", "3"], ["sqrt(3^(2))", "3"],
+      ["sqrt(64)", "8"], ["sqrt(100)", "10"], ["sqrt(3)×sqrt(7)", "√21"], ["sqrt(2)×sqrt(3)", "√6"],
+      ["sqrt(2)×sqrt(7)", "√14"], ["sqrt(5)×sqrt(5)", "5"], ["sqrt(4)×sqrt(5)", "2√5"], ["sqrt(24)÷sqrt(4)", "√6"],
+      ["sqrt(8)÷sqrt(4)", "√2"]
+    ], { cat: "root" }),
+    /* 標準：a√b の形にする・同じ √ をまとめる */
+    l2: mrows([
+      ["sqrt(5^(2)×3)", "5√3"], ["sqrt(16×5)", "4√5"], ["sqrt(45)", "3√5"], ["sqrt(72)", "6√2"], ["sqrt(98)", "7√2"],
+      ["sqrt(108)", "6√3"], ["sqrt(75)", "5√3"], ["sqrt(48)", "4√3"], ["sqrt(162)", "9√2"], ["sqrt(147)", "7√3"],
+      ["sqrt(200)", "10√2"], ["sqrt(243)", "9√3"], ["sqrt(72)÷sqrt(9)", "2√2"], ["sqrt(12)×sqrt(6)", "6√2"],
+      ["sqrt(75)÷sqrt(3)", "5"], ["3sqrt(7)+2sqrt(7)", "5√7"], ["5sqrt(3)+6sqrt(3)", "11√3"], ["8sqrt(2)-4sqrt(2)", "4√2"],
+      ["4sqrt(5)-sqrt(5)", "3√5"], ["2sqrt(5)+6sqrt(5)", "8√5"]
+    ], { cat: "root" }),
+    /* 発展：a√b に直してからまとめる・分配法則 */
+    l3: mrows([
+      ["3sqrt(8)+4sqrt(8)-5sqrt(8)", "4√2"], ["2sqrt(3)+sqrt(48)", "6√3"], ["sqrt(63)-2sqrt(7)", "√7"],
+      ["2sqrt(12)+sqrt(27)", "7√3"], ["sqrt(50)+3sqrt(8)", "11√2"], ["sqrt(20)+sqrt(45)", "5√5"], ["3sqrt(18)-sqrt(8)", "7√2"],
+      ["sqrt(12)+sqrt(27)", "5√3"], ["sqrt(50)-sqrt(18)", "2√2"], ["sqrt(3)(sqrt(5)+sqrt(4))", "√15+2√3"],
+      ["sqrt(7)(sqrt(6)-sqrt(3))", "√42-√21"], ["sqrt(3)(sqrt(4)-sqrt(2))", "2√3-√6"]
+    ], { cat: "root" }),
+    /* 最難関：分配してから a√b に直してまとめる */
+    final: mrows([
+      ["sqrt(3)(2sqrt(5)+sqrt(45))", "5√15"], ["sqrt(7)(6sqrt(2)+sqrt(32))", "10√14"], ["sqrt(6)(sqrt(24)-sqrt(6))", "6"],
+      ["sqrt(10)(sqrt(40)+sqrt(90))", "50"], ["sqrt(6)(sqrt(24)+sqrt(54))", "30"], ["sqrt(2)(sqrt(18)-sqrt(8))", "2"],
+      ["sqrt(5)(3sqrt(5)+sqrt(20))", "25"], ["sqrt(2)(sqrt(6)+sqrt(10))", "2√3+2√5"], ["sqrt(3)(sqrt(6)-sqrt(15))", "3√2-3√5"],
+      ["2sqrt(3)×sqrt(6)", "6√2"], ["sqrt(8)×sqrt(18)", "12"], ["sqrt(27)×sqrt(12)÷sqrt(9)", "6"]
+    ], { cat: "root" })
+  },
+
+  /* ---- 式の変形（y について解く） ---- */
+  trans: {
+    /* 基礎：移項だけ */
+    l1: mrows([
+      ["y-6=3x", "3x+6"], ["y-2=4x", "4x+2"], ["y+7=9x", "9x-7"], ["y-11=9x", "9x+11"], ["y-5x=8", "5x+8"],
+      ["y+14x=-2", "-14x-2"], ["y-10=2x+5", "2x+15"], ["y+5=8x-6", "8x-11"], ["y-6=7x", "7x+6"], ["y+9=4x", "4x-9"],
+      ["y-8x=15", "8x+15"], ["y+3x=10", "-3x+10"], ["y-4=-2x+7", "-2x+11"], ["y+12=5x-3", "5x-15"]
+    ], { cat: "eqn" }),
+    /* 標準：y を1つにまとめる・係数でわる */
+    l2: mrows([
+      ["2y+3=5x+y-7", "5x-10"], ["4y+7x=6x+3y-9", "-x-9"], ["5x+2y=3y-9+6x", "-x+9"], ["4y+12x=20x+3y-8", "8x-8"],
+      ["6y=12x", "2x"], ["7y=14x", "2x"], ["5y=20x", "4x"], ["8y=16x+40", "2x+5"], ["9y=9x-81", "x-9"], ["2y=6x+8", "3x+4"],
+      ["3y=12x-15", "4x-5"], ["3y=12x-18", "4x-6"], ["5y=25x+40", "5x+8"], ["2y=4(x+5)", "2x+10"], ["6y=24(2x-6)", "8x-24"]
+    ], { cat: "eqn" }),
+    /* 発展：移項してから係数でわる・分母をはらう */
+    l3: mrows([
+      ["3y-12=18x+9", "6x+7"], ["7y+24=14x+3", "2x-3"], ["4y+8=20x", "5x-2"], ["5y-10=15x+5", "3x+3"],
+      ["6y+18=24x-6", "4x-4"], ["7y-14=21x+7", "3x+3"], ["8y+16=32x-8", "4x-3"], ["9y-27=18x+9", "2x+4"],
+      ["2y+5=8x-3", "4x-4"], ["3y-7=15x+2", "5x+3"], ["4y+3x=7x+12", "x+3"], ["5y-2x=13x-10", "3x-2"],
+      ["6y+4x=22x+12", "3x+2"], ["2y-3=8x+5", "4x+4"], ["3y+7=15x-2", "5x-3"], ["4y-9=12x+7", "3x+4"],
+      ["5y+8=20x-12", "4x-4"], ["6y-5x=13x+12", "3x+2"], ["7y+4x=25x-14", "3x-2"], ["2y-7=6x+3", "3x+5"],
+      ["frac(y,7)=x", "7x"], ["frac(y,5)=x", "5x"], ["frac(y,3)=-7x", "-21x"], ["frac(y,4)=3x", "12x"]
+    ], { cat: "eqn" }),
+    /* 最難関：分数をふくむ式の変形 */
+    final: mrows([
+      ["frac(2y,3)=4x", "6x"], ["frac(3y,6)=-2x", "-4x"], ["frac(2y,5)=4x", "10x"], ["frac(y,7)=9x+2", "63x+14"],
+      ["frac(y,2)=2(x+3)", "4x+12"], ["frac(y,6)=-(x+2)", "-6x-12"], ["frac(y,5)=6x+1", "30x+5"], ["frac(2y,3)=4x-8", "6x-12"],
+      ["frac(y,3)=-7x-2", "-21x-6"], ["frac(3y,6)=-2x-3", "-4x-6"], ["frac(y,7)+3x=9x+2", "42x+14"],
+      ["frac(y,2)+8=2(x+3)", "4x-4"], ["frac(5y,6)=-(x+2)+y", "6x+12"], ["frac(y,4)=-frac(1,4)(x-8)", "-x+8"],
+      ["frac(y,4)=-frac(1,4)(2x-8)-frac(y,4)", "-x+4"], ["frac(y,4)=3x-2", "12x-8"], ["frac(y,8)=2x+5", "16x+40"],
+      ["frac(3y,4)=6x-9", "8x-12"], ["frac(2y,5)=4x+6", "10x+15"], ["frac(y,3)+2=5x", "15x-6"], ["frac(y,6)-x=3x+2", "24x+12"],
+      ["frac(y,5)+4x=10x-3", "30x-15"], ["frac(y,3)-2x=5", "6x+15"], ["frac(3y,4)=9x-6", "12x-8"], ["frac(y,6)+2=3x", "18x-12"],
+      ["frac(2y,3)-4=6x", "9x+6"], ["frac(y,3)=5x-2", "15x-6"]
+    ], { cat: "eqn" })
+  },
+
+  /* ---- 一次方程式（x について解く） ---- */
+  lin: {
+    /* 基礎：ax＋b＝0 の形・1回の移項 */
+    l1: mrows([
+      ["3x+15=0", "-5"], ["7x-28=0", "4"], ["12x+24=0", "-2"], ["2x-10=0", "5"], ["9x+27=0", "-3"], ["-6x+42=0", "7"],
+      ["x+8=3", "-5"], ["x-6=-2", "4"], ["x+13=0", "-13"], ["4x=-20", "-5"], ["5x=35", "7"], ["-3x=18", "-6"]
+    ], LIN),
+    /* 標準：両辺に x がある */
+    l2: mrows([
+      ["5x+40=10", "-6"], ["12x-6=18", "2"], ["9x+14=6x+2", "-4"], ["11-4x=2x-7", "3"], ["3x-5=x+9", "7"],
+      ["7x+2=4x-10", "-4"], ["2x+9=5x-6", "5"], ["8-3x=2x-12", "4"], ["6x-7=-x+14", "3"], ["10x-4=3x+10", "2"],
+      ["5x-8=2x+7", "5"], ["4x+3=9", "3/2"], ["8x-4=0", "1/2"]
+    ], LIN),
+    /* 発展：( ) をふくむ */
+    l3: mrows([
+      ["5(x-2)=15", "5"], ["6(x-8)=12", "10"], ["2(x+21)=16", "-13"], ["3(x-9)+7=1", "7"], ["10(x+3)-13=-3", "-2"],
+      ["5(x+2)-19=6", "3"], ["6(3x-5)=6", "2"], ["2(3x+7)=12+4x", "-1"], ["4(-8x-7)+20=56", "-2"],
+      ["3(2x+1)=4(x+2)", "5/2"], ["7-2(x-3)=x+1", "4"], ["4(x+5)-3(x-2)=30", "4"]
+    ], LIN),
+    /* 最難関：分数・小数をふくむ */
+    final: mrows([
+      ["frac(x,3)+2=5", "9"], ["frac(x,4)-1=frac(x,6)", "12"], ["frac(x-1,2)=frac(x+3,4)", "5"], ["frac(2x,3)-4=frac(x,2)", "24"],
+      ["frac(3x+1,5)=2", "3"], ["frac(x,2)+frac(x,3)=10", "12"], ["frac(5x-2,3)=x+2", "4"], ["frac(x+2,3)-frac(x-1,2)=1", "1"],
+      ["2x-frac(x-3,2)=6", "3"], ["0.2x+1.5=0.5x", "5"], ["0.3(x-2)=0.6", "4"], ["1.2x-0.8=x+0.4", "6"]
+    ], LIN)
+  },
+
+  /* ---- 三平方の定理（a＝底辺・b＝高さ・c＝斜辺） ---- */
+  pyth: {
+    /* 基礎：斜辺を求める（整数） */
+    l1: [
+      py("4", "3", "", "5"), py("3", "4", "", "5"), py("6", "8", "", "10"), py("8", "6", "", "10"), py("12", "5", "", "13"),
+      py("5", "12", "", "13"), py("9", "12", "", "15"), py("15", "8", "", "17"), py("16", "12", "", "20"),
+      py("20", "15", "", "25"), py("24", "7", "", "25"), py("24", "10", "", "26")
+    ],
+    /* 標準：底辺・高さを求める（整数） */
+    l2: [
+      py("", "3", "5", "4"), py("", "9", "15", "12"), py("", "8", "10", "6"), py("4", "", "5", "3"), py("12", "", "15", "9"),
+      py("5", "", "13", "12"), py("", "5", "13", "12"), py("8", "", "17", "15"), py("", "7", "25", "24"),
+      py("", "16", "20", "12"), py("6", "", "10", "8"), py("10", "", "26", "24")
+    ],
+    /* 発展：答えが √ になる・√ の辺 */
+    l3: [
+      py("5", "5", "", "5√2"), py("1", "1", "", "√2"), py("2", "4", "", "2√5"), py("3", "6", "", "3√5"), py("2", "3", "", "√13"),
+      py("4", "6", "", "2√13"), py("sqrt(3)", "1", "", "2"), py("", "1", "sqrt(2)", "1"), py("2", "", "sqrt(8)", "2"),
+      py("sqrt(12)", "", "4", "2"), py("4", "", "6", "2√5"), py("", "3", "9", "6√2"), py("5", "", "7", "2√6")
+    ],
+    /* 最難関：√ をふくむ辺・図形への応用 */
+    final: [
+      py("2sqrt(3)", "2", "", "4"), py("sqrt(5)", "2", "", "3"), py("1", "", "sqrt(10)", "3"), py("", "2", "2sqrt(5)", "4"),
+      py("sqrt(6)", "sqrt(3)", "", "3"), py("3", "", "3sqrt(2)", "3"), py("2sqrt(2)", "2sqrt(2)", "", "4"),
+      pw("1辺 6 の正方形の\n対角線", "6√2"), pw("1辺 4 の正三角形の\n高さ", "2√3"), pw("1辺 10 の正三角形の\n高さ", "5√3"),
+      pw("縦 3・横 4・高さ 12 の\n直方体の対角線", "13"), pw("2点 (1, 2) と (4, 6) の\n距離", "5")
+    ]
+  },
+
+  /* ---- 三角比 ---- */
+  trig: {
+    /* 基礎：辺の長さから三角比（整数の辺） */
+    l1: [
+      tr("sin", "4", "3", "5", "3/5"), tr("cos", "4", "3", "5", "4/5"), tr("tan", "4", "3", "5", "3/4"),
+      tr("sin", "12", "5", "13", "5/13"), tr("cos", "12", "5", "13", "12/13"), tr("tan", "12", "5", "13", "5/12"),
+      tr("sin", "15", "8", "17", "8/17"), tr("cos", "15", "8", "17", "15/17"), tr("tan", "15", "8", "17", "8/15"),
+      tr("sin", "16", "12", "20", "3/5"), tr("cos", "16", "12", "20", "4/5"), tr("tan", "16", "12", "20", "3/4"),
+      tr("sin", "24", "7", "25", "7/25"), tr("cos", "24", "7", "25", "24/25"), tr("tan", "24", "7", "25", "7/24")
+    ],
+    /* 標準：√ をふくむ辺・30°・45°・60° の値 */
+    l2: [
+      tr("sin", "sqrt(3)", "1", "2", "1/2"), tr("cos", "sqrt(3)", "1", "2", "√3/2"), tr("tan", "sqrt(3)", "1", "2", "√3/3"),
+      tr("sin", "1", "1", "sqrt(2)", "√2/2"), tr("cos", "1", "1", "sqrt(2)", "√2/2"), tr("tan", "1", "1", "sqrt(2)", "1"),
+      tr("sin", "1", "sqrt(3)", "2", "√3/2"), tr("tan", "1", "sqrt(3)", "2", "√3"),
+      tr("sin", "2", "sqrt(5)", "3", "√5/3"), tr("cos", "2", "sqrt(5)", "3", "2/3"), tr("tan", "2", "sqrt(5)", "3", "√5/2"),
+      ...mrows([
+        ["sin30°", "1/2"], ["cos30°", "√3/2"], ["tan30°", "√3/3"], ["sin45°", "√2/2"], ["cos45°", "√2/2"],
+        ["tan45°", "1"], ["sin60°", "√3/2"], ["cos60°", "1/2"], ["tan60°", "√3"]
+      ], SPECIAL)
+    ],
+    /* 発展：三角比の値を使って辺を求める */
+    l3: [
+      ts("c", "b", "9", "36.9", "sin36.9°=0.6"), ts("a", "c", "10", "36.9", "cos36.9°=0.8"), ts("b", "c", "20", "36.9", "sin36.9°=0.6"),
+      ts("c", "a", "12.9", "30", "cos30°=0.86"), ts("a", "b", "5.8", "30", "tan30°=0.58"), ts("b", "c", "30", "40", "sin40°=0.64"),
+      ts("b", "a", "8", "36.9", "tan36.9°=0.75"), ts("c", "a", "16", "36.9", "cos36.9°=0.8"), ts("a", "c", "40", "40", "cos40°=0.77"),
+      ts("b", "a", "20", "40", "tan40°=0.84"), ts("c", "b", "12.8", "40", "sin40°=0.64"), ts("a", "b", "9", "36.9", "tan36.9°=0.75"),
+      ts("b", "c", "50", "30", "sin30°=0.5")
+    ],
+    /* 最難関：30°・45°・60° で辺を求める・高さの測量 */
+    final: [
+      ts("b", "c", "10", "30", "", "5"), ts("a", "c", "8", "60", "", "4"), ts("c", "b", "6", "30", "", "12"),
+      ts("b", "a", "6", "60", "", "6√3"), ts("b", "c", "6", "45", "", "3√2"), ts("b", "a", "4sqrt(3)", "30", "", "4"),
+      ts("a", "c", "12", "30", "", "6√3"), ts("a", "b", "5", "45", "", "5"),
+      wq("L＝50 m　α＝30°\n器械高 I＝1.30 m", 50 * 0.577 + 1.3,
+        { lead: "建物の高さ H〔m〕を もとめよ", pre: "H=", unit: "m", note: "H＝L tanα＋I　tan30°＝0.577 とする", hint: "H＝L tanα＋I" }),
+      wq("L＝56.04 m　α＝36.9°\n器械高 I＝1.50 m", 56.04 * 0.75 + 1.5,
+        { lead: "建物の高さ H〔m〕を もとめよ", pre: "H=", unit: "m", note: "H＝L tanα＋I　tan36.9°＝0.75 とする", hint: "H＝L tanα＋I" }),
+      wq("長さ 20 m の坂道\n水平面との角 30°", 20 * 0.5,
+        { lead: "坂の高さ〔m〕を もとめよ", unit: "m", hint: "高さ＝長さ×sin30°" })
+    ]
+  },
+
+  /* ---- 量とSI単位・長さ・面積・体積・時間 ---- */
+  si: {
+    /* 基礎：接頭語の意味・よく使う換算 */
+    l1: [
+      pn("k(キロ)=10^(□)", 3), pn("M(メガ)=10^(□)", 6), pn("G(ギガ)=10^(□)", 9), pn("c(センチ)=10^(□)", -2), pn("m(ミリ)=10^(□)", -3),
+      cv(1, "km", "m"), cv(3, "km", "m"), cv(1, "m", "cm"), cv(1, "m", "mm"), cv(5, "cm", "mm"), cv(1, "kg", "g"), cv(1, "t", "kg"),
+      cv(1, "min", "s"), cv(1, "h", "min"), cv(2, "h", "min"), cv(1, "h", "s"), cv(1, "s", "ms"), cv(1, "L", "cm³")
+    ],
+    /* 標準：10ⁿ で表す・小数をふくむ換算 */
+    l2: [
+      pn("μ(マイクロ)=10^(□)", -6), pn("n(ナノ)=10^(□)", -9), pn("p(ピコ)=10^(□)", -12),
+      pn("1000=10^(□)", 3), pn("1000000=10^(□)", 6), pn("1000000000=10^(□)", 9),
+      pn("0.001=10^(□)", -3), pn("0.000001=10^(□)", -6), pn("0.000000001=10^(□)", -9),
+      cv(1530, "mm", "m"), cv(4.16, "m", "mm"), cv(570, "m", "cm"), cv(1234, "m", "km"), cv(0.1234, "g", "mg"),
+      cv(0.13, "s", "ms"), cv(2.17, "s", "ms"), cv(0.6, "h", "min"), cv(780, "s", "min"), cv(1440, "min", "h"),
+      cv(54, "min", "h"), cv(25, "mL", "L")
+    ],
+    /* 発展：指数法則・面積と体積の換算 */
+    l3: [
+      pn("frac(1,10^(3))×10^(9)=10^(□)", 6), pn("10^(6)×frac(1,10^(-3))=10^(□)", 9), pn("10^(-6)×(10^(2))^(3)×10^(3)=10^(□)", 3),
+      pn("10^(4)×10^(-7)=10^(□)", -3), pn("(10^(-2))^(3)=10^(□)", -6),
+      cv(4.8, "m²", "cm²"), cv(0.95, "m²", "cm²"), cv(30, "cm²", "m²"), cv(0.05, "m³", "cm³"), cv(3.75, "L", "cm³"),
+      cv(1500, "cm³", "m³"), cv(2800, "mm³", "cm³"), cvt("3 h 15 min", 3 * 3600 + 15 * 60, "s"),
+      wq("縦 20 mm・横 28 mm の\n長方形の面積", 20 * 28, { lead: "面積〔mm²〕を もとめよ", unit: "mm²", hint: "面積＝縦×横" })
+    ],
+    /* 最難関：負の指数の組み合わせ・円周と断面積 */
+    final: [
+      pn("frac(1,10^(3))×10^(-2)×10^(4)=10^(□)", -1), pn("frac(1,10^(3))×(10^(-3))^(2)×10^(3)=10^(□)", -6),
+      pn("frac(1,10^(3))×(10^(-3))^(2)×10^(-3)=10^(□)", -12), pn("frac(1,10^(-3))×(10^(2))^(3)=10^(□)", 9),
+      cvt("18 日 16 時間", 18 * 86400 + 16 * 3600, "h"), cv(0.3, "h", "s"), cv(830, "mm³", "cm³"),
+      wq("直径 500 mm の円の\n円周", 3.14 * 500, { lead: "円周〔mm〕を もとめよ", unit: "mm", note: "π＝3.14 とする", hint: "円周＝π×直径" }),
+      wq("直径 500 mm の円の\n円周", 3.14 * 500 / 10, { lead: "円周〔cm〕を もとめよ", unit: "cm", note: "π＝3.14 とする", hint: "円周＝π×直径\n1 cm＝10 mm" }),
+      wq("直径 10 mm の丸棒の\n断面積", 3.14 * 10 * 10 / 4, { lead: "断面積〔mm²〕を もとめよ", unit: "mm²", note: "π＝3.14 とする", hint: "円の面積＝πd²÷4" }),
+      wq("直径 20 mm の丸棒の\n断面積", 3.14 * 20 * 20 / 4, { lead: "断面積〔mm²〕を もとめよ", unit: "mm²", note: "π＝3.14 とする", hint: "円の面積＝πd²÷4" }),
+      wq("直径 50 mm・長さ 1 m の\n丸棒の側面積", 3.14 * 50 * 1000, { lead: "側面積〔mm²〕を もとめよ", unit: "mm²", note: "π＝3.14 とする", hint: "側面積＝πd×長さ\n1 m＝1000 mm" })
+    ]
+  },
+
+  /* ---- 時間・速さ・加速度・密度 ---- */
+  phys: {
+    /* 基礎：速さ・距離・密度の基本 */
+    l1: [
+      wq("100 m を 20 秒で 進む", 100 / 20, SPD("m/s")), wq("9 m を 1.5 秒で 進む", 9 / 1.5, SPD("m/s")),
+      wq("36 km を 2 時間で 進む", 36 / 2, SPD("km/h")), wq("1500 m を 5 分で 進む", 1500 / 5, SPD("m/min")),
+      wq("秒速 15 m/s で\n8 秒 進む", 15 * 8, DIST("m")), wq("時速 60 km/h で\n2.5 時間 進む", 60 * 2.5, DIST("km")),
+      wq("時速 40 km/h で\n3 時間 進む", 40 * 3, DIST("km")), wq("静止から 4 秒で\n秒速 20 m/s になった", (20 - 0) / 4, ACC),
+      wq("質量 270 g\n体積 100 cm³", 270 / 100, DEN("g/cm³")), wq("密度 2.7 g/cm³\n体積 10 cm³", 2.7 * 10, MASS("g"))
+    ],
+    /* 標準：時速と秒速の換算・加速度 */
+    l2: [
+      cv(36, "km/h", "m/s"), cv(72, "km/h", "m/s"), cv(54, "km/h", "m/s"), cv(18, "km/h", "m/s"), cv(108, "km/h", "m/s"),
+      cv(10, "m/s", "km/h"), cv(20, "m/s", "km/h"), cv(60, "km/h", "m/min"),
+      wq("20 m 離れた2点を\n0.8 秒で 通過", 20 / 0.8, SPD("m/s")), wq("静止から 10 秒で\n秒速 35 m/s になった", (35 - 0) / 10, ACC),
+      wq("秒速 10 m/s から 5 秒で\n秒速 25 m/s になった", (25 - 10) / 5, ACC), wq("質量 540 g\n体積 200 cm³", 540 / 200, DEN("g/cm³"))
+    ],
+    /* 発展：小数の換算・v＝v₀＋at・密度の換算 */
+    l3: [
+      cv(45, "km/h", "m/s"), cv(63, "km/h", "m/s"), cv(27, "km/h", "m/s"), cv(90, "km/h", "m/min"),
+      wq("552.5 km を\n2 時間 30 分で 走る", 552.5 / 2.5, SPD("km/h")), wq("静止から 8 秒で\n秒速 14 m/s になった", (14 - 0) / 8, ACC),
+      wq("秒速 5.5 m/s から\n加速度 2 m/s² で 7 秒", 5.5 + 2 * 7, VEL), wq("秒速 3 m/s から\n加速度 1.5 m/s² で 6 秒", 3 + 1.5 * 6, VEL),
+      cv(2.7, "g/cm³", "kg/m³"), cv(8.96, "g/cm³", "kg/m³"), cv(0.82, "g/cm³", "kg/m³"), cv(1000, "kg/m³", "g/cm³"),
+      cvt("7.86×10³ kg/m³", 7.86e3, "g/cm³")
+    ],
+    /* 最難関：単位をそろえてから計算する */
+    final: [
+      wq("静止から 10 秒で\n時速 54 km/h になった", (54 / 3.6 - 0) / 10, ACC), wq("静止から 5 秒で\n時速 72 km/h になった", (72 / 3.6 - 0) / 5, ACC),
+      wq("時速 36 km/h から 8 秒で\n時速 72 km/h になった", (72 / 3.6 - 36 / 3.6) / 8, ACC),
+      wq("質量 3.85 kg\n体積 500 cm³", 3850 / 500, DEN("g/cm³")), wq("質量 3.93 kg\n体積 500 cm³", 3930 / 500, DEN("g/cm³")),
+      wq("質量 145 g\n体積 200 cm³", 145 / 200, DEN("g/cm³")), wq("密度 0.82 g/cm³ の灯油\n5 L", 0.82 * 5000 / 1000, MASS("kg")),
+      wq("密度 7.9 g/cm³ の鉄\n1000 cm³", 7.9 * 1000 / 1000, MASS("kg")), wq("密度 2.7 g/cm³ のアルミ\n0.5 m³", 2.7 * 500000 / 1e6, MASS("t")),
+      wq("密度 1.0 g/cm³ の水\n15 t", 15e6 / 1.0 / 1e6, { lead: "体積〔m³〕を もとめよ", pre: "V=", unit: "m³", hint: "V＝m÷ρ\n1 t＝10⁶ g　1 m³＝10⁶ cm³" })
+    ]
+  },
+
+  /* ---- 電気の単位・オームの法則・合成抵抗 ---- */
+  elec: {
+    /* 基礎：V＝RI（整数）・直列接続 */
+    l1: [
+      ohm("V", { R: "20 Ω", I: "15 A" }, "V"), ohm("V", { R: "15 Ω", I: "12 A" }, "V"), ohm("V", { R: "10 Ω", I: "3 A" }, "V"),
+      ohm("I", { V: "12 V", R: "6 Ω" }, "A"), ohm("I", { V: "20 V", R: "4 Ω" }, "A"), ohm("R", { V: "100 V", I: "4 A" }, "Ω"),
+      ohm("R", { V: "9 V", I: "3 A" }, "Ω"), ckt(["s", "4Ω", "8Ω"], "Ω"), ckt(["s", "20Ω", "40Ω"], "Ω"),
+      ckt(["s", "5Ω", "10Ω", "15Ω"], "Ω"), cv(3, "A", "mA"), cv(1, "kΩ", "Ω")
+    ],
+    /* 標準：小数の答え・単位の換算 */
+    l2: [
+      ohm("I", { V: "25 V", R: "100 Ω" }, "A"), ohm("I", { V: "12 V", R: "150 Ω" }, "A"), ohm("R", { V: "12 V", I: "0.5 A" }, "Ω"),
+      ohm("V", { R: "4 Ω", I: "2.5 A" }, "V"), cv(25, "A", "mA"), cv(505, "μA", "mA"), cv(45, "mV", "V"), cv(5.7, "kΩ", "Ω"),
+      cv(250, "mA", "A"), cv(2.2, "kΩ", "Ω"), cv(23, "kV", "V"), ckt(["s", "800Ω", "1kΩ"], "kΩ"), ckt(["p", "10Ω", "10Ω"], "Ω")
+    ],
+    /* 発展：並列接続・mA や kΩ をふくむオームの法則 */
+    l3: [
+      ckt(["p", "4Ω", "6Ω"], "Ω"), ckt(["p", "5Ω", "20Ω"], "Ω"), ckt(["p", "3Ω", "6Ω"], "Ω"), ckt(["p", "12Ω", "4Ω"], "Ω"),
+      ckt(["p", "800Ω", "1.2kΩ"], "kΩ"), ohm("I", { V: "3 V", R: "600 Ω" }, "mA"), ohm("R", { V: "24 V", I: "240 mA" }, "Ω"),
+      ohm("R", { V: "12 V", I: "200 mA" }, "Ω"), ohm("V", { R: "2 kΩ", I: "5 mA" }, "V"), cv(0.5, "μA", "mA"),
+      cv(0.3, "mV", "V"), cv(31.2, "mΩ", "Ω"), cv(68.4, "MΩ", "Ω")
+    ],
+    /* 最難関：直並列接続・回路に流れる電流 */
+    final: [
+      ckt(["s", "4Ω", ["p", "2Ω", "3Ω"]], "Ω"), ckt(["s", ["p", "5Ω", "5Ω"], "5Ω"], "Ω"), ckt(["s", "2Ω", ["p", "3Ω", "7Ω"], "3Ω"], "Ω"),
+      ckt(["p", "6Ω", "3Ω", "2Ω"], "Ω"), ckt(["p", "12Ω", "12Ω", "6Ω"], "Ω"), ckt(["p", ["s", "2Ω", "4Ω"], "3Ω"], "Ω"),
+      ckt(["p", ["s", "1Ω", "2Ω"], ["s", "3Ω", "3Ω"]], "Ω"), cktI(["s", "4Ω", ["p", "3Ω", "6Ω"]], "12 V"),
+      cktI(["p", "6Ω", "3Ω"], "12 V"), cktI(["s", "2Ω", ["p", "4Ω", "4Ω"]], "8 V"), cv(23, "kV", "mV"), cv(6.5, "kΩ", "mΩ")
+    ]
+  }
+};
+/* どの単元・難易度の問題かを覚えさせる（画面の小見出しとシャッフル袋のため） */
+for (const u of MATH_UNITS) for (const lv of ["l1", "l2", "l3", "final"]) for (const q of MATH_BANK[u.id][lv]) { q.u = u.id; q.lv = lv; }
+
+/* ---- ボーナス（範囲の選択によらず共通） ---- */
+const MATH_BONUS = {
+  /* ボーナス1（LEVEL1の後）：整数四則の早撃ち */
+  b1: mrows([
+    ["(-3)+(-8)", "-11"], ["(-9)+(-4)", "-13"], ["7+(-12)", "-5"], ["(-15)+6", "-9"], ["(-4)-(-9)", "5"], ["6-14", "-8"],
+    ["(-7)-8", "-15"], ["(-6)×5", "-30"], ["(-4)×(-8)", "32"], ["9×(-3)", "-27"], ["(-48)÷6", "-8"], ["(-42)÷(-7)", "6"],
+    ["36÷(-9)", "-4"], ["(-30)÷(-5)", "6"], ["(-19)+8", "-11"], ["17+(-29)", "-12"], ["(-21)-(-13)", "-8"], ["14-31", "-17"],
+    ["(-8)×7", "-56"], ["(-9)×(-6)", "54"], ["72÷(-8)", "-9"], ["(-81)÷(-9)", "9"], ["(-12)+(-25)", "-37"], ["43-(-18)", "61"],
+    ["(-11)×12", "-132"], ["144÷(-12)", "-12"], ["(-35)-27", "-62"], ["68+(-47)", "21"], ["(-96)÷8", "-12"], ["13×(-9)", "-117"]
+  ]),
+  /* ボーナス2（LEVEL2の後）：平方根の値の早撃ち */
+  b2: mrows([
+    ["sqrt(4)", "2"], ["sqrt(9)", "3"], ["sqrt(36)", "6"], ["sqrt(64)", "8"], ["sqrt(100)", "10"], ["sqrt(121)", "11"],
+    ["sqrt(144)", "12"], ["sqrt(8)", "2√2"], ["sqrt(12)", "2√3"], ["sqrt(18)", "3√2"], ["sqrt(20)", "2√5"], ["sqrt(50)", "5√2"],
+    ["sqrt(32)", "4√2"], ["sqrt(27)", "3√3"], ["sqrt(169)", "13"], ["sqrt(196)", "14"], ["sqrt(225)", "15"], ["sqrt(256)", "16"],
+    ["sqrt(288)", "12√2"], ["sqrt(300)", "10√3"], ["sqrt(125)", "5√5"], ["sqrt(180)", "6√5"], ["sqrt(242)", "11√2"],
+    ["sqrt(192)", "8√3"], ["sqrt(245)", "7√5"], ["sqrt(363)", "11√3"], ["sqrt(432)", "12√3"], ["sqrt(500)", "10√5"],
+    ["sqrt(675)", "15√3"], ["sqrt(800)", "20√2"]
+  ], { cat: "root" })
 };
 
 /* ===== 一般教養を中心に再選定した追加問題 =====
    l1=基礎 / l2=標準 / l3=発展 / final=最難関
    英語は基礎頻出語→日常動詞→教養語→抽象・学術語、
-   数学は計算手順と抽象度、部首は使用頻度と字形の希少性で段階化。 */
+   部首は使用頻度と字形の希少性で段階化（数学は js1b_math.js の単元別バンクにまとめた）。 */
 const GENERAL_KANJI_MORE = {
   l1: [
     ["社会","しゃかい"],["自然","しぜん"],["科学","かがく"],["歴史","れきし"],["文化","ぶんか"],
@@ -1582,59 +1896,6 @@ const GENERAL_RADICAL_MORE = {
   final: [
     ["鼎","かなえ","例：鼎"],["黽","べんあし","例：黽"],["齒","は|はへん","例：齒"],["龜","かめ","例：龜"],
     ["龍","りゅう","例：龍"],["齊","せい","例：齊"],["鼓","つづみ","例：鼓"],["鹵","しお","例：鹵"]
-  ],
-  b1: [],
-  b2: []
-};
-
-const GENERAL_MATH_MORE = {
-  l1: [
-    { disp: "(-12)+19", a: "7", cat: "int" },
-    { disp: "34-47", a: "-13", cat: "int" },
-    { disp: "(-6)×(-11)", a: "66", cat: "int" },
-    { disp: "84÷(-12)", a: "-7", cat: "int" },
-    { disp: "7x+5x", a: "12x", cat: "poly" },
-    { disp: "15a-9a", a: "6a", cat: "poly" },
-    { disp: "4y+3-2y+8", a: "2y+11", cat: "poly" },
-    { disp: "-3x+10+7x-4", a: "4x+6", cat: "poly" },
-    { disp: "12x-5-8x+9", a: "4x+4", cat: "poly" },
-    { disp: "-6a+2-5a-7", a: "-11a-5", cat: "poly" }
-  ],
-  l2: [
-    { disp: "7(2x+3y)", a: "14x+21y", cat: "poly" },
-    { disp: "-4(5a-2b)", a: "-20a+8b", cat: "poly" },
-    { disp: "(24x-18y)÷6", a: "4x-3y", cat: "poly" },
-    { disp: "(-21a-14b)÷7", a: "-3a-2b", cat: "poly" },
-    { disp: "4^(3)", a: "64", cat: "int" },
-    { disp: "(-6)^(2)", a: "36", cat: "int" },
-    { disp: "(-2)^(4)×3", a: "48", cat: "int" },
-    { disp: "10×frac(7,25)", a: "14/5", cat: "frac" },
-    { disp: "frac(-9,14)×7", a: "-9/2", cat: "frac" },
-    { disp: "24÷frac(-6,5)", a: "-20", cat: "int" }
-  ],
-  l3: [
-    { disp: "x^(5)×x^(8)", a: "x^13", cat: "poly" },
-    { disp: "(a^(4))^(3)", a: "a^12", cat: "poly" },
-    { disp: "(-3x)^(2)", a: "9x^2", cat: "poly" },
-    { disp: "8a^(3)×(-2a^(2))", a: "-16a^5", cat: "poly" },
-    { disp: "20x^(6)y^(3)÷(5x^(2)y)", a: "4x^4y^2", cat: "poly" },
-    { disp: "sqrt(162)", a: "9√2", cat: "root" },
-    { disp: "sqrt(243)", a: "9√3", cat: "root" },
-    { disp: "sqrt(20)+sqrt(45)", a: "5√5", cat: "root" },
-    { disp: "3sqrt(18)-sqrt(8)", a: "7√2", cat: "root" },
-    { disp: "sqrt(10)(sqrt(40)+sqrt(90))", a: "50", cat: "root" }
-  ],
-  final: [
-    { disp: "2y-3=8x+5", a: "4x+4", cat: "eqn" },
-    { disp: "3y+7=15x-2", a: "5x-3", cat: "eqn" },
-    { disp: "4y-9=12x+7", a: "3x+4", cat: "eqn" },
-    { disp: "5y+8=20x-12", a: "4x-4", cat: "eqn" },
-    { disp: "6y-5x=13x+12", a: "3x+2", cat: "eqn" },
-    { disp: "7y+4x=25x-14", a: "3x-2", cat: "eqn" },
-    { disp: "frac(y,3)-2x=5", a: "6x+15", cat: "eqn" },
-    { disp: "frac(3y,4)=9x-6", a: "12x-8", cat: "eqn" },
-    { disp: "frac(y,6)+2=3x", a: "18x-12", cat: "eqn" },
-    { disp: "frac(2y,3)-4=6x", a: "9x+6", cat: "eqn" }
   ],
   b1: [],
   b2: []
@@ -1742,62 +2003,9 @@ const RADICAL_MORE2 = {
   b2: []
 };
 
-const MATH_MORE2 = {
-  l1: [
-    { disp: "(-8)+15", a: "7", cat: "int" },
-    { disp: "23-40", a: "-17", cat: "int" },
-    { disp: "(-9)×7", a: "-63", cat: "int" },
-    { disp: "(-72)÷(-8)", a: "9", cat: "int" },
-    { disp: "6x+13x", a: "19x", cat: "poly" },
-    { disp: "18a-11a", a: "7a", cat: "poly" },
-    { disp: "5y+9-3y+2", a: "2y+11", cat: "poly" },
-    { disp: "-4x+7+9x-12", a: "5x-5", cat: "poly" },
-    { disp: "10x-8-3x+5", a: "7x-3", cat: "poly" },
-    { disp: "-7a+3-2a-8", a: "-9a-5", cat: "poly" }
-  ],
-  l2: [
-    { disp: "6(3x+4y)", a: "18x+24y", cat: "poly" },
-    { disp: "-5(4a-3b)", a: "-20a+15b", cat: "poly" },
-    { disp: "(20x-35y)÷5", a: "4x-7y", cat: "poly" },
-    { disp: "(-18a-24b)÷(-6)", a: "3a+4b", cat: "poly" },
-    { disp: "11^(2)", a: "121", cat: "int" },
-    { disp: "(-4)^(3)", a: "-64", cat: "int" },
-    { disp: "(-3)^(2)×2^(2)", a: "36", cat: "int" },
-    { disp: "9×frac(4,15)", a: "12/5", cat: "frac" },
-    { disp: "frac(-8,21)×7", a: "-8/3", cat: "frac" },
-    { disp: "30÷(-frac(6,5))", a: "-25", cat: "int" }
-  ],
-  l3: [
-    { disp: "x^(6)×x^(9)", a: "x^15", cat: "poly" },
-    { disp: "(a^(5))^(4)", a: "a^20", cat: "poly" },
-    { disp: "(-4y)^(2)", a: "16y^2", cat: "poly" },
-    { disp: "12a^(4)b÷(3a^(2))", a: "4a^2b", cat: "poly" },
-    { disp: "15x^(5)y^(4)÷(5x^(2)y^(2))", a: "3x^3y^2", cat: "poly" },
-    { disp: "sqrt(75)", a: "5√3", cat: "root" },
-    { disp: "sqrt(48)", a: "4√3", cat: "root" },
-    { disp: "sqrt(12)+sqrt(27)", a: "5√3", cat: "root" },
-    { disp: "sqrt(50)-sqrt(18)", a: "2√2", cat: "root" },
-    { disp: "sqrt(6)(sqrt(24)+sqrt(54))", a: "30", cat: "root" }
-  ],
-  final: [
-    { disp: "y-6=7x", a: "7x+6", cat: "eqn" },
-    { disp: "y+9=4x", a: "4x-9", cat: "eqn" },
-    { disp: "y-8x=15", a: "8x+15", cat: "eqn" },
-    { disp: "3y=12x-18", a: "4x-6", cat: "eqn" },
-    { disp: "5y=25x+40", a: "5x+8", cat: "eqn" },
-    { disp: "2y-7=6x+3", a: "3x+5", cat: "eqn" },
-    { disp: "4y+12x=20x+3y-8", a: "8x-8", cat: "eqn" },
-    { disp: "frac(y,4)=3x", a: "12x", cat: "eqn" },
-    { disp: "frac(y,3)=5x-2", a: "15x-6", cat: "eqn" },
-    { disp: "frac(2y,5)=4x", a: "10x", cat: "eqn" }
-  ],
-  b1: [],
-  b2: []
-};
-
 /* ---- 表示用のトークン ---- */
 const MATH_KEYS_NUM = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", "-", "+"];
-const MATH_KEYS_SYM = ["x", "y", "a", "b", "√", "^", "/"];
+const MATH_KEYS_SYM = ["x", "y", "a", "b", "√", "^", "/", "."];
 
 function catLead(cat) { return cat === "eqn" ? "y について 解け" : "答えを もとめよ"; }
 function catHint(cat) {
@@ -1806,9 +2014,15 @@ function catHint(cat) {
     frac: "答えは分数",
     poly: "答えは文字式",
     root: "√を使う形（◯√◯ など）",
-    eqn: "◯x（＋◯）の形"
+    eqn: "◯x（＋◯）の形",
+    val: "小数・分数・√ で答えてよい"
   }[cat] || "";
 }
+function mathLead(q) { return q.lead || catLead(q.cat); }
+function mathHint(q) { return q.hint || catHint(q.cat); }
+/* 回答欄の前に出す文字（y について解く問題は「y＝」） */
+function mathPre(q) { return q.pre != null ? q.pre : (q.cat === "eqn" ? "y=" : ""); }
+function mathUnitName(id) { const u = MATH_UNITS.find(x => x.id === id); return u ? u.name : ""; }
 
 /* ---- 数式の描画（disp → HTML） ---- */
 function rootMarkup(value) {
@@ -1829,14 +2043,78 @@ function mathHTML(d) {
   s = s.replace(/sqrt\(([^()]*)\)/g, (_, value) => rootMarkup(value));
   return s;
 }
-/* ---- 答えの描画（a → HTML） ---- */
-function answerHTML(a, cat) {
-  let s = (cat === "eqn") ? ("y=" + a) : a;
-  s = s.replace(/\^(\d+)/g, (_, value) => toSuperDigits(value));
-  s = s.replace(/(-?\d+)\/(\d+)/g,
-    '<span class="fr"><span>$1</span><span>$2</span></span>');
-  s = s.replace(/√(\d+)/g, '<span class="answer-root">√$1</span>');
-  return s;
+
+/* ---- 図（直角三角形・抵抗の回路） ---- */
+function figHTML(f) {
+  return f.tri ? triHTML(f.tri) : f.ckt ? cktHTML(f.ckt) : "";
+}
+/* 直角三角形：左下に θ、右下に直角。辺の文字は a（底辺）・b（高さ）・c（斜辺） */
+function triHTML(t) {
+  const lb = (key, x, y) => {
+    const v = t[key];
+    if (!v) return "";
+    const ask = t.ask === key || /^[abc]$/.test(v);
+    return `<span class="lb lb-${key}${ask ? " ask" : ""}" style="left:${x}%;top:${y}%">${mathHTML(v)}</span>`;
+  };
+  const th = t.th ? `<path d="M34,86 A22,22 0 0 0 30.9,74.9"/>` : "";
+  return `<span class="mfig tri"><svg viewBox="0 0 160 100" aria-hidden="true">
+      <polygon points="12,86 138,86 138,12"/><path d="M129,86 V77 H138"/>${th}</svg>` +
+    lb("a", 48, 98) + lb("b", 90, 49) + lb("c", 40, 35) +
+    (t.th ? `<span class="lb th" style="left:${t.th === "θ" ? 30 : 38}%;top:${t.th === "θ" ? 79 : 78}%">${mathEsc(t.th)}</span>` : "") +
+    `</span>`;
+}
+/* 回路：直列は横に、並列は縦に並べる。抵抗の文字は値そのもの（"4Ω" など） */
+function cktLayout(n) {
+  if (typeof n === "string") return { w: 46, h: 30, draw: (x, y) =>
+    `<rect x="${x + 7}" y="${y + 15}" width="32" height="10"/><text x="${x + 23}" y="${y + 11}">${mathEsc(n)}</text>` };
+  const kids = n.slice(1).map(cktLayout), gap = 10;
+  if (n[0] === "s") {
+    const h = Math.max(...kids.map(k => k.h));
+    const w = kids.reduce((sum, k) => sum + k.w, 0) + gap * (kids.length - 1);
+    return { w, h, draw: (x, y) => {
+      let out = "", cx = x;
+      kids.forEach((k, i) => {
+        out += k.draw(cx, y + (h - k.h) / 2);
+        cx += k.w;
+        if (i < kids.length - 1) { out += `<line x1="${cx}" y1="${y + h / 2}" x2="${cx + gap}" y2="${y + h / 2}"/>`; cx += gap; }
+      });
+      return out;
+    } };
+  }
+  const rail = 9, vgap = 4;
+  const inner = Math.max(...kids.map(k => k.w));
+  const w = inner + rail * 2, h = kids.reduce((sum, k) => sum + k.h, 0) + vgap * (kids.length - 1);
+  return { w, h, draw: (x, y) => {
+    let out = "", cy = y;
+    const mids = [];
+    kids.forEach(k => {
+      const kx = x + rail + (inner - k.w) / 2, my = cy + k.h / 2;
+      out += k.draw(kx, cy);
+      out += `<line x1="${x}" y1="${my}" x2="${kx}" y2="${my}"/><line x1="${kx + k.w}" y1="${my}" x2="${x + w}" y2="${my}"/>`;
+      mids.push(my); cy += k.h + vgap;
+    });
+    const top = mids[0], bot = mids[mids.length - 1];
+    out += `<line x1="${x}" y1="${top}" x2="${x}" y2="${bot}"/><line x1="${x + w}" y1="${top}" x2="${x + w}" y2="${bot}"/>`;
+    out += `<circle cx="${x}" cy="${y + h / 2}" r="2"/><circle cx="${x + w}" cy="${y + h / 2}" r="2"/>`;
+    return out;
+  } };
+}
+function cktHTML(tree) {
+  const L = cktLayout(tree), lead = 14, W = L.w + lead * 2, H = L.h + 4;
+  const body = L.draw(lead, 2);
+  const my = 2 + L.h / 2;
+  return `<span class="mfig ckt" style="--ckt-w:${(W / 14).toFixed(2)}em"><svg viewBox="0 0 ${W} ${H}" aria-hidden="true">` +
+    `<line x1="0" y1="${my}" x2="${lead}" y2="${my}"/><line x1="${W - lead}" y1="${my}" x2="${W}" y2="${my}"/>` +
+    body + `</svg></span>`;
+}
+
+/* ---- 答えの描画（a → HTML） ----
+   答えも入力と同じ組み立て（mathUnits）で描くので、打った形と見比べやすい。 */
+function answerHTML(q) {
+  const body = mathUnits([...String(q.a)]).map(unitHTML).join("");
+  const pre = mathPre(q), unit = q.unit;
+  return (pre ? `<span class="ans-pre">${mathEsc(pre)}</span>` : "") + body +
+    (unit ? `<span class="ans-unit">${mathEsc(unit)}</span>` : "");
 }
 
 /* ---- 入力タイルの組み立て ----
@@ -1846,36 +2124,48 @@ const MATH_PH = '<i class="ph"></i>';
 function mathEsc(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 
 function mathUnits(toks) {
-  /* 連続する数字をひとまとめに */
+  /* 連続する数字（小数点をふくむ）をひとまとめに */
   const runs = [];
   for (const t of toks) {
     const last = runs[runs.length - 1];
-    if (/^\d$/.test(t) && last && last.t === "num") last.v += t;
-    else if (/^\d$/.test(t)) runs.push({ t: "num", v: t });
+    const isNum = /^[\d.]$/.test(t);
+    if (isNum && last && last.t === "num") last.v += t;
+    else if (isNum) runs.push({ t: "num", v: t });
     else if (t === "^" || t === "/" || t === "√") runs.push({ t: t, v: t });
     else runs.push({ t: "sym", v: t });
   }
   /* 指数は直前へ上付き、分数は直前を分子にして縦に積む、√は中身に覆いを掛ける */
   const units = [];
+  const rootAt = j => {
+    const nx = runs[j + 1], has = !!(nx && nx.t === "num");
+    return { u: { k: "root", rad: has ? nx.v : "" }, next: j + (has ? 2 : 1) };
+  };
   for (let i = 0; i < runs.length; i++) {
     const r = runs[i];
     if (r.t === "√") {
-      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
-      units.push({ k: "root", rad: has ? nx.v : "" });
-      if (has) i++;
+      const { u, next } = rootAt(i);
+      units.push(u); i = next - 1;
     } else if (r.t === "^") {
-      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
-      const sup = has ? nx.v : "";
+      /* 負の指数（^-3）は符号ごと上付きにする */
+      let sup = "", j = i + 1;
+      if (runs[j] && runs[j].t === "sym" && runs[j].v === "-") { sup = "-"; j++; }
+      if (runs[j] && runs[j].t === "num") { sup += runs[j].v; j++; }
       const last = units[units.length - 1];
       if (last && last.k === "plain" && !("sup" in last)) last.sup = sup;
       else units.push({ k: "plain", v: "", sup: sup });
-      if (has) i++;
+      i = j - 1;
     } else if (r.t === "/") {
-      const nx = runs[i + 1], has = !!(nx && nx.t === "num");
-      const den = has ? nx.v : "";
-      const prev = units.length ? units.pop() : { k: "plain", v: "" };
-      units.push({ k: "frac", num: prev, den: den });
-      if (has) i++;
+      /* 分母は数か √数。分子は直前のまとまり（2√3/3 のように係数つきの √ は係数ごと） */
+      let den = null, j = i + 1;
+      if (runs[j] && runs[j].t === "num") { den = { k: "plain", v: runs[j].v }; j++; }
+      else if (runs[j] && runs[j].t === "√") { const rt = rootAt(j); den = rt.u; j = rt.next; }
+      let num = units.length ? units.pop() : { k: "plain", v: "" };
+      const prev = units[units.length - 1];
+      if (num.k === "root" && prev && prev.k === "plain" && /^[\d.]+$/.test(prev.v) && !("sup" in prev)) {
+        num = { k: "seq", parts: [units.pop(), num] };
+      }
+      units.push({ k: "frac", num: num, den: den });
+      i = j - 1;
     } else {
       units.push({ k: "plain", v: r.v });
     }
@@ -1883,18 +2173,20 @@ function mathUnits(toks) {
   return units;
 }
 function unitHTML(u) {
+  if (u.k === "seq") return u.parts.map(unitHTML).join("");
   if (u.k === "root") {
     const rad = u.rad === "" ? MATH_PH : mathEsc(u.rad);
     return `<span class="answer-root">√${rad}</span>`;
   }
   if (u.k === "frac") {
     const n = unitHTML(u.num);
-    const d = u.den === "" ? MATH_PH : mathEsc(u.den);
+    const d = u.den ? unitHTML(u.den) : MATH_PH;
     return `<span class="fr"><span>${n}</span><span>${d}</span></span>`;
   }
   let h = u.v === "" ? "" : mathEsc(u.v === "-" ? "−" : u.v);
   if ("sup" in u) {
-    const exp = u.sup === "" ? MATH_PH : toSuperDigits(mathEsc(u.sup));
+    const open = u.sup === "" || u.sup === "-";
+    const exp = toSuperDigits(mathEsc(u.sup)) + (open ? MATH_PH : "");
     h += `<span class="answer-power">${exp}</span>`;
   }
   return h === "" ? MATH_PH : h;
@@ -1943,7 +2235,13 @@ function parsePolyTerms(s) {
     while (j < s.length && /[a-z]/.test(s[j])) {
       const v = s[j]; j++;
       let exp = 1;
-      if (s[j] === "^") { j++; let e = ""; while (j < s.length && /\d/.test(s[j])) { e += s[j]; j++; } if (e === "") return null; exp = parseInt(e, 10); }
+      if (s[j] === "^") {
+        j++; let e = "";
+        if (s[j] === "-") { e = "-"; j++; }   // 負の指数 x^-5
+        while (j < s.length && /\d/.test(s[j])) { e += s[j]; j++; }
+        if (e === "" || e === "-") return null;
+        exp = parseInt(e, 10);
+      }
       vars[v] = (vars[v] || 0) + exp;
       sawVar = true;
     }
@@ -2015,6 +2313,59 @@ function canonRoot(s) {
   return out[0] === "+" ? out.slice(1) : out;
 }
 
+/* 数の式（小数・分数・√・10^-3 など）の値。文字や書きかけの式は null。
+   分数の線は mathUnits と同じく直前のまとまりと直後の数（か √数）を結ぶ。 */
+function evalVal(src) {
+  const s = String(src).replace(/\s/g, "").replace(/[−ー]/g, "-");
+  if (s === "" || /[^0-9.+\-\/^√]/.test(s)) return null;
+  let i = 0;
+  const number = () => {
+    const m = /^(\d+(\.\d+)?|\.\d+)/.exec(s.slice(i));
+    if (!m) return null;
+    i += m[0].length;
+    return parseFloat(m[0]);
+  };
+  const atom = () => {
+    if (s[i] !== "√") return number();
+    i++;
+    const n = number();
+    return n == null ? null : Math.sqrt(n);
+  };
+  const factor = () => {
+    let v = atom();
+    if (v == null) return null;
+    if (s[i] === "^") {
+      i++;
+      const sg = s[i] === "-" ? (i++, -1) : 1;
+      const e = number();
+      if (e == null) return null;
+      v = Math.pow(v, sg * e);
+    }
+    if (s[i] === "/") {
+      i++;
+      const d = atom();
+      if (d == null || d === 0) return null;
+      v /= d;
+    }
+    return v;
+  };
+  let total = 0, terms = 0;
+  while (i < s.length) {
+    let sg = 1;
+    if (s[i] === "+" || s[i] === "-") { sg = s[i] === "-" ? -1 : 1; i++; }
+    else if (terms) return null;
+    let v = factor();
+    if (v == null) return null;
+    while (i < s.length && (s[i] === "√" || /\d/.test(s[i]))) {   // 2√3 のような係数のかけ算
+      const f = factor();
+      if (f == null) return null;
+      v *= f;
+    }
+    total += sg * v; terms++;
+  }
+  return terms ? total : null;
+}
+
 function mathNorm(s, cat) {
   if (cat === "int") return normInt(s);
   if (cat === "frac") return normFrac(s);
@@ -2022,6 +2373,10 @@ function mathNorm(s, cat) {
   return canonPoly(s);   // poly / eqn
 }
 function mathEqual(typed, a, cat) {
+  if (cat === "val") {
+    const u = evalVal(typed), v = evalVal(a);
+    return u != null && v != null && Math.abs(u - v) <= 1e-9 * Math.max(1, Math.abs(v));
+  }
   const u = mathNorm(typed, cat), v = mathNorm(a, cat);
   return u != null && v != null && u === v;
 }
@@ -2841,7 +3196,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
 const motionOK = () => !!CFG.fx && !RMQ.matches;
 
-const CFG = { mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1 };
+const CFG = {
+  mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1,
+  units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
+  diff: "route"                                               // 数学の難易度（route＝航路の配分どおり）
+};
 const isMath = () => CFG.mode === "math";
 const isEnglish = () => CFG.mode === "english";
 const answersInEnglish = () => isEnglish() && CFG.engAnswer === "en";
@@ -2866,27 +3225,28 @@ function relevelEnglishBase(base) {
   const moved = base.final.map(row => [row[0], row[1], String(row[2]).startsWith("日本語訳") ? "日本語訳・発展" : "発展単語"]);
   return { ...base, l3: [...base.l3, ...moved], final: [] };
 }
-/* 数学は単元名ではなく、必要な計算手順数で再分類する。
-   1手の式変形は標準、整数係数の複数手順は発展、分数を含む式変形を最難関とする。 */
-function buildMathMainSet() {
-  return {
-    l1: [...MATH_Q.l1, ...MATH_EXTRA_Q.l1, ...GENERAL_MATH_MORE.l1, ...MATH_MORE2.l1],
-    l2: [...MATH_Q.l2, ...MATH_EXTRA_Q.l2, ...GENERAL_MATH_MORE.l2, ...MATH_Q.final.slice(0, 16), ...MATH_MORE2.l2],
-    l3: [...MATH_Q.l3, ...MATH_EXTRA_Q.l3, ...GENERAL_MATH_MORE.l3,
-      ...MATH_EXTRA_Q.final.slice(0, 10), ...GENERAL_MATH_MORE.final.slice(0, 6), ...MATH_MORE2.l3],
-    final: [...MATH_Q.final.slice(16), ...MATH_EXTRA_Q.final.slice(10), ...GENERAL_MATH_MORE.final.slice(6), ...MATH_MORE2.final],
-    b1: [...MATH_Q.b1, ...MATH_EXTRA_Q.b1, ...GENERAL_MATH_MORE.b1],
-    b2: [...MATH_Q.b2, ...MATH_EXTRA_Q.b2, ...GENERAL_MATH_MORE.b2]
-  };
+/* 数学は選んだ単元（出題範囲）の問題を難易度ごとに束ねる。範囲が変わったときだけ作り直す。 */
+let _mathSetCache = { key: null, set: null };
+function mathUnitsSelected() {
+  const ids = MATH_UNITS.map(u => u.id).filter(id => CFG.units.includes(id));
+  return ids.length ? ids : MATH_UNITS.filter(u => u.ch === 1).map(u => u.id);
+}
+function mathSet() {
+  const ids = mathUnitsSelected(), key = ids.join(",");
+  if (_mathSetCache.key !== key) {
+    const set = { b1: MATH_BONUS.b1, b2: MATH_BONUS.b2 };
+    for (const lv of ["l1", "l2", "l3", "final"]) set[lv] = ids.flatMap(id => MATH_BANK[id][lv]);
+    _mathSetCache = { key, set };
+  }
+  return _mathSetCache.set;
 }
 const KANJI_RAW = mergeRawSets(mergeRawSets(mergeRawSets(DEFAULT_Q, KANJI_EXTRA_Q), GENERAL_KANJI_MORE), KANJI_MORE2);
-const MSET = buildMathMainSet();
 let QSET = normalizeQ(KANJI_RAW);
 const ESET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_Q), englishExtraRaw(ENGLISH_EXTRA, false)), englishExtraRaw(GENERAL_ENGLISH_MORE, false)), englishExtraRaw(ENGLISH_MORE2, false)));
 const EJSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_JA_Q), englishExtraRaw(ENGLISH_EXTRA, true)), englishExtraRaw(GENERAL_ENGLISH_MORE, true)), englishExtraRaw(ENGLISH_MORE2, true)));
 const RSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(RADICAL_Q, RADICAL_EXTRA_Q), GENERAL_RADICAL_MORE), RADICAL_MORE2));
 function activeSet() {
-  if (isMath()) return MSET;
+  if (isMath()) return mathSet();
   if (isEnglish()) return answersInEnglish() ? ESET : EJSET;
   if (isRadical()) return RSET;
   return QSET;
@@ -2915,7 +3275,13 @@ const ROUTE_MIX_LABEL = {
   4: "基礎25%・標準50%・発展25%", 5: "標準50%・発展50%",
   6: "標準25%・発展50%・最難関25%", 7: "発展25%・最難関75%"
 };
+/* 数学は難易度を1つに固定できる（航路は背景と音楽だけを決める） */
+const DIFF_LABEL = { l1: "基礎", l2: "標準", l3: "発展", final: "最難関" };
+const fixedDiff = () => isMath() && CFG.diff !== "route" ? CFG.diff : null;
+function routeName(stage) { return fixedDiff() ? `難易度 ${DIFF_LABEL[fixedDiff()]}` : ROUTE_DIFFICULTY[stage]; }
+function routeMixShort(stage) { return fixedDiff() ? `${DIFF_LABEL[fixedDiff()]}のみ` : ROUTE_MIX_SHORT[stage]; }
 function buildRoutePlan(stage, count) {
+  if (fixedDiff()) return Array(count).fill(fixedDiff());
   const mix = ROUTE_MIX[stage] || ROUTE_MIX[1];
   const parts = POOL_ORDER.filter(k => mix[k]).map(k => {
     const exact = mix[k] * count;
@@ -3003,15 +3369,13 @@ function buildSetup() {
   for (const n of list) {
     const b = document.createElement("button");
     b.className = "stage-chip";
-    b.title = `航路${n}：${ROUTE_DIFFICULTY[n]}（${ROUTE_MIX_LABEL[n]}）`;
-    b.setAttribute("aria-label", b.title);
-    b.innerHTML = `<div class="n">${n}</div><div class="nm">${STAGES[n].jp}</div><div class="df">${ROUTE_MIX_SHORT[n]}</div>`;
+    b.innerHTML = `<div class="n">${n}</div><div class="nm">${STAGES[n].jp}</div><div class="df"></div>`;
     b.onclick = () => { CFG.stage = n; Audio_.sfx.ui(); paintStages(); previewStage(n); };
     wrap.appendChild(b);
   }
   const r = document.createElement("button");
   r.className = "stage-chip";
-  r.innerHTML = `<div class="n">?</div><div class="nm">おまかせ</div><div class="df">難度ランダム</div>`;
+  r.innerHTML = `<div class="n">?</div><div class="nm">おまかせ</div><div class="df"></div>`;
   r.onclick = () => { CFG.stage = "?"; Audio_.sfx.ui(); paintStages(); previewStage(1 + Math.floor(Math.random() * 7)); };
   wrap.appendChild(r);
 
@@ -3052,7 +3416,91 @@ function buildSetup() {
     d.appendChild(seg); o.appendChild(d);
   }
   const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
-  paintStages(); paintOpts(); previewStage(1);
+  buildMathOpts();
+  labelStages(); paintStages(); paintOpts(); previewStage(1);
+}
+/* 航路チップの難度表示。数学で難易度を固定しているときは「◯◯のみ」と出す */
+function labelStages() {
+  [...$("stages").children].forEach((el, i) => {
+    const n = i < 7 ? i + 1 : null;
+    el.querySelector(".df").textContent = n ? routeMixShort(n) : (fixedDiff() ? routeMixShort(1) : "難度ランダム");
+    el.title = !n ? "おまかせ（航路をランダムに選ぶ）"
+      : fixedDiff() ? `航路${n}：${STAGES[n].jp}（${routeName(n)}）`
+        : `航路${n}：${ROUTE_DIFFICULTY[n]}（${ROUTE_MIX_LABEL[n]}）`;
+    el.setAttribute("aria-label", el.title);
+  });
+  $("hintLine").textContent = fixedDiff()
+    ? `難易度を「${DIFF_LABEL[fixedDiff()]}」に固定しています。航路は背景と音楽だけが変わります。`
+    : "基＝基礎、標＝標準、発＝発展、最＝最難関。表示比率で配分し、後半ほど難しく出題します。";
+}
+
+/* ---------- 数学の出題範囲と難易度 ---------- */
+const DIFF_OPTS = [["route", "航路どおり"], ["l1", "基礎"], ["l2", "標準"], ["l3", "発展"], ["final", "最難関"]];
+function buildMathOpts() {
+  const box = $("mathOpts");
+  box.innerHTML = "";
+  box.hidden = !isMath();
+  if (!isMath()) return;
+
+  const head = document.createElement("div"); head.className = "mrange-head";
+  head.innerHTML = `<span>出題範囲（複数選択できます）</span>`;
+  const quick = document.createElement("div"); quick.className = "mrange-quick";
+  const all = MATH_UNITS.map(u => u.id);
+  const byCh = ch => MATH_UNITS.filter(u => u.ch === ch).map(u => u.id);
+  for (const [lb, ids] of [["すべて", all], ["第1章のみ", byCh(1)], ["第2章のみ", byCh(2)]]) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = lb;
+    b.onclick = () => { CFG.units = ids.slice(); Audio_.sfx.ui(); paintMathOpts(); };
+    quick.appendChild(b);
+  }
+  head.appendChild(quick); box.appendChild(head);
+
+  for (const ch of [1, 2]) {
+    const cap = document.createElement("div"); cap.className = "mrange-ch"; cap.textContent = MATH_CHAPTERS[ch];
+    const grid = document.createElement("div"); grid.className = "mrange";
+    for (const u of MATH_UNITS.filter(x => x.ch === ch)) {
+      const n = ["l1", "l2", "l3", "final"].reduce((sum, lv) => sum + MATH_BANK[u.id][lv].length, 0);
+      const b = document.createElement("button"); b.type = "button"; b.className = "unit-chip"; b.dataset.unit = u.id;
+      b.innerHTML = `<span class="nm">${u.name}</span><span class="ct">${n}問</span>`;
+      b.onclick = () => toggleMathUnit(u.id);
+      grid.appendChild(b);
+    }
+    box.appendChild(cap); box.appendChild(grid);
+  }
+
+  const d = document.createElement("div"); d.className = "opt mdiff";
+  d.innerHTML = `<span>難易度</span>`;
+  const seg = document.createElement("div"); seg.className = "seg";
+  for (const [v, lb] of DIFF_OPTS) {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = lb; b.dataset.diff = v;
+    b.onclick = () => { CFG.diff = v; Audio_.sfx.ui(); paintMathOpts(); labelStages(); };
+    seg.appendChild(b);
+  }
+  d.appendChild(seg); box.appendChild(d);
+  const note = document.createElement("div"); note.className = "mrange-note"; note.id = "mathNote";
+  box.appendChild(note);
+  paintMathOpts();
+}
+function toggleMathUnit(id) {
+  const on = mathUnitsSelected().includes(id);
+  if (on && mathUnitsSelected().length <= 1) {
+    Audio_.sfx.wrong();
+    $("mathNote").textContent = "出題範囲は1つ以上えらんでください。";
+    return;
+  }
+  CFG.units = on ? mathUnitsSelected().filter(x => x !== id) : [...mathUnitsSelected(), id];
+  Audio_.sfx.ui(); paintMathOpts();
+}
+function paintMathOpts() {
+  const box = $("mathOpts");
+  if (box.hidden) return;
+  const sel = mathUnitsSelected();
+  box.querySelectorAll(".unit-chip").forEach(b => {
+    const on = sel.includes(b.dataset.unit);
+    b.classList.toggle("sel", on); b.setAttribute("aria-pressed", String(on));
+  });
+  box.querySelectorAll("[data-diff]").forEach(b => b.classList.toggle("sel", b.dataset.diff === CFG.diff));
+  const set = mathSet();
+  $("mathNote").textContent = `${sel.length} 単元を選択中 ― 基礎 ${set.l1.length}・標準 ${set.l2.length}・発展 ${set.l3.length}・最難関 ${set.final.length} 問`;
 }
 function paintStages() {
   [...$("stages").children].forEach((el, i) => {
@@ -3140,7 +3588,7 @@ function buildMathPad(area) {
     const b = document.createElement("button"); b.className = "op";
     if (MATH_KEY_ICON[t]) { b.innerHTML = MATH_KEY_ICON[t]; b.classList.add("icon"); }
     else b.textContent = t;
-    b.setAttribute("aria-label", t === "/" ? "分数" : t === "^" ? "指数" : t);
+    b.setAttribute("aria-label", t === "/" ? "分数" : t === "^" ? "指数" : t === "." ? "小数点" : t);
     b.onclick = () => pressMath(t);
     sym.appendChild(b);
   }
@@ -3203,8 +3651,9 @@ function renderSlots() {
   s.className = "slots";
   s.innerHTML = "";
   if (isMath()) {
-    if (G.q && G.q.cat === "eqn") {
-      const p = document.createElement("div"); p.className = "eqpre"; p.textContent = "y="; s.appendChild(p);
+    const pre = G.q ? mathPre(G.q) : "";
+    if (pre) {
+      const p = document.createElement("div"); p.className = "eqpre"; p.textContent = pre; s.appendChild(p);
     }
     for (const u of mathUnits(IN.kana)) {
       const d = document.createElement("div");
@@ -3213,6 +3662,9 @@ function renderSlots() {
       s.appendChild(d);
     }
     if (!IN.kana.length) { const d = document.createElement("div"); d.className = "slot math ghost"; s.appendChild(d); }
+    if (G.q && G.q.unit) {
+      const u = document.createElement("div"); u.className = "equnit"; u.textContent = G.q.unit; s.appendChild(u);
+    }
     $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
     return;
   }
@@ -3236,8 +3688,10 @@ function renderHud() {
   const s = STAGES[G.stage];
   $("stgName").textContent = (G.stage === 6) ? `学舎 ― ${ROOMS[G.rooms[lvIndex(G.level)] || 0]}` : s.jp;
   $("lvName").textContent = G.bonusMode
-    ? `BONUS · ${ROUTE_DIFFICULTY[G.stage]}`
-    : `${LV_LABEL[G.level]} · ${ROUTE_DIFFICULTY[G.stage]} · ${ROUTE_MIX_SHORT[G.stage]}`;
+    ? `BONUS · ${routeName(G.stage)}`
+    : fixedDiff()
+      ? `${LV_LABEL[G.level]} · ${routeName(G.stage)}`
+      : `${LV_LABEL[G.level]} · ${ROUTE_DIFFICULTY[G.stage]} · ${ROUTE_MIX_SHORT[G.stage]}`;
 
   const b = BOUNDS[CFG.N];
   const p = $("pips"); p.innerHTML = "";
@@ -3362,7 +3816,7 @@ function flash(kind) {
 }
 function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 function answerDisplay() {
-  if (isMath()) return answerHTML(G.q.a, G.q.cat);
+  if (isMath()) return answerHTML(G.q);
   const answer = G.q.a.split("|")[0];
   return escapeHtml(answersInEnglish() ? answer.toUpperCase() : answer);
 }
@@ -3397,7 +3851,8 @@ function hideReveal() { $("reveal").classList.remove("on"); }
 function showHint() {
   if (!G.q) return;
   const box = $("hintBox"); box.hidden = false;
-  if (isMath()) { box.innerHTML = catHint(G.q.cat); return; }
+  if (isMath()) { box.classList.add("math"); box.textContent = mathHint(G.q); return; }
+  box.classList.remove("math");
   const a = G.q.a.split("|")[0];
   if (answersInEnglish()) {
     box.innerHTML = `<b>${escapeHtml(a[0].toUpperCase())}</b>${a.length} LETTERS`;
@@ -3461,7 +3916,7 @@ function drawFromBag(key, len) {
   return bag.order[bag.pos++];
 }
 function activeSetTag() {
-  if (isMath()) return "M";
+  if (isMath()) return "M[" + mathUnitsSelected().join(",") + "]";
   if (isEnglish()) return answersInEnglish() ? "E" : "EJ";
   if (isRadical()) return "R";
   return "K";
@@ -3496,14 +3951,19 @@ function renderQ(q, kata, lead) {
   $("qText").style.visibility = ""; $("qSub").style.visibility = "";
   const t = $("qText");
   if (isMath()) {
-    $("qLead").textContent = catLead(q.cat);
+    $("qLead").textContent = mathLead(q);
     t.classList.remove("small", "english-prompt"); t.classList.add("math");
-    t.innerHTML = mathHTML(q.disp);
-    $("qSub").textContent = "";
+    t.classList.toggle("wordq", !!q.txt);
+    t.classList.toggle("figq", !!q.fig);
+    if (q.fig) t.innerHTML = figHTML(q.fig);
+    else if (q.txt) t.textContent = q.txt;
+    else t.innerHTML = mathHTML(q.disp);
+    /* 補足（「sin36.9°＝0.6 とする」など）がなければ単元名を小さく出す */
+    $("qSub").textContent = q.note || mathUnitName(q.u);
     fitMathText();
   } else {
     $("qLead").textContent = lead;
-    t.classList.remove("math"); t.style.fontSize = "";
+    t.classList.remove("math", "wordq", "figq"); t.style.fontSize = "";
     t.classList.toggle("english-prompt", isEnglish() && !answersInEnglish());
     t.textContent = q.q;
     t.classList.toggle("small", q.q.length > 4);
@@ -3609,7 +4069,7 @@ function explodeQuestion() {
     }
     const el = document.createElement("div");
     el.className = "shard";
-    el.textContent = t.textContent;
+    if (isMath()) el.innerHTML = t.innerHTML; else el.textContent = t.textContent;
     el.style.left = r.left + "px"; el.style.top = r.top + "px";
     el.style.width = r.width + "px"; el.style.height = r.height + "px";
     el.style.fontFamily = cs.fontFamily; el.style.fontSize = cs.fontSize;
@@ -3670,7 +4130,7 @@ function deflect() {
   shakeScreen(true);
 
   // 札ごとに跳ね返る向きを散らす
-  const kids = [...slots.children].filter(el => !el.classList.contains("eqpre"));
+  const kids = [...slots.children].filter(el => !el.classList.contains("eqpre") && !el.classList.contains("equnit"));
   kids.forEach((el, i) => {
     const off = i - (kids.length - 1) / 2;
     el.style.setProperty("--dx", (off * 24 + (Math.random() - .5) * 34).toFixed(0) + "px");
@@ -3771,7 +4231,7 @@ async function levelBanner(level) {
   if (G.stage === 6) Art.setStage(6, level, G.rooms[lvIndex(level)]);
   Audio_.sfx.levelUp();
   Audio_.bgmStop(0.3);
-  showOv("gold", `<h2>${LV_LABEL[level]}</h2><div class="sub">${STAGES[G.stage].jp} ${level === "final" ? "最深部" : "第" + (lvIndex(level) + 1) + "層"} ／ ${ROUTE_DIFFICULTY[G.stage]}</div>`);
+  showOv("gold", `<h2>${LV_LABEL[level]}</h2><div class="sub">${STAGES[G.stage].jp} ${level === "final" ? "最深部" : "第" + (lvIndex(level) + 1) + "層"} ／ ${routeName(G.stage)}</div>`);
   await sleep(1600); hideOv();
   Audio_.bgmStart(G.stage === 7 ? "final" : level);
 }
@@ -3956,7 +4416,7 @@ window.addEventListener("keydown", e => {
       const k = e.key, low = k.toLowerCase();
       let tok = null;
       if (/^[0-9]$/.test(k)) tok = k;
-      else if ("+-/^".includes(k)) tok = k;
+      else if ("+-/^.".includes(k)) tok = k;
       else if ("xyab".includes(low)) tok = low;
       else if (low === "r") tok = "√";
       if (tok) { e.preventDefault(); pressMath(tok); }
