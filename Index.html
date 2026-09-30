@@ -147,8 +147,19 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .mdiff .seg button:first-child{flex:1.6}
 .mrange-note{margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--haiiro)}
 
-.setup-foot{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap}
-.hintline{font-size:12px;color:var(--haiiro);letter-spacing:.06em}
+/* 出発ボタンの帯：設定画面をスクロールしても常に画面の下に見える */
+.setup-foot{
+  position:sticky;bottom:0;z-index:3;display:flex;gap:10px 14px;justify-content:space-between;align-items:center;flex-wrap:wrap;
+  margin:22px -24px -22px;padding:12px 24px 14px;
+  background:rgba(22,60,99,.94);border-top:1px solid rgba(255,255,255,.2);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.setup-summary{flex:1 1 170px;min-width:0}
+#setupSummary{font-size:12px;letter-spacing:.06em;color:var(--shironeri);line-height:1.6}
+.saved-note{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:3px;font-size:11px;color:var(--haiiro);letter-spacing:.06em}
+#resetBtn{font-size:11px;color:var(--haiiro);border-bottom:1px dotted rgba(255,255,255,.5);padding:1px 0;letter-spacing:.06em}
+#resetBtn:hover,#resetBtn:focus-visible{color:var(--kin);border-color:var(--kin);outline:none}
+.hintline{font-size:12px;color:var(--haiiro);letter-spacing:.06em;margin-top:9px;line-height:1.6}
 
 /* ---------- 出撃 ---------- */
 #launch{text-align:center}
@@ -169,7 +180,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .game-actions{display:flex;gap:6px;margin-top:8px}
 .game-actions button{
   border:1px solid rgba(255,255,255,.34);background:rgba(26,69,112,.76);
-  padding:6px 9px;font-size:10px;letter-spacing:.08em;color:var(--shironeri);
+  padding:6px 9px;font-size:10px;letter-spacing:.08em;color:var(--shironeri);white-space:nowrap;
 }
 .game-actions button:hover,.game-actions button:focus-visible{border-color:var(--kin);color:var(--kin);outline:none}
 #quitBtn{border-color:rgba(255,107,95,.58);color:#ffd1cc}
@@ -209,11 +220,19 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .seal .kanji{
   font-family:var(--mincho);font-weight:600;line-height:1.12;
   font-size:clamp(28px,8.5vh,64px);letter-spacing:.06em;
-  text-shadow:0 0 26px rgba(0,0,0,.9),0 2px 0 rgba(0,0,0,.5);
+  text-shadow:0 0 3px rgba(4,17,33,.95),0 0 9px rgba(4,17,33,.8),0 0 26px rgba(0,0,0,.9),0 2px 0 rgba(0,0,0,.5);
 }
 .seal .kanji.small{font-size:clamp(17px,4.4vh,30px);letter-spacing:.02em;line-height:1.5}
-.seal .lead{font-size:11px;letter-spacing:.3em;color:var(--haiiro);margin-bottom:10px}
-.seal .qsub{font-size:12px;letter-spacing:.14em;color:var(--haiiro);margin-top:12px;min-height:1em}
+.seal .lead{font-size:12px;letter-spacing:.24em;color:#e3eefa;margin-bottom:10px;text-shadow:0 0 3px rgba(4,17,33,.95),0 0 8px rgba(4,17,33,.85)}
+.seal .qsub{font-size:12px;letter-spacing:.12em;color:#d6e5f5;margin-top:12px;min-height:1em;text-shadow:0 0 3px rgba(4,17,33,.95),0 0 8px rgba(4,17,33,.85)}
+/* 問題の後ろだけを暗いガラスのように沈め、背景の絵や光を少しぼかす（白くは塗らない）。
+   縁はぼかして消すので、封印円の見た目はそのまま */
+.seal::before{
+  content:"";position:absolute;inset:9%;z-index:0;border-radius:50%;pointer-events:none;
+  background:radial-gradient(closest-side,rgba(6,22,42,.62) 0,rgba(6,22,42,.54) 62%,rgba(6,22,42,.26) 84%,rgba(6,22,42,0) 100%);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  -webkit-mask-image:radial-gradient(closest-side,#000 70%,transparent 100%);mask-image:radial-gradient(closest-side,#000 70%,transparent 100%);
+}
 .seal.correct{animation:pop .5s cubic-bezier(.2,.8,.3,1)}
 @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
 /* 撃破：封印円が砕け散る */
@@ -378,8 +397,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .root-symbol{display:inline-block;font-size:1.24em;line-height:.86;transform:translateY(.12em);margin-right:-.05em}
 .root-radicand{display:inline-block;min-width:.62em;border-top:1.6px solid currentColor;padding:.08em .12em 0 .09em;line-height:1;text-align:center}
 .power{display:inline-block;font-size:.6em;line-height:1;font-weight:600;vertical-align:baseline;position:relative;top:-.58em;margin-left:.04em}
-.eqpre{font-family:"Georgia","Cambria",var(--mincho);font-size:22px;color:var(--haiiro);padding:0 3px 0 1px;align-self:center;letter-spacing:.02em;white-space:nowrap}
-.equnit{font-family:"Georgia","Cambria",var(--mincho);font-size:19px;color:var(--haiiro);padding-left:4px;align-self:center;white-space:nowrap}
+.eqpre{font-family:"Georgia","Cambria",var(--mincho);font-size:22px;color:#dbe8f6;text-shadow:0 0 3px rgba(4,17,33,.9),0 0 8px rgba(4,17,33,.7);padding:0 3px 0 1px;align-self:center;letter-spacing:.02em;white-space:nowrap}
+.equnit{font-family:"Georgia","Cambria",var(--mincho);font-size:19px;color:#dbe8f6;text-shadow:0 0 3px rgba(4,17,33,.9),0 0 8px rgba(4,17,33,.7);padding-left:4px;align-self:center;white-space:nowrap}
 .ans-pre{margin-right:.08em}
 .ans-unit{font-size:.72em;margin-left:.3em;letter-spacing:.04em}
 /* 文章題（単位の換算・オームの法則など） */
@@ -390,7 +409,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 /* 図（直角三角形・回路）。大きさは問題文の文字サイズに連動する */
 .seal .kanji.math.figq{line-height:1;white-space:normal}
 .mfig{position:relative;display:block;margin:0 auto;font-size:.4em;font-weight:500}
-.mfig svg{display:block;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.mfig svg{display:block;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;filter:drop-shadow(0 0 1.5px rgba(4,17,33,.95))}
 .seal .mfig svg{position:relative;inset:auto}   /* 封印円の輪（.seal svg）用の絶対配置を打ち消す */
 .mfig.tri{width:10.5em;height:6.6em;margin-bottom:1.35em}
 .mfig.tri svg path{stroke-width:1.2;opacity:.8}
@@ -438,6 +457,15 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 .ctrls{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px;flex-wrap:wrap}
 .ctrls .btn{padding:11px 20px;font-size:13px}
+.ctrls .btn:disabled{opacity:.32}
+kbd.kk{
+  display:none;margin-left:7px;padding:2px 4px 1px;border:1px solid currentColor;border-radius:3px;
+  font-family:var(--latin);font-size:9px;font-weight:600;line-height:1;letter-spacing:0;text-indent:0;opacity:.62;vertical-align:1px;
+}
+.keyonly{display:none}
+@media (hover:hover) and (pointer:fine){kbd.kk{display:inline-block}.keyonly{display:block}}
+.mkeys button{position:relative}
+.mkeys kbd.kk{position:absolute;top:3px;right:3px;margin:0;font-size:8px;padding:1px 3px}
 .fire{border-color:var(--stage-accent);color:var(--stage-accent);font-weight:700;letter-spacing:.3em;text-indent:.3em}
 .fire:not(:disabled):hover{background:var(--stage-accent);color:#0a0d13}
 .swap{border-color:var(--midori);color:var(--midori)}
@@ -547,6 +575,13 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 #quitConfirm .acts{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}
 
 @media (max-width:640px){
+  /* スマホ：全画面ボタンは記号だけにして、残り人数の表示と重ならないようにする */
+  .fs-label{display:none}
+  .hud{padding-right:40px}
+  #setupSummary{font-size:11px;letter-spacing:.03em}
+  .ctrls{gap:6px}
+  .ctrls .btn{padding:10px 11px;font-size:12px;letter-spacing:.06em}
+  .ctrls .fire{letter-spacing:.2em;text-indent:.2em}
   .stages{grid-template-columns:repeat(4,1fr)}
   .kbd{gap:3px}
   .kbd button{padding:7px 0}
@@ -574,13 +609,14 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 <canvas id="bg"></canvas>
 <div id="vignette"></div>
 <div id="flash"></div>
-<button id="fullscreenBtn" type="button" aria-label="全画面表示を切り替える"><span class="enter">⛶ 全画面</span><span class="exit">× 全画面終了</span></button>
+<button id="fullscreenBtn" type="button" aria-label="全画面表示を切り替える"><span class="enter">⛶<span class="fs-label"> 全画面</span></span><span class="exit">×<span class="fs-label"> 全画面終了</span></span></button>
 <div class="bigcount" id="bigcount"></div>
 <div id="boom" aria-hidden="true"></div>
 <div id="pauseScreen" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
   <div class="pause-card">
     <h2 id="pauseTitle">PAUSED</h2>
     <p>ゲームを一時停止しています</p>
+    <p class="keyonly">Esc か Space でも再開できます</p>
     <div class="volume-gauge">
       <div class="volume-row"><label for="pauseVolumeSlider">音量</label><output id="pauseVolumeValue">75%</output></div>
       <input id="pauseVolumeSlider" type="range" min="0" max="100" step="5" value="75" aria-label="一時停止中の音量">
@@ -614,6 +650,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   <div class="panel">
     <div class="eyebrow">航路を選ぶ</div>
     <div class="stages" id="stages"></div>
+    <div class="hintline" id="hintLine"></div>
 
     <div class="rule"></div>
 
@@ -622,7 +659,10 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
     <div class="mathopts" id="mathOpts" hidden></div>
 
     <div class="setup-foot">
-      <div class="hintline" id="hintLine"></div>
+      <div class="setup-summary">
+        <div id="setupSummary"></div>
+        <div class="saved-note"><span id="savedNote"></span><button type="button" id="resetBtn">初期設定に戻す</button></div>
+      </div>
       <div style="display:flex;gap:10px">
         <button class="btn" id="editBtn">問題を編集</button>
         <button class="btn primary" id="goBtn">出　発</button>
@@ -643,7 +683,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
       <div class="stg" id="stgName">遺跡</div>
       <div class="lv" id="lvName">LEVEL 1</div>
       <div class="game-actions">
-        <button id="pauseBtn" type="button">Ⅱ 一時停止</button>
+        <button id="pauseBtn" type="button">Ⅱ 一時停止<kbd class="kk">Esc</kbd></button>
         <button id="quitBtn" type="button">■ 中止</button>
       </div>
     </div>
@@ -676,8 +716,10 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
     <div id="kbdArea"></div>
     <div class="ctrls">
       <button class="btn swap" id="swapBtn" hidden>問題入替 <b>×<span id="swapN">0</span></b></button>
-      <button class="btn" id="delBtn">一字消す</button>
-      <button class="btn fire" id="fireBtn" disabled>発射</button>
+      <button class="btn" id="hintBtn" type="button" hidden>ヒント</button>
+      <button class="btn" id="delBtn" type="button">一字消す<kbd class="kk">BS</kbd></button>
+      <button class="btn" id="clearBtn" type="button">全部消す<kbd class="kk">Del</kbd></button>
+      <button class="btn fire" id="fireBtn" type="button" disabled>発射<kbd class="kk">Enter</kbd></button>
     </div>
     <div class="timer" id="timer">
       <div class="bar"><i id="timerBar"></i></div>
@@ -3201,6 +3243,54 @@ const CFG = {
   units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
   diff: "route"                                               // 数学の難易度（route＝航路の配分どおり）
 };
+/* ---------- 設定の保存 ----------
+   設定画面で選んだ内容をブラウザに覚えさせ、次に開いたときも同じ設定で始める。
+   保存できない環境（プライベートモード、埋め込み表示など）では何もしない。 */
+const CFG_DEFAULT = JSON.parse(JSON.stringify(CFG));
+const CFG_STORE_KEY = "five-readers:settings:v1";
+const STORE_OK = (() => {
+  try { localStorage.setItem(CFG_STORE_KEY + ":t", "1"); localStorage.removeItem(CFG_STORE_KEY + ":t"); return true; }
+  catch (_) { return false; }
+})();
+function saveSettings() {
+  if (!STORE_OK) return;
+  try { localStorage.setItem(CFG_STORE_KEY, JSON.stringify(CFG)); } catch (_) {}
+}
+function loadSettings() {
+  if (!STORE_OK) return;
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(CFG_STORE_KEY) || "null"); } catch (_) { return; }
+  if (saved && typeof saved === "object") applySettings(saved);
+}
+/* 保存値は選択肢にあるものだけを受け入れる（古い版や壊れた値で動かなくならないように） */
+function applySettings(src) {
+  for (const opt of OPTS) {
+    if (!(opt.k in src)) continue;
+    if (opt.k === "volume") {
+      const v = Number(src.volume);
+      if (isFinite(v)) CFG.volume = Math.max(0, Math.min(1, v));
+      continue;
+    }
+    const hit = opt.vals.find(([v]) => String(v) === String(src[opt.k]));
+    if (hit) CFG[opt.k] = hit[0];
+  }
+  if (src.stage === "?" || [1, 2, 3, 4, 5, 6, 7].includes(src.stage)) CFG.stage = src.stage;
+  if (Array.isArray(src.units)) {
+    const ids = MATH_UNITS.map(u => u.id).filter(id => src.units.includes(id));
+    if (ids.length) CFG.units = ids;
+  }
+  if (DIFF_OPTS.some(([v]) => v === src.diff)) CFG.diff = src.diff;
+}
+function resetSettings() {
+  Object.assign(CFG, JSON.parse(JSON.stringify(CFG_DEFAULT)));
+  if (STORE_OK) { try { localStorage.removeItem(CFG_STORE_KEY); } catch (_) {} }
+  Audio_.setVolume(CFG.volume); Audio_.setBgmEnabled(!!CFG.bgm); Art.setFx(motionOK());
+  Audio_.sfx.ui();
+  buildSetup();
+}
+/* 設定を変えたら要約を更新して保存する */
+function settingsChanged() { paintSummary(); saveSettings(); }
+
 const isMath = () => CFG.mode === "math";
 const isEnglish = () => CFG.mode === "english";
 const answersInEnglish = () => isEnglish() && CFG.engAnswer === "en";
@@ -3351,6 +3441,7 @@ function setGameVolume(percent, preview) {
   Audio_.setVolume(CFG.volume);
   syncVolumeControls();
   if (preview) Audio_.sfx.ui();
+  settingsChanged();
 }
 function createVolumeGauge(sliderId, valueId) {
   const gauge = document.createElement("div"); gauge.className = "volume-gauge";
@@ -3370,13 +3461,13 @@ function buildSetup() {
     const b = document.createElement("button");
     b.className = "stage-chip";
     b.innerHTML = `<div class="n">${n}</div><div class="nm">${STAGES[n].jp}</div><div class="df"></div>`;
-    b.onclick = () => { CFG.stage = n; Audio_.sfx.ui(); paintStages(); previewStage(n); };
+    b.onclick = () => { CFG.stage = n; Audio_.sfx.ui(); paintStages(); previewStage(n); settingsChanged(); };
     wrap.appendChild(b);
   }
   const r = document.createElement("button");
   r.className = "stage-chip";
   r.innerHTML = `<div class="n">?</div><div class="nm">おまかせ</div><div class="df"></div>`;
-  r.onclick = () => { CFG.stage = "?"; Audio_.sfx.ui(); paintStages(); previewStage(1 + Math.floor(Math.random() * 7)); };
+  r.onclick = () => { CFG.stage = "?"; Audio_.sfx.ui(); paintStages(); previewStage(1 + Math.floor(Math.random() * 7)); settingsChanged(); };
   wrap.appendChild(r);
 
   const bonusLabels = isMath()
@@ -3409,6 +3500,7 @@ function buildSetup() {
         if (opt.k === "fx") Art.setFx(motionOK());
         if (opt.k === "bgm") Audio_.setBgmEnabled(!!CFG.bgm);
         if (opt.k === "mode") buildSetup(); else paintOpts();
+        settingsChanged();
       };
       seg.appendChild(b);
     }
@@ -3417,7 +3509,27 @@ function buildSetup() {
   }
   const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
   buildMathOpts();
-  labelStages(); paintStages(); paintOpts(); previewStage(1);
+  labelStages(); paintStages(); paintOpts(); paintSummary(); previewStage(1);
+  $("savedNote").textContent = STORE_OK ? "設定は自動で保存されます" : "この表示環境では設定を保存できません";
+}
+/* 出発ボタンの横に、いまの設定を1行でまとめる（スクロールしても確認できるように） */
+function mathRangeLabel() {
+  const sel = mathUnitsSelected(), ids = ch => MATH_UNITS.filter(u => u.ch === ch).map(u => u.id);
+  const same = list => list.length === sel.length && list.every(id => sel.includes(id));
+  if (sel.length === MATH_UNITS.length) return "全単元";
+  if (same(ids(1))) return "第1章すべて";
+  if (same(ids(2))) return "第2章すべて";
+  if (sel.length <= 2) return sel.map(mathUnitName).join("・");
+  return `${sel.length}単元`;
+}
+function paintSummary() {
+  const label = (k, v) => { const o = OPTS.find(x => x.k === k), hit = o && o.vals.find(([x]) => String(x) === String(v)); return hit ? hit[1] : v; };
+  const parts = [label("mode", CFG.mode)];
+  if (isMath()) parts.push(`範囲 ${mathRangeLabel()}`, fixedDiff() ? `難易度 ${DIFF_LABEL[fixedDiff()]}` : "難易度 航路どおり");
+  if (isEnglish()) parts.push(label("engAnswer", CFG.engAnswer));
+  parts.push(CFG.stage === "?" ? "航路 おまかせ" : `航路${CFG.stage} ${STAGES[CFG.stage].jp}`);
+  parts.push(`${CFG.N}問・${label("mult", CFG.mult)}・${CFG.lives}人`);
+  $("setupSummary").textContent = parts.join("　／　");
 }
 /* 航路チップの難度表示。数学で難易度を固定しているときは「◯◯のみ」と出す */
 function labelStages() {
@@ -3449,7 +3561,7 @@ function buildMathOpts() {
   const byCh = ch => MATH_UNITS.filter(u => u.ch === ch).map(u => u.id);
   for (const [lb, ids] of [["すべて", all], ["第1章のみ", byCh(1)], ["第2章のみ", byCh(2)]]) {
     const b = document.createElement("button"); b.type = "button"; b.textContent = lb;
-    b.onclick = () => { CFG.units = ids.slice(); Audio_.sfx.ui(); paintMathOpts(); };
+    b.onclick = () => { CFG.units = ids.slice(); Audio_.sfx.ui(); paintMathOpts(); settingsChanged(); };
     quick.appendChild(b);
   }
   head.appendChild(quick); box.appendChild(head);
@@ -3472,7 +3584,7 @@ function buildMathOpts() {
   const seg = document.createElement("div"); seg.className = "seg";
   for (const [v, lb] of DIFF_OPTS) {
     const b = document.createElement("button"); b.type = "button"; b.textContent = lb; b.dataset.diff = v;
-    b.onclick = () => { CFG.diff = v; Audio_.sfx.ui(); paintMathOpts(); labelStages(); };
+    b.onclick = () => { CFG.diff = v; Audio_.sfx.ui(); paintMathOpts(); labelStages(); settingsChanged(); };
     seg.appendChild(b);
   }
   d.appendChild(seg); box.appendChild(d);
@@ -3488,7 +3600,7 @@ function toggleMathUnit(id) {
     return;
   }
   CFG.units = on ? mathUnitsSelected().filter(x => x !== id) : [...mathUnitsSelected(), id];
-  Audio_.sfx.ui(); paintMathOpts();
+  Audio_.sfx.ui(); paintMathOpts(); settingsChanged();
 }
 function paintMathOpts() {
   const box = $("mathOpts");
@@ -3574,6 +3686,8 @@ const MATH_KEY_ICON = {
   "/": '<span class="fr"><span><i class="ph"></i></span><span><i class="ph"></i></span></span>',
   "^": '<i class="ph"></i><sup class="power"><i class="ph"></i></sup>'
 };
+/* PC のキーボードで打つときのキー（見た目と違うものだけ） */
+const MATH_KEY_PC = { "√": "R", "^": "^", "/": "/" };
 function buildMathPad(area) {
   const wrap = document.createElement("div"); wrap.className = "mathpad";
   const num = document.createElement("div"); num.className = "mkeys num";
@@ -3588,6 +3702,7 @@ function buildMathPad(area) {
     const b = document.createElement("button"); b.className = "op";
     if (MATH_KEY_ICON[t]) { b.innerHTML = MATH_KEY_ICON[t]; b.classList.add("icon"); }
     else b.textContent = t;
+    if (MATH_KEY_PC[t]) b.insertAdjacentHTML("beforeend", `<kbd class="kk">${MATH_KEY_PC[t]}</kbd>`);
     b.setAttribute("aria-label", t === "/" ? "分数" : t === "^" ? "指数" : t === "." ? "小数点" : t);
     b.onclick = () => pressMath(t);
     sym.appendChild(b);
@@ -3645,6 +3760,11 @@ function backspace() {
   Audio_.sfx.del(); renderSlots();
 }
 function clearInput() { IN.kana = []; IN.romaji = ""; renderSlots(); }
+/* 「全部消す」ボタン・Delete キー */
+function clearAnswer() {
+  if (G.state !== "answer" || G.judging || (!IN.kana.length && !IN.romaji)) return;
+  Audio_.sfx.del(); clearInput();
+}
 
 function renderSlots() {
   const s = $("slots");
@@ -3666,6 +3786,7 @@ function renderSlots() {
       const u = document.createElement("div"); u.className = "equnit"; u.textContent = G.q.unit; s.appendChild(u);
     }
     $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
+    paintCtrls();
     return;
   }
   if (answersInEnglish()) s.classList.add("english");
@@ -3681,6 +3802,18 @@ function renderSlots() {
     const d = document.createElement("div"); d.className = "slot ghost"; s.appendChild(d);
   }
   $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
+  paintCtrls();
+}
+/* ヒントは設定で「あり」のときだけ出す。表示中・解答中でないときは押せない */
+function paintCtrls() {
+  const answering = G.state === "answer" && !G.judging;
+  $("hintBtn").hidden = !CFG.hint;
+  $("hintBtn").disabled = !(answering && $("hintBox").hidden);
+  $("clearBtn").disabled = !(answering && (IN.kana.length || IN.romaji));
+}
+function requestHint() {
+  if (!CFG.hint || G.state !== "answer" || G.judging || !$("hintBox").hidden) return;
+  Audio_.sfx.ui(); showHint();
 }
 
 /* ---------- HUD ---------- */
@@ -3851,6 +3984,7 @@ function hideReveal() { $("reveal").classList.remove("on"); }
 function showHint() {
   if (!G.q) return;
   const box = $("hintBox"); box.hidden = false;
+  $("hintBtn").disabled = true;
   if (isMath()) { box.classList.add("math"); box.textContent = mathHint(G.q); return; }
   box.classList.remove("math");
   const a = G.q.a.split("|")[0];
@@ -3870,7 +4004,7 @@ function showHint() {
     ? `<b>${a[0]}</b>${a.length} 文字`
     : `<b>${a.length}</b>文字`;
 }
-function hideHint() { $("hintBox").hidden = true; }
+function hideHint() { $("hintBox").hidden = true; paintCtrls(); }
 
 /* ---------- オーバーレイ ---------- */
 function showOv(cls, html) { $("ovIn").innerHTML = html; $("ov").className = "on " + (cls || ""); }
@@ -4385,6 +4519,9 @@ $("pauseVolumeSlider").oninput = e => setGameVolume(e.target.value, false);
 $("pauseVolumeSlider").onchange = e => setGameVolume(e.target.value, true);
 $("fireBtn").onclick = fire;
 $("delBtn").onclick = backspace;
+$("clearBtn").onclick = clearAnswer;
+$("hintBtn").onclick = requestHint;
+$("resetBtn").onclick = resetSettings;
 $("swapBtn").onclick = swap;
 $("goBtn").onclick = () => start();
 
@@ -4400,7 +4537,9 @@ window.addEventListener("keydown", e => {
   if ($("edit").classList.contains("on")) return;
   if ($("ov").classList.contains("on")) return;
   if (!$("play").classList.contains("on")) return;
+  if (e.code === "Escape") { e.preventDefault(); pauseGame(); return; }
   if (e.code === "Backspace") { e.preventDefault(); backspace(); return; }
+  if (e.code === "Delete") { e.preventDefault(); clearAnswer(); return; }
   if (e.code === "Enter" || e.code === "NumpadEnter") {
     e.preventDefault();
     if (CFG.input === 1 && IN.romaji) {
@@ -4468,6 +4607,9 @@ $("editUp").onchange = async e => {
   e.target.value = "";
 };
 
+loadSettings();
+Audio_.setVolume(CFG.volume);
+Art.setFx(motionOK());
 buildSetup();
 
 </script>
