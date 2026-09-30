@@ -692,7 +692,7 @@ kbd.kk{
 
     <div class="opts" id="opts"></div>
 
-    <div class="mathopts" id="mathOpts" hidden></div>
+    <div class="mathopts" id="rangeOpts" hidden></div>
 
     <div class="setup-foot">
       <div class="setup-summary">
@@ -882,116 +882,67 @@ const DEFAULT_Q = {
   ]
 };
 
-/* 英語モード：日本語を見て英単語を入力（q=日本語 / a=英語 / sub=補足） */
+/* 英語ボーナス（英単語で答える）[日本語, ヒント, 英単語]・[日本語, 英単語, 分類] */
 const ENGLISH_Q = {
-  l1: [
-    ["りんご","apple","基本単語"],["本","book","基本単語"],["学校","school","基本単語"],
-    ["水","water","基本単語"],["机","desk","基本単語"],["いす","chair","基本単語"],
-    ["犬","dog","基本単語"],["猫","cat","基本単語"],["車","car","基本単語"],
-    ["家","house","基本単語"],["友達","friend","基本単語"],["家族","family","基本単語"],
-    ["音楽","music","基本単語"],["朝","morning","基本単語"],["夜","night","基本単語"],
-    ["赤い","red","基本単語"],["大きい","big","基本単語"],["小さい","small","基本単語"]
-  ],
-  l2: [
-    ["始める","begin|start","動詞"],["選ぶ","choose","動詞"],["建てる","build","動詞"],
-    ["運ぶ","carry","動詞"],["必要な","necessary","形容詞"],["有名な","famous","形容詞"],
-    ["危険な","dangerous","形容詞"],["異なる","different","形容詞"],["十分な","enough","形容詞"],
-    ["質問","question","名詞"],["答え","answer","名詞"],["未来","future","名詞"],
-    ["文化","culture","名詞"],["自然","nature","名詞"],["旅行","travel","名詞"],
-    ["健康","health","名詞"],["練習","practice","名詞"],["成功","success","名詞"]
-  ],
-  l3: [
-    ["環境","environment","発展単語"],["技術","technology","発展単語"],["教育","education","発展単語"],
-    ["経験","experience","発展単語"],["知識","knowledge","発展単語"],["改善","improvement","発展単語"],
-    ["機会","opportunity","発展単語"],["責任","responsibility","発展単語"],["意思疎通","communication","発展単語"],
-    ["情報","information","発展単語"],["産業","industry","発展単語"],["安全","safety","発展単語"],
-    ["品質","quality","発展単語"],["設計","design","発展単語"],["材料","material","発展単語"],
-    ["測定","measurement","発展単語"],["製造","manufacturing","発展単語"],["持続可能な","sustainable","発展単語"]
-  ],
-  final: [
-    ["達成","achievement","最終問題"],["発展・開発","development","最終問題"],
-    ["国際的な","international","最終問題"],["関係","relationship","最終問題"],
-    ["組織","organization","最終問題"],["電気","electricity","最終問題"],
-    ["温度","temperature","最終問題"],["交通・輸送","transportation","最終問題"],
-    ["発音","pronunciation","最終問題"],["実験","experiment","最終問題"],
-    ["工学","engineering","最終問題"],["数学","mathematics","最終問題"],
-    ["独立","independence","最終問題"],["創造性","creativity","最終問題"],
-    ["挑戦","challenge","最終問題"],["建築","architecture","最終問題"]
-  ],
   b1: [
-    ["春","最初の文字：s","spring"],["夏","最初の文字：s","summer"],
-    ["秋","最初の文字：a","autumn|fall"],["冬","最初の文字：w","winter"],
-    ["東","最初の文字：e","east"],["西","最初の文字：w","west"],
-    ["南","最初の文字：s","south"],["北","最初の文字：n","north"],
-    ["月曜日","最初の文字：m","monday"],["火曜日","最初の文字：t","tuesday"],
-    ["水曜日","最初の文字：w","wednesday"],["木曜日","最初の文字：t","thursday"]
+    ["春","最初の文字：s","spring"],
+    ["夏","最初の文字：s","summer"],
+    ["秋","最初の文字：a","autumn|fall"],
+    ["冬","最初の文字：w","winter"],
+    ["東","最初の文字：e","east"],
+    ["西","最初の文字：w","west"],
+    ["南","最初の文字：s","south"],
+    ["北","最初の文字：n","north"],
+    ["月曜日","最初の文字：m","monday"],
+    ["火曜日","最初の文字：t","tuesday"],
+    ["水曜日","最初の文字：w","wednesday"],
+    ["木曜日","最初の文字：t","thursday"]
   ],
   b2: [
-    ["美しい","beautiful","発展単語"],["重要な","important","発展単語"],
-    ["興味深い","interesting","発展単語"],["理解する","understand","発展単語"],
-    ["説明する","explain","発展単語"],["決定する","decide","発展単語"],
-    ["準備する","prepare","発展単語"],["守る・保護する","protect","発展単語"],
-    ["発見する","discover","発展単語"],["想像する","imagine","発展単語"],
-    ["比べる","compare","発展単語"],["完成させる","complete","発展単語"]
+    ["美しい","beautiful","発展単語"],
+    ["重要な","important","発展単語"],
+    ["興味深い","interesting","発展単語"],
+    ["理解する","understand","発展単語"],
+    ["説明する","explain","発展単語"],
+    ["決定する","decide","発展単語"],
+    ["準備する","prepare","発展単語"],
+    ["守る・保護する","protect","発展単語"],
+    ["発見する","discover","発展単語"],
+    ["想像する","imagine","発展単語"],
+    ["比べる","compare","発展単語"],
+    ["完成させる","complete","発展単語"]
   ]
 };
 
-/* 英語モード（日本語訳）：英単語を見て、訳をひらがなで入力 */
+/* 英語ボーナス（日本語訳で答える） */
 const ENGLISH_JA_Q = {
-  l1: [
-    ["APPLE","りんご","日本語訳・基本"],["BOOK","ほん","日本語訳・基本"],
-    ["SCHOOL","がっこう","日本語訳・基本"],["WATER","みず","日本語訳・基本"],
-    ["DESK","つくえ","日本語訳・基本"],["CHAIR","いす","日本語訳・基本"],
-    ["DOG","いぬ","日本語訳・基本"],["CAT","ねこ","日本語訳・基本"],
-    ["CAR","くるま","日本語訳・基本"],["HOUSE","いえ","日本語訳・基本"],
-    ["FRIEND","ともだち","日本語訳・基本"],["FAMILY","かぞく","日本語訳・基本"],
-    ["MUSIC","おんがく","日本語訳・基本"],["MORNING","あさ","日本語訳・基本"],
-    ["NIGHT","よる","日本語訳・基本"],["RED","あか|あかい","日本語訳・基本"]
-  ],
-  l2: [
-    ["BEGIN / START","はじめる","日本語訳・動詞"],["CHOOSE","えらぶ","日本語訳・動詞"],
-    ["BUILD","たてる","日本語訳・動詞"],["CARRY","はこぶ","日本語訳・動詞"],
-    ["NECESSARY","ひつような|ひつよう","日本語訳・形容詞"],["FAMOUS","ゆうめいな|ゆうめい","日本語訳・形容詞"],
-    ["DANGEROUS","きけんな|きけん","日本語訳・形容詞"],["DIFFERENT","ことなる|ちがう","日本語訳・形容詞"],
-    ["ENOUGH","じゅうぶんな|じゅうぶん","日本語訳・形容詞"],["QUESTION","しつもん","日本語訳・名詞"],
-    ["ANSWER","こたえ","日本語訳・名詞"],["FUTURE","みらい","日本語訳・名詞"],
-    ["CULTURE","ぶんか","日本語訳・名詞"],["NATURE","しぜん","日本語訳・名詞"],
-    ["TRAVEL","りょこう|たび","日本語訳・名詞"],["HEALTH","けんこう","日本語訳・名詞"]
-  ],
-  l3: [
-    ["ENVIRONMENT","かんきょう","日本語訳・発展"],["TECHNOLOGY","ぎじゅつ","日本語訳・発展"],
-    ["EDUCATION","きょういく","日本語訳・発展"],["EXPERIENCE","けいけん","日本語訳・発展"],
-    ["KNOWLEDGE","ちしき","日本語訳・発展"],["IMPROVEMENT","かいぜん","日本語訳・発展"],
-    ["OPPORTUNITY","きかい","日本語訳・発展"],["RESPONSIBILITY","せきにん","日本語訳・発展"],
-    ["COMMUNICATION","いしそつう|こみゅにけーしょん","日本語訳・発展"],
-    ["INFORMATION","じょうほう","日本語訳・発展"],["INDUSTRY","さんぎょう","日本語訳・発展"],
-    ["SAFETY","あんぜん","日本語訳・発展"],["QUALITY","ひんしつ","日本語訳・発展"],
-    ["DESIGN","せっけい|でざいん","日本語訳・発展"],["MATERIAL","ざいりょう","日本語訳・発展"],
-    ["MEASUREMENT","そくてい","日本語訳・発展"]
-  ],
-  final: [
-    ["ACHIEVEMENT","たっせい","日本語訳・最終"],["DEVELOPMENT","かいはつ|はってん","日本語訳・最終"],
-    ["INTERNATIONAL","こくさいてきな|こくさいてき","日本語訳・最終"],["RELATIONSHIP","かんけい","日本語訳・最終"],
-    ["ORGANIZATION","そしき","日本語訳・最終"],["ELECTRICITY","でんき","日本語訳・最終"],
-    ["TEMPERATURE","おんど","日本語訳・最終"],["TRANSPORTATION","こうつう|ゆそう","日本語訳・最終"],
-    ["PRONUNCIATION","はつおん","日本語訳・最終"],["EXPERIMENT","じっけん","日本語訳・最終"],
-    ["ENGINEERING","こうがく","日本語訳・最終"],["MATHEMATICS","すうがく","日本語訳・最終"],
-    ["INDEPENDENCE","どくりつ","日本語訳・最終"],["CREATIVITY","そうぞうせい","日本語訳・最終"],
-    ["CHALLENGE","ちょうせん","日本語訳・最終"],["ARCHITECTURE","けんちく","日本語訳・最終"]
-  ],
   b1: [
-    ["SPRING","季節","はる"],["SUMMER","季節","なつ"],["AUTUMN / FALL","季節","あき"],
-    ["WINTER","季節","ふゆ"],["EAST","方角","ひがし"],["WEST","方角","にし"],
-    ["SOUTH","方角","みなみ"],["NORTH","方角","きた"],["MONDAY","曜日","げつようび"],
-    ["TUESDAY","曜日","かようび"],["WEDNESDAY","曜日","すいようび"],["THURSDAY","曜日","もくようび"]
+    ["SPRING","季節","はる"],
+    ["SUMMER","季節","なつ"],
+    ["AUTUMN / FALL","季節","あき"],
+    ["WINTER","季節","ふゆ"],
+    ["EAST","方角","ひがし"],
+    ["WEST","方角","にし"],
+    ["SOUTH","方角","みなみ"],
+    ["NORTH","方角","きた"],
+    ["MONDAY","曜日","げつようび"],
+    ["TUESDAY","曜日","かようび"],
+    ["WEDNESDAY","曜日","すいようび"],
+    ["THURSDAY","曜日","もくようび"]
   ],
   b2: [
-    ["BEAUTIFUL","うつくしい","日本語訳・発展"],["IMPORTANT","じゅうような|じゅうよう","日本語訳・発展"],
-    ["INTERESTING","きょうみぶかい|おもしろい","日本語訳・発展"],["UNDERSTAND","りかいする|わかる","日本語訳・発展"],
-    ["EXPLAIN","せつめいする","日本語訳・発展"],["DECIDE","きめる|けっていする","日本語訳・発展"],
-    ["PREPARE","じゅんびする","日本語訳・発展"],["PROTECT","まもる|ほごする","日本語訳・発展"],
-    ["DISCOVER","はっけんする|みつける","日本語訳・発展"],["IMAGINE","そうぞうする","日本語訳・発展"],
-    ["COMPARE","くらべる|ひかくする","日本語訳・発展"],["COMPLETE","かんせいさせる|しあげる","日本語訳・発展"]
+    ["BEAUTIFUL","うつくしい","日本語訳・発展"],
+    ["IMPORTANT","じゅうような|じゅうよう","日本語訳・発展"],
+    ["INTERESTING","きょうみぶかい|おもしろい","日本語訳・発展"],
+    ["UNDERSTAND","りかいする|わかる","日本語訳・発展"],
+    ["EXPLAIN","せつめいする","日本語訳・発展"],
+    ["DECIDE","きめる|けっていする","日本語訳・発展"],
+    ["PREPARE","じゅんびする","日本語訳・発展"],
+    ["PROTECT","まもる|ほごする","日本語訳・発展"],
+    ["DISCOVER","はっけんする|みつける","日本語訳・発展"],
+    ["IMAGINE","そうぞうする","日本語訳・発展"],
+    ["COMPARE","くらべる|ひかくする","日本語訳・発展"],
+    ["COMPLETE","かんせいさせる|しあげる","日本語訳・発展"]
   ]
 };
 
@@ -1101,71 +1052,35 @@ const KANJI_EXTRA_Q = {
   ]
 };
 
-/* [日本語表示, 英単語, 日本語訳（かな）, 分類] */
+/* 英語ボーナスの追加分 [日本語, 英単語, ひらがな, 分類] */
 const ENGLISH_EXTRA = {
-  l1: [
-    ["食べ物","food","たべもの","基本単語"],["時計","clock","とけい","基本単語"],
-    ["鉛筆","pencil","えんぴつ","基本単語"],["部屋","room","へや","基本単語"],
-    ["窓","window","まど","基本単語"],["扉","door","とびら","基本単語"],
-    ["先生","teacher","せんせい","基本単語"],["生徒","student","せいと","基本単語"],
-    ["町","town","まち","基本単語"],["国","country","くに","基本単語"],
-    ["川","river","かわ","基本単語"],["山","mountain","やま","基本単語"],
-    ["海","sea","うみ","基本単語"],["空","sky","そら","基本単語"],
-    ["太陽","sun","たいよう","基本単語"],["雨","rain","あめ","基本単語"],
-    ["幸せな","happy","しあわせな","基本単語"],["速い","fast","はやい","基本単語"],
-    ["新しい","new","あたらしい","基本単語"],["古い","old","ふるい","基本単語"]
-  ],
-  l2: [
-    ["覚える","remember","おぼえる","標準単語"],["忘れる","forget","わすれる","標準単語"],
-    ["借りる","borrow","かりる","標準単語"],["貸す","lend","かす","標準単語"],
-    ["到着する","arrive","とうちゃくする","標準単語"],["出発する・去る","leave","しゅっぱつする|でる","標準単語"],
-    ["起こる","happen","おこる","標準単語"],["続ける","continue","つづける","標準単語"],
-    ["可能な","possible","かのうな|かのう","標準単語"],["難しい","difficult","むずかしい","標準単語"],
-    ["注意深い","careful","ちゅういぶかい","標準単語"],["役に立つ","useful","やくにたつ","標準単語"],
-    ["人気のある","popular","にんきのある","標準単語"],["理由","reason","りゆう","標準単語"],
-    ["例","example","れい","標準単語"],["言語","language","げんご","標準単語"],
-    ["歴史","history","れきし","標準単語"],["科学","science","かがく","標準単語"],
-    ["エネルギー","energy","えねるぎー","標準単語"],["工場","factory","こうじょう","標準単語"]
-  ],
-  l3: [
-    ["能力","ability","のうりょく","発展単語"],["利点","advantage","りてん","発展単語"],
-    ["行動","behavior","こうどう","発展単語"],["地域社会","community","ちいきしゃかい","発展単語"],
-    ["状態・条件","condition","じょうたい|じょうけん","発展単語"],["建設","construction","けんせつ","発展単語"],
-    ["顧客","customer","こきゃく","発展単語"],["決定","decision","けってい","発展単語"],
-    ["経済","economy","けいざい","発展単語"],["効果","effect","こうか","発展単語"],
-    ["従業員","employee","じゅうぎょういん","発展単語"],["装置・設備","equipment","そうち|せつび","発展単語"],
-    ["機能","function","きのう","発展単語"],["管理","management","かんり","発展単語"],
-    ["方法","method","ほうほう","発展単語"],["生産","production","せいさん","発展単語"],
-    ["研究","research","けんきゅう","発展単語"],["資源","resource","しげん","発展単語"],
-    ["構造","structure","こうぞう","発展単語"],["仕組み・体系","system","しすてむ","発展単語"]
-  ],
-  final: [
-    ["分析","analysis","ぶんせき","最終単語"],["適切な","appropriate","てきせつな|てきせつ","最終単語"],
-    ["状況","circumstance","じょうきょう","最終単語"],["結果・成り行き","consequence","けっか","最終単語"],
-    ["貢献","contribution","こうけん","最終単語"],["効率","efficiency","こうりつ","最終単語"],
-    ["証拠","evidence","しょうこ","最終単語"],["基本的な","fundamental","きほんてきな|きほんてき","最終単語"],
-    ["革新","innovation","かくしん","最終単語"],["保守・整備","maintenance","ほしゅ|せいび","最終単語"],
-    ["製造する","manufacture","せいぞうする","最終単語"],["機構","mechanism","きこう","最終単語"],
-    ["性能","performance","せいのう","最終単語"],["精度","precision","せいど","最終単語"],
-    ["手順","procedure","てじゅん","最終単語"],["要件","requirement","ようけん","最終単語"],
-    ["重要な","significant","じゅうような|じゅうよう","最終単語"],["仕様","specification","しよう","最終単語"],
-    ["戦略","strategy","せんりゃく","最終単語"],["公差・許容差","tolerance","こうさ|きょようさ","最終単語"]
-  ],
   b1: [
-    ["金曜日","friday","きんようび","曜日"],["土曜日","saturday","どようび","曜日"],
-    ["日曜日","sunday","にちようび","曜日"],["1月","january","いちがつ","月"],
-    ["2月","february","にがつ","月"],["3月","march","さんがつ","月"],
-    ["4月","april","しがつ","月"],["5月","may","ごがつ","月"],
-    ["6月","june","ろくがつ","月"],["7月","july","しちがつ","月"],
-    ["8月","august","はちがつ","月"],["9月","september","くがつ","月"]
+    ["金曜日","friday","きんようび","曜日"],
+    ["土曜日","saturday","どようび","曜日"],
+    ["日曜日","sunday","にちようび","曜日"],
+    ["1月","january","いちがつ","月"],
+    ["2月","february","にがつ","月"],
+    ["3月","march","さんがつ","月"],
+    ["4月","april","しがつ","月"],
+    ["5月","may","ごがつ","月"],
+    ["6月","june","ろくがつ","月"],
+    ["7月","july","しちがつ","月"],
+    ["8月","august","はちがつ","月"],
+    ["9月","september","くがつ","月"]
   ],
   b2: [
-    ["信頼性","reliability","しんらいせい","発展単語"],["持続可能性","sustainability","じぞくかのうせい","発展単語"],
-    ["特徴","characteristic","とくちょう","発展単語"],["実施","implementation","じっし","発展単語"],
-    ["調査","investigation","ちょうさ","発展単語"],["評価","evaluation","ひょうか","発展単語"],
-    ["解決策","solution","かいけつさく","発展単語"],["利用可能な","available","りようかのうな","発展単語"],
-    ["予防","prevention","よぼう","発展単語"],["複雑な","complex","ふくざつな","発展単語"],
-    ["正確な","accurate","せいかくな","発展単語"],["一貫した","consistent","いっかんした","発展単語"]
+    ["信頼性","reliability","しんらいせい","発展単語"],
+    ["持続可能性","sustainability","じぞくかのうせい","発展単語"],
+    ["特徴","characteristic","とくちょう","発展単語"],
+    ["実施","implementation","じっし","発展単語"],
+    ["調査","investigation","ちょうさ","発展単語"],
+    ["評価","evaluation","ひょうか","発展単語"],
+    ["解決策","solution","かいけつさく","発展単語"],
+    ["利用可能な","available","りようかのうな","発展単語"],
+    ["予防","prevention","よぼう","発展単語"],
+    ["複雑な","complex","ふくざつな","発展単語"],
+    ["正確な","accurate","せいかくな","発展単語"],
+    ["一貫した","consistent","いっかんした","発展単語"]
   ]
 };
 
@@ -1929,35 +1844,6 @@ const GENERAL_KANJI_MORE = {
   b2: []
 };
 
-/* [日本語表示, 英単語, 日本語訳（かな・別解は|区切り）, 分類] */
-const GENERAL_ENGLISH_MORE = {
-  l1: [
-    ["紙","paper","かみ","基礎頻出語"],["かばん","bag","かばん","基礎頻出語"],["手","hand","て","基礎頻出語"],["頭","head","あたま","基礎頻出語"],["目","eye","め","基礎頻出語"],
-    ["耳","ear","みみ","基礎頻出語"],["顔","face","かお","基礎頻出語"],["名前","name","なまえ","基礎頻出語"],["日","day","ひ","基礎頻出語"],["週","week","しゅう","基礎頻出語"],
-    ["月","month","つき","基礎頻出語"],["年","year","とし","基礎頻出語"],["時間","time","じかん","基礎頻出語"],["場所","place","ばしょ","基礎頻出語"],["人々","people","ひとびと","基礎頻出語"],
-    ["子ども","child","こども","基礎頻出語"],["母","mother","はは","基礎頻出語"],["父","father","ちち","基礎頻出語"],["兄・弟","brother","あに|おとうと|きょうだい","基礎頻出語"],["姉・妹","sister","あね|いもうと|しまい","基礎頻出語"]
-  ],
-  l2: [
-    ["受け入れる","accept","うけいれる","日常・標準動詞"],["同意する","agree","どういする","日常・標準動詞"],["信じる","believe","しんじる","日常・標準動詞"],["変える","change","かえる","日常・標準動詞"],["発展させる・開発する","develop","はってんさせる|かいはつする","日常・標準動詞"],
-    ["発見する","discover","はっけんする","日常・標準動詞"],["楽しむ","enjoy","たのしむ","日常・標準動詞"],["従う","follow","したがう","日常・標準動詞"],["学ぶ","learn","まなぶ","日常・標準動詞"],["意味する","mean","いみする","日常・標準動詞"],
-    ["動く・移動する","move","うごく|いどうする","日常・標準動詞"],["提供する・申し出る","offer","ていきょうする|もうしでる","日常・標準動詞"],["計画する","plan","けいかくする","日常・標準動詞"],["約束する","promise","やくそくする","日常・標準動詞"],["到達する","reach","とうたつする","日常・標準動詞"],
-    ["受け取る","receive","うけとる","日常・標準動詞"],["戻る・返す","return","もどる|かえす","日常・標準動詞"],["分かち合う・共有する","share","わかちあう|きょうゆうする","日常・標準動詞"],["費やす・過ごす","spend","ついやす|すごす","日常・標準動詞"],["支える","support","ささえる","日常・標準動詞"]
-  ],
-  l3: [
-    ["記事","article","きじ","一般教養語"],["市民","citizen","しみん","一般教養語"],["民主主義","democracy","みんしゅしゅぎ","一般教養語"],["政府","government","せいふ","一般教養語"],["社会","society","しゃかい","一般教養語"],
-    ["人口","population","じんこう","一般教養語"],["気候","climate","きこう","一般教養語"],["汚染","pollution","おせん","一般教養語"],["伝統","tradition","でんとう","一般教養語"],["宗教","religion","しゅうきょう","一般教養語"],
-    ["文学","literature","ぶんがく","一般教養語"],["哲学","philosophy","てつがく","一般教養語"],["心理学","psychology","しんりがく","一般教養語"],["生物学","biology","せいぶつがく","一般教養語"],["化学","chemistry","かがく","一般教養語"],
-    ["物理学","physics","ぶつりがく","一般教養語"],["地理","geography","ちり","一般教養語"],["政治","politics","せいじ","一般教養語"],["正義","justice","せいぎ","一般教養語"],["自由","freedom","じゆう","一般教養語"]
-  ],
-  final: [
-    ["抽象的な","abstract","ちゅうしょうてきな|ちゅうしょうてき","抽象・学術語"],["仮定","assumption","かてい","抽象・学術語"],["権威","authority","けんい","抽象・学術語"],["文明","civilization","ぶんめい","抽象・学術語"],["憲法","constitution","けんぽう","抽象・学術語"],
-    ["論争","controversy","ろんそう","抽象・学術語"],["多様性","diversity","たようせい","抽象・学術語"],["仮説","hypothesis","かせつ","抽象・学術語"],["イデオロギー","ideology","いでおろぎー","抽象・学術語"],["不平等","inequality","ふびょうどう","抽象・学術語"],
-    ["解釈","interpretation","かいしゃく","抽象・学術語"],["視点","perspective","してん","抽象・学術語"],["現象","phenomenon","げんしょう","抽象・学術語"],["原則","principle","げんそく","抽象・学術語"],["確率","probability","かくりつ","抽象・学術語"],
-    ["規制","regulation","きせい","抽象・学術語"],["革命","revolution","かくめい","抽象・学術語"],["重要性・意義","significance","じゅうようせい|いぎ","抽象・学術語"],["理論","theory","りろん","抽象・学術語"],["福祉","welfare","ふくし","抽象・学術語"]
-  ],
-  b1: [],
-  b2: []
-};
 
 const GENERAL_RADICAL_MORE = {
   l1: [
@@ -2022,39 +1908,6 @@ const KANJI_MORE2 = {
   b2: []
 };
 
-/* [日本語表示, 英単語, 日本語訳（かな・別解は|区切り）, 分類] */
-const ENGLISH_MORE2 = {
-  l1: [
-    ["卵","egg","たまご","基礎頻出語"],["牛乳","milk","ぎゅうにゅう","基礎頻出語"],["肉","meat","にく","基礎頻出語"],["魚","fish","さかな","基礎頻出語"],
-    ["米","rice","こめ","基礎頻出語"],["花","flower","はな","基礎頻出語"],["木","tree","き","基礎頻出語"],["鳥","bird","とり","基礎頻出語"],
-    ["色","color","いろ","基礎頻出語"],["白い","white","しろい","基礎頻出語"],["黒い","black","くろい","基礎頻出語"],["青い","blue","あおい","基礎頻出語"],
-    ["長い","long","ながい","基礎頻出語"],["短い","short","みじかい","基礎頻出語"],["高い","tall|high","たかい","基礎頻出語"],["低い","low","ひくい","基礎頻出語"],
-    ["暑い・熱い","hot","あつい","基礎頻出語"],["寒い・冷たい","cold","さむい|つめたい","基礎頻出語"],["開ける","open","あける","基礎頻出語"],["閉じる","close","とじる","基礎頻出語"]
-  ],
-  l2: [
-    ["作る","make","つくる","日常・標準"],["使う","use","つかう","日常・標準"],["見つける","find","みつける","日常・標準"],["感じる","feel","かんじる","日常・標準"],
-    ["眠る","sleep","ねむる","日常・標準"],["泳ぐ","swim","およぐ","日常・標準"],["飛ぶ","fly","とぶ","日常・標準"],["歌う","sing","うたう","日常・標準"],
-    ["踊る","dance","おどる","日常・標準"],["笑う","laugh","わらう","日常・標準"],["泣く","cry","なく","日常・標準"],["静かな","quiet","しずかな","日常・標準"],
-    ["賢い","clever","かしこい","日常・標準"],["強い","strong","つよい","日常・標準"],["弱い","weak","よわい","日常・標準"],["豊かな","rich","ゆたかな","日常・標準"],
-    ["貧しい","poor","まずしい","日常・標準"],["安全な","safe","あんぜんな","日常・標準"],["自由な","free","じゆうな","日常・標準"],["満足した","satisfied","まんぞくした","日常・標準"]
-  ],
-  l3: [
-    ["目的","purpose","もくてき","一般教養語"],["結果","result","けっか","一般教養語"],["原因","cause","げんいん","一般教養語"],["過程","process","かてい","一般教養語"],
-    ["目標","goal","もくひょう","一般教養語"],["価値","value","かち","一般教養語"],["利益","benefit","りえき","一般教養語"],["損失","loss","そんしつ","一般教養語"],
-    ["需要","demand","じゅよう","一般教養語"],["供給","supply","きょうきゅう","一般教養語"],["競争","competition","きょうそう","一般教養語"],["協力","cooperation","きょうりょく","一般教養語"],
-    ["交渉","negotiation","こうしょう","一般教養語"],["契約","contract","けいやく","一般教養語"],["予算","budget","よさん","一般教養語"],["投資","investment","とうし","一般教養語"],
-    ["政策","policy","せいさく","一般教養語"],["世代","generation","せだい","一般教養語"],["国境","border","こっきょう","一般教養語"],["貧困","poverty","ひんこん","一般教養語"]
-  ],
-  final: [
-    ["結論","conclusion","けつろん","抽象・学術語"],["前提","premise","ぜんてい","抽象・学術語"],["矛盾","contradiction","むじゅん","抽象・学術語"],["妥当な","valid","だとうな","抽象・学術語"],
-    ["客観的な","objective","きゃっかんてきな","抽象・学術語"],["主観的な","subjective","しゅかんてきな","抽象・学術語"],["普遍的な","universal","ふへんてきな","抽象・学術語"],["相対的な","relative","そうたいてきな","抽象・学術語"],
-    ["絶対的な","absolute","ぜったいてきな","抽象・学術語"],["本質的な","essential","ほんしつてきな","抽象・学術語"],["論理的な","logical","ろんりてきな","抽象・学術語"],["合理的な","rational","ごうりてきな","抽象・学術語"],
-    ["曖昧な","ambiguous","あいまいな","抽象・学術語"],["明白な","obvious","めいはくな","抽象・学術語"],["一貫性","consistency","いっかんせい","抽象・学術語"],["妥協","compromise","だきょう","抽象・学術語"],
-    ["洞察","insight","どうさつ","抽象・学術語"],["直観","intuition","ちょっかん","抽象・学術語"],["偏見","prejudice","へんけん","抽象・学術語"],["共感","empathy","きょうかん","抽象・学術語"]
-  ],
-  b1: [],
-  b2: []
-};
 
 const RADICAL_MORE2 = {
   l1: [
@@ -2470,6 +2323,212 @@ function mathEqual(typed, a, cat) {
   const u = mathNorm(typed, cat), v = mathNorm(a, cat);
   return u != null && v != null && u === v;
 }
+
+/* ===== js1c_eiken.js ===== */
+/* ========== 7. 英語モード：英検の級ごとの英単語 ==========
+   各級は「その級で新しく覚える語」。下の級もふくめるときは設定で複数の級を選ぶ。
+   級の中は l1 基礎 / l2 標準 / l3 発展 / final 最難関（その級の中での頻度・難しさ）。
+   1語は [英単語, 日本語の意味, 日本語訳のひらがな, 品詞]。
+     英単語 … 「英単語を答える」の答え。別解は | で区切る（例 begin|start）
+     日本語の意味 … 「英単語を答える」の問題文
+     ひらがな … 「日本語訳を答える」の答え。別解は | で区切る */
+const EIKEN_GRADES = [
+  { id: "g5", name: "5級" },
+  { id: "g4", name: "4級" },
+  { id: "g3", name: "3級" },
+  { id: "gp2", name: "準2級" },
+  { id: "gp2p", name: "準2級プラス" },
+  { id: "g2", name: "2級" }
+];
+const EIKEN_BANK = {
+  /* ---- 英検5級 ---- */
+  g5: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["apple", "りんご", "りんご", "名詞"], ["big", "大きい", "おおきい", "形容詞"], ["black", "黒い・黒", "くろい|くろ", "形容詞"],
+      ["blue", "青い・青", "あおい|あお", "形容詞"], ["book", "本", "ほん", "名詞"], ["brother", "兄・弟", "あに|おとうと|きょうだい", "名詞"],
+      ["cat", "猫", "ねこ", "名詞"], ["cold", "寒い・冷たい", "さむい|つめたい", "形容詞"], ["day", "日・一日", "ひ|にち|いちにち", "名詞"],
+      ["dog", "犬", "いぬ", "名詞"], ["father", "父", "ちち|おとうさん", "名詞"], ["friend", "友達", "ともだち|ゆうじん", "名詞"],
+      ["happy", "幸せな・うれしい", "しあわせな|しあわせ|うれしい", "形容詞"], ["hot", "暑い・熱い", "あつい", "形容詞"], ["make", "作る", "つくる", "動詞"],
+      ["morning", "朝・午前", "あさ|ごぜん", "名詞"], ["mother", "母", "はは|おかあさん", "名詞"], ["music", "音楽", "おんがく", "名詞"],
+      ["name", "名前", "なまえ", "名詞"], ["new", "新しい", "あたらしい", "形容詞"], ["old", "古い・年をとった", "ふるい|としをとった", "形容詞"],
+      ["open", "開ける", "あける|ひらく", "動詞"], ["pencil", "鉛筆", "えんぴつ", "名詞"], ["red", "赤い・赤", "あかい|あか", "形容詞"],
+      ["school", "学校", "がっこう", "名詞"], ["sing", "歌う", "うたう", "動詞"], ["sister", "姉・妹", "あね|いもうと|しまい", "名詞"],
+      ["student", "生徒・学生", "せいと|がくせい", "名詞"], ["swim", "泳ぐ", "およぐ", "動詞"], ["teacher", "先生・教師", "せんせい|きょうし", "名詞"],
+      ["time", "時間・時", "じかん|とき", "名詞"], ["white", "白い・白", "しろい|しろ", "形容詞"], ["year", "年", "とし|ねん", "名詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["bag", "かばん", "かばん|ばっぐ", "名詞"], ["bird", "鳥", "とり", "名詞"], ["car", "車", "くるま|じどうしゃ", "名詞"],
+      ["chair", "いす", "いす", "名詞"], ["close|shut", "閉める・閉じる", "しめる|とじる", "動詞"], ["color|colour", "色", "いろ", "名詞"],
+      ["dance", "踊る", "おどる|だんすする", "動詞"], ["desk", "机", "つくえ", "名詞"], ["family", "家族", "かぞく", "名詞"],
+      ["fish", "魚", "さかな", "名詞"], ["flower", "花", "はな", "名詞"], ["hand", "手", "て", "名詞"],
+      ["house", "家", "いえ|うち", "名詞"], ["long", "長い", "ながい", "形容詞"], ["milk", "牛乳", "ぎゅうにゅう|みるく", "名詞"],
+      ["month", "（暦の）月", "つき|げつ", "名詞"], ["night", "夜", "よる", "名詞"], ["room", "部屋", "へや", "名詞"],
+      ["sleep", "眠る", "ねむる|ねる", "動詞"], ["small", "小さい", "ちいさい", "形容詞"], ["use", "使う", "つかう", "動詞"],
+      ["water", "水", "みず", "名詞"], ["week", "週", "しゅう|いっしゅうかん", "名詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["clock", "（掛け・置き）時計", "とけい", "名詞"], ["door", "ドア・扉", "どあ|とびら", "名詞"], ["egg", "卵", "たまご", "名詞"],
+      ["fast|quick", "（速度が）速い", "はやい|すばやい", "形容詞"], ["food", "食べ物", "たべもの|しょくもつ", "名詞"], ["short", "短い", "みじかい", "形容詞"],
+      ["tall|high", "（背・高さが）高い", "たかい", "形容詞"], ["window", "窓", "まど", "名詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+      ["eye", "目", "め", "名詞"], ["meat", "肉", "にく", "名詞"], ["mountain", "山", "やま", "名詞"],
+      ["rice", "米・ご飯", "こめ|ごはん|おこめ", "名詞"], ["science", "科学・理科", "かがく|りか", "名詞"], ["sea", "海", "うみ", "名詞"],
+      ["tree", "木", "き", "名詞"]
+    ]
+  },
+  /* ---- 英検4級 ---- */
+  g4: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["answer", "答え", "こたえ|かいとう", "名詞"], ["begin|start", "始める", "はじめる", "動詞"], ["change", "変える・変わる", "かえる|かわる", "動詞"],
+      ["child", "子ども", "こども", "名詞"], ["country", "国", "くに", "名詞"], ["difficult|hard", "難しい", "むずかしい", "形容詞"],
+      ["enjoy", "楽しむ", "たのしむ", "動詞"], ["face", "顔", "かお", "名詞"], ["famous", "有名な", "ゆうめいな|ゆうめい", "形容詞"],
+      ["find", "見つける", "みつける", "動詞"], ["fly", "飛ぶ", "とぶ", "動詞"], ["head", "頭", "あたま", "名詞"],
+      ["learn", "学ぶ", "まなぶ|ならう|おぼえる", "動詞"], ["leave", "出発する・去る", "しゅっぱつする|でる|さる|はなれる", "動詞"], ["paper", "紙", "かみ", "名詞"],
+      ["people", "人々", "ひとびと|ひと", "名詞"], ["place", "場所", "ばしょ|ところ", "名詞"], ["practice", "練習", "れんしゅう", "名詞"],
+      ["question", "質問", "しつもん|といかけ", "名詞"], ["rain", "雨", "あめ", "名詞"], ["river", "川", "かわ", "名詞"],
+      ["sky", "空", "そら", "名詞"], ["strong", "強い", "つよい", "形容詞"], ["town", "町", "まち", "名詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["ear", "耳", "みみ", "名詞"], ["feel", "感じる", "かんじる", "動詞"], ["forget", "忘れる", "わすれる", "動詞"],
+      ["free", "自由な・無料の", "じゆうな|じゆう|むりょうの|むりょう|ただの|ひまな", "形容詞"], ["history", "歴史", "れきし", "名詞"], ["plan", "計画する", "けいかくする", "動詞"],
+      ["popular", "人気のある", "にんきのある|にんきがある", "形容詞"], ["quiet", "静かな", "しずかな|しずか", "形容詞"], ["sun", "太陽", "たいよう|ひ", "名詞"],
+      ["travel", "旅行", "りょこう|たび", "名詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["borrow", "借りる", "かりる", "動詞"], ["build", "建てる", "たてる|けんせつする", "動詞"], ["careful", "注意深い", "ちゅういぶかい|しんちょうな|しんちょう", "形容詞"],
+      ["cry", "泣く", "なく", "動詞"], ["language", "言語", "げんご|ことば", "名詞"], ["move", "動く・移動する", "うごく|いどうする|うごかす|ひっこす", "動詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+    ]
+  },
+  /* ---- 英検3級 ---- */
+  g3: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["arrive", "到着する", "とうちゃくする|つく", "動詞"], ["believe", "信じる", "しんじる", "動詞"], ["carry", "運ぶ", "はこぶ", "動詞"],
+      ["choose|select", "選ぶ", "えらぶ", "動詞"], ["dangerous", "危険な", "きけんな|きけん|あぶない", "形容詞"], ["different", "異なる・違う", "ことなる|ちがう|ちがった", "形容詞"],
+      ["example", "例", "れい|たとえ", "名詞"], ["future", "未来・将来", "みらい|しょうらい", "名詞"], ["happen", "起こる", "おこる|しょうじる", "動詞"],
+      ["information", "情報", "じょうほう", "名詞"], ["laugh", "（声を出して）笑う", "わらう", "動詞"], ["low", "低い", "ひくい", "形容詞"],
+      ["mean", "意味する", "いみする", "動詞"], ["poor", "貧しい", "まずしい|びんぼうな|びんぼう", "形容詞"], ["reason", "理由", "りゆう", "名詞"],
+      ["remember", "覚えている・思い出す", "おぼえている|おもいだす|おぼえる", "動詞"], ["rich", "金持ちの・豊かな", "かねもちの|かねもち|ゆたかな|ゆたか", "形容詞"], ["spend", "費やす・過ごす", "ついやす|すごす|つかう", "動詞"],
+      ["useful", "役に立つ", "やくにたつ|ゆうような|ゆうよう|べんりな|べんり", "形容詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["agree", "同意する・賛成する", "どういする|さんせいする", "動詞"], ["continue", "続ける", "つづける", "動詞"], ["enough", "十分な", "じゅうぶんな|じゅうぶん", "形容詞"],
+      ["follow|obey", "従う・ついて行く", "したがう|ついていく", "動詞"], ["goal|aim|target", "目標", "もくひょう", "名詞"], ["health", "健康", "けんこう", "名詞"],
+      ["international", "国際的な", "こくさいてきな|こくさいてき|こくさいの", "形容詞"], ["lend", "貸す", "かす", "動詞"], ["nature", "自然", "しぜん", "名詞"],
+      ["promise", "約束する", "やくそくする", "動詞"], ["receive", "受け取る", "うけとる", "動詞"], ["return", "戻る・返す", "もどる|かえす|かえる", "動詞"],
+      ["safe", "安全な", "あんぜんな|あんぜん", "形容詞"], ["share", "分かち合う・共有する", "わかちあう|きょうゆうする|わける", "動詞"], ["weak", "弱い", "よわい", "形容詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["clever|smart|wise", "賢い", "かしこい|りこうな|あたまがいい", "形容詞"], ["culture", "文化", "ぶんか", "名詞"], ["discover", "発見する", "はっけんする|みつける", "動詞"],
+      ["experience", "経験", "けいけん|たいけん", "名詞"], ["factory", "工場", "こうじょう", "名詞"], ["possible", "可能な", "かのうな|かのう", "形容詞"],
+      ["temperature", "温度・気温", "おんど|きおん", "名詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+      ["energy", "エネルギー", "えねるぎー", "名詞"]
+    ]
+  },
+  /* ---- 英検準2級 ---- */
+  gp2: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["accept", "受け入れる", "うけいれる|うけとる", "動詞"], ["cause", "原因", "げんいん", "名詞"], ["challenge", "挑戦・難題", "ちょうせん|なんだい", "名詞"],
+      ["customer", "（店の）客・顧客", "きゃく|おきゃく|こきゃく", "名詞"], ["design", "設計・デザイン", "せっけい|でざいん", "名詞"], ["develop", "発展させる・開発する", "はってんさせる|はってんする|かいはつする", "動詞"],
+      ["education", "教育", "きょういく", "名詞"], ["environment", "環境", "かんきょう", "名詞"], ["experiment", "実験", "じっけん", "名詞"],
+      ["necessary", "必要な", "ひつような|ひつよう", "形容詞"], ["offer", "提供する・申し出る", "ていきょうする|もうしでる", "動詞"], ["reach", "到達する・届く", "とうたつする|とどく|つく", "動詞"],
+      ["research", "研究", "けんきゅう|ちょうさ", "名詞"], ["result", "結果", "けっか", "名詞"], ["success", "成功", "せいこう", "名詞"],
+      ["support", "支える・支援する", "ささえる|しえんする", "動詞"], ["technology", "技術", "ぎじゅつ|かがくぎじゅつ|てくのろじー", "名詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["ability", "能力", "のうりょく", "名詞"], ["article", "記事", "きじ", "名詞"], ["communication", "意思疎通・伝達", "いしそつう|こみゅにけーしょん|でんたつ", "名詞"],
+      ["community", "地域社会", "ちいきしゃかい|きょうどうたい|こみゅにてぃ|こみゅにてぃー", "名詞"], ["competition", "競争・競技会", "きょうそう|きょうぎかい", "名詞"], ["decision", "決定", "けってい|けつだん|けつい", "名詞"],
+      ["development", "発展・開発", "かいはつ|はってん", "名詞"], ["electricity", "電気", "でんき", "名詞"], ["freedom|liberty", "自由", "じゆう", "名詞"],
+      ["geography", "地理", "ちり|ちりがく", "名詞"], ["knowledge", "知識", "ちしき", "名詞"], ["mathematics|math|maths", "数学", "すうがく", "名詞"],
+      ["purpose", "目的", "もくてき", "名詞"], ["relationship", "関係", "かんけい", "名詞"], ["safety", "安全", "あんぜん", "名詞"],
+      ["satisfied", "満足した", "まんぞくした|まんぞくしている", "形容詞"], ["society", "社会", "しゃかい", "名詞"], ["system", "仕組み・体系", "しくみ|たいけい|せいど|しすてむ", "名詞"],
+      ["tradition", "伝統", "でんとう", "名詞"], ["value", "価値", "かち", "名詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["benefit", "利益・恩恵", "りえき|おんけい", "名詞"], ["border", "国境・境界", "こっきょう|きょうかい", "名詞"], ["generation", "世代", "せだい", "名詞"],
+      ["government", "政府", "せいふ", "名詞"], ["opportunity|chance", "機会", "きかい|ちゃんす", "名詞"], ["organization|organisation", "組織・団体", "そしき|だんたい", "名詞"],
+      ["performance", "（機械の）性能・演技", "せいのう|えんぎ|えんそう", "名詞"], ["politics", "政治", "せいじ", "名詞"], ["pollution", "汚染", "おせん|こうがい", "名詞"],
+      ["population", "人口", "じんこう", "名詞"], ["transportation|transport", "交通・輸送", "こうつう|ゆそう|こうつうきかん", "名詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+      ["pronunciation", "発音", "はつおん", "名詞"]
+    ]
+  },
+  /* ---- 英検準2級プラス ---- */
+  gp2p: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["loss", "損失・失うこと", "そんしつ|そん|しつ", "名詞"], ["material", "材料", "ざいりょう|そざい", "名詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["advantage", "利点", "りてん|ゆうりなてん|ちょうしょ", "名詞"], ["climate", "気候", "きこう", "名詞"], ["condition", "状態・条件", "じょうたい|じょうけん", "名詞"],
+      ["process", "過程・工程", "かてい|こうてい", "名詞"], ["responsibility", "責任", "せきにん", "名詞"], ["supply", "供給", "きょうきゅう", "名詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["achievement", "達成・業績", "たっせい|ぎょうせき", "名詞"], ["employee", "従業員", "じゅうぎょういん|しゃいん", "名詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+    ]
+  },
+  /* ---- 英検2級 ---- */
+  g2: {
+    /* 基礎：その級で最もよく出る語 */
+    l1: [
+      ["behavior|behaviour", "行動・ふるまい", "こうどう|ふるまい", "名詞"], ["economy", "経済", "けいざい", "名詞"], ["effect", "効果・影響", "こうか|えいきょう", "名詞"],
+      ["improvement", "改善", "かいぜん|こうじょう|かいりょう", "名詞"], ["industry", "産業", "さんぎょう|こうぎょう", "名詞"], ["method|way", "方法", "ほうほう|やりかた", "名詞"],
+      ["production", "生産", "せいさん|せいぞう", "名詞"], ["quality", "品質", "ひんしつ|しつ", "名詞"]
+    ],
+    /* 標準 */
+    l2: [
+      ["appropriate", "適切な", "てきせつな|てきせつ", "形容詞"], ["budget", "予算", "よさん", "名詞"], ["citizen", "市民", "しみん|こくみん", "名詞"],
+      ["construction", "建設", "けんせつ|こうじ|けんちく", "名詞"], ["contract", "契約", "けいやく|けいやくしょ", "名詞"], ["contribution", "貢献・寄付", "こうけん|きふ", "名詞"],
+      ["cooperation", "協力", "きょうりょく", "名詞"], ["demand", "需要・要求", "じゅよう|ようきゅう", "名詞"], ["engineering", "工学", "こうがく", "名詞"],
+      ["equipment", "装置・設備", "そうち|せつび|きぐ", "名詞"], ["evidence", "証拠", "しょうこ", "名詞"], ["justice", "正義", "せいぎ", "名詞"],
+      ["management", "管理・経営", "かんり|けいえい", "名詞"], ["policy", "政策・方針", "せいさく|ほうしん", "名詞"], ["poverty", "貧困", "ひんこん|まずしさ", "名詞"],
+      ["resource", "資源", "しげん", "名詞"], ["theory", "理論", "りろん|せつ", "名詞"]
+    ],
+    /* 発展 */
+    l3: [
+      ["analysis", "分析", "ぶんせき", "名詞"], ["architecture", "建築", "けんちく|けんちくがく", "名詞"], ["civilization|civilisation", "文明", "ぶんめい", "名詞"],
+      ["conclusion", "結論", "けつろん", "名詞"], ["consequence", "結果・成り行き", "けっか|なりゆき", "名詞"], ["creativity", "創造性", "そうぞうせい|そうぞうりょく", "名詞"],
+      ["diversity", "多様性", "たようせい", "名詞"], ["essential", "本質的な・不可欠な", "ほんしつてきな|ほんしつてき|ふかけつな|ふかけつ", "形容詞"], ["function", "機能", "きのう|はたらき", "名詞"],
+      ["independence", "独立", "どくりつ", "名詞"], ["innovation", "革新", "かくしん", "名詞"], ["investment", "投資", "とうし", "名詞"],
+      ["literature", "文学", "ぶんがく", "名詞"], ["obvious", "明白な・明らかな", "めいはくな|めいはく|あきらかな|あきらか", "形容詞"], ["religion", "宗教", "しゅうきょう", "名詞"],
+      ["revolution", "革命", "かくめい", "名詞"], ["significant", "重要な・かなりの", "じゅうような|じゅうよう|じゅうだいな|じゅうだい|かなりの", "形容詞"], ["strategy", "戦略", "せんりゃく", "名詞"]
+    ],
+    /* 最難関：その級で難しい・出題の少ない語 */
+    final: [
+      ["biology", "生物学", "せいぶつがく|せいぶつ", "名詞"], ["chemistry", "化学", "かがく", "名詞"], ["circumstance", "状況・事情", "じょうきょう|じじょう", "名詞"],
+      ["democracy", "民主主義", "みんしゅしゅぎ", "名詞"], ["efficiency", "効率", "こうりつ|のうりつ", "名詞"], ["manufacture", "製造する", "せいぞうする", "動詞"],
+      ["measurement", "測定", "そくてい|けいそく", "名詞"], ["negotiation", "交渉", "こうしょう", "名詞"], ["physics", "物理学", "ぶつりがく|ぶつり", "名詞"],
+      ["regulation", "規制・規則", "きせい|きそく", "名詞"], ["requirement", "必要条件・要件", "ひつようじょうけん|ようけん", "名詞"], ["structure", "構造", "こうぞう", "名詞"],
+      ["sustainable", "持続可能な", "じぞくかのうな|じぞくかのう", "形容詞"]
+    ]
+  }
+};
 
 /* ===== js2_audio.js ===== */
 /* ========== 3. 音（すべてWeb Audioで合成／外部音源なし） ========== */
@@ -3343,7 +3402,9 @@ const motionOK = () => !!CFG.fx && !RMQ.matches;
 const CFG = {
   mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "normal",
   units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
-  diff: "route"                                               // 数学の難易度（route＝航路の配分どおり）
+  diff: "route",                                              // 数学の難易度（route＝航路の配分どおり）
+  grades: ["g5", "g4", "g3", "gp2", "gp2p", "g2"],            // 英語の出題範囲（英検の級。初期値は全級）
+  engDiff: "route"                                            // 英語の難易度
 };
 /* ---------- 設定の保存 ----------
    設定画面で選んだ内容をブラウザに覚えさせ、次に開いたときも同じ設定で始める。
@@ -3382,6 +3443,11 @@ function applySettings(src) {
     if (ids.length) CFG.units = ids;
   }
   if (DIFF_OPTS.some(([v]) => v === src.diff)) CFG.diff = src.diff;
+  if (Array.isArray(src.grades)) {
+    const ids = EIKEN_GRADES.map(g => g.id).filter(id => src.grades.includes(id));
+    if (ids.length) CFG.grades = ids;
+  }
+  if (DIFF_OPTS.some(([v]) => v === src.engDiff)) CFG.engDiff = src.engDiff;
 }
 function resetSettings() {
   Object.assign(CFG, JSON.parse(JSON.stringify(CFG_DEFAULT)));
@@ -3412,11 +3478,6 @@ function englishExtraRaw(source, reverse) {
     return reverse ? [englishWordDisplay(en), ja, `日本語訳・${sub}`] : [jp, en, sub];
   })]));
 }
-/* 旧データの「最終」はB1前後の一般語が中心なので、発展帯へ移して再分類する。 */
-function relevelEnglishBase(base) {
-  const moved = base.final.map(row => [row[0], row[1], String(row[2]).startsWith("日本語訳") ? "日本語訳・発展" : "発展単語"]);
-  return { ...base, l3: [...base.l3, ...moved], final: [] };
-}
 /* 数学は選んだ単元（出題範囲）の問題を難易度ごとに束ねる。範囲が変わったときだけ作り直す。 */
 let _mathSetCache = { key: null, set: null };
 function mathUnitsSelected() {
@@ -3434,12 +3495,37 @@ function mathSet() {
 }
 const KANJI_RAW = mergeRawSets(mergeRawSets(mergeRawSets(DEFAULT_Q, KANJI_EXTRA_Q), GENERAL_KANJI_MORE), KANJI_MORE2);
 let QSET = normalizeQ(KANJI_RAW);
-const ESET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_Q), englishExtraRaw(ENGLISH_EXTRA, false)), englishExtraRaw(GENERAL_ENGLISH_MORE, false)), englishExtraRaw(ENGLISH_MORE2, false)));
-const EJSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(relevelEnglishBase(ENGLISH_JA_Q), englishExtraRaw(ENGLISH_EXTRA, true)), englishExtraRaw(GENERAL_ENGLISH_MORE, true)), englishExtraRaw(ENGLISH_MORE2, true)));
+/* 英語のボーナス（曜日・季節などの早撃ち）は級によらず共通。本編は英検の級ごとのバンクから作る */
+const bonusOnly = set => ({ l1: [], l2: [], l3: [], final: [], b1: set.b1 || [], b2: set.b2 || [] });
+const ENGLISH_BONUS_EN = normalizeQ(mergeRawSets(bonusOnly(ENGLISH_Q), englishExtraRaw(bonusOnly(ENGLISH_EXTRA), false)));
+const ENGLISH_BONUS_JA = normalizeQ(mergeRawSets(bonusOnly(ENGLISH_JA_Q), englishExtraRaw(bonusOnly(ENGLISH_EXTRA), true)));
+function engGradesSelected() {
+  const ids = EIKEN_GRADES.map(g => g.id).filter(id => CFG.grades.includes(id));
+  return ids.length ? ids : EIKEN_GRADES.map(g => g.id);
+}
+/* 選んだ級の単語を難易度ごとに束ねる。答え方（英単語／日本語訳）と範囲が変わったときだけ作り直す */
+let _engSetCache = { key: null, set: null };
+function englishSet() {
+  const ids = engGradesSelected(), en = answersInEnglish(), key = (en ? "E:" : "J:") + ids.join(",");
+  if (_engSetCache.key !== key) {
+    const bonus = en ? ENGLISH_BONUS_EN : ENGLISH_BONUS_JA;
+    const set = { b1: bonus.b1, b2: bonus.b2 };
+    for (const lv of ["l1", "l2", "l3", "final"]) {
+      set[lv] = ids.flatMap(id => {
+        const name = EIKEN_GRADES.find(g => g.id === id).name;
+        return EIKEN_BANK[id][lv].map(([word, jp, kana, pos]) => en
+          ? { q: jp, a: word, sub: `英検${name}・${pos}` }
+          : { q: englishWordDisplay(word), a: kana, sub: `日本語訳・英検${name}` });
+      });
+    }
+    _engSetCache = { key, set };
+  }
+  return _engSetCache.set;
+}
 const RSET = normalizeQ(mergeRawSets(mergeRawSets(mergeRawSets(RADICAL_Q, RADICAL_EXTRA_Q), GENERAL_RADICAL_MORE), RADICAL_MORE2));
 function activeSet() {
   if (isMath()) return mathSet();
-  if (isEnglish()) return answersInEnglish() ? ESET : EJSET;
+  if (isEnglish()) return englishSet();
   if (isRadical()) return RSET;
   return QSET;
 }
@@ -3467,9 +3553,12 @@ const ROUTE_MIX_LABEL = {
   4: "基礎25%・標準50%・発展25%", 5: "標準50%・発展50%",
   6: "標準25%・発展50%・最難関25%", 7: "発展25%・最難関75%"
 };
-/* 数学は難易度を1つに固定できる（航路は背景と音楽だけを決める） */
 const DIFF_LABEL = { l1: "基礎", l2: "標準", l3: "発展", final: "最難関" };
-const fixedDiff = () => isMath() && CFG.diff !== "route" ? CFG.diff : null;
+/* 数学・英語は難易度を1つに固定できる（航路は背景と音楽だけを決める） */
+function fixedDiff() {
+  const v = isMath() ? CFG.diff : isEnglish() ? CFG.engDiff : "route";
+  return v && v !== "route" ? v : null;
+}
 function routeName(stage) { return fixedDiff() ? `難易度 ${DIFF_LABEL[fixedDiff()]}` : ROUTE_DIFFICULTY[stage]; }
 function routeMixShort(stage) { return fixedDiff() ? `${DIFF_LABEL[fixedDiff()]}のみ` : ROUTE_MIX_SHORT[stage]; }
 function buildRoutePlan(stage, count) {
@@ -3612,7 +3701,7 @@ function buildSetup() {
     d.appendChild(seg); o.appendChild(d);
   }
   const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
-  buildMathOpts();
+  buildRangeOpts();
   labelStages(); paintStages(); paintOpts(); paintSummary(); previewStage(1);
   $("savedNote").textContent = STORE_OK ? "設定は自動で保存されます" : "この表示環境では設定を保存できません";
 }
@@ -3626,11 +3715,16 @@ function mathRangeLabel() {
   if (sel.length <= 2) return sel.map(mathUnitName).join("・");
   return `${sel.length}単元`;
 }
+function engRangeLabel() {
+  const sel = engGradesSelected();
+  return sel.length === EIKEN_GRADES.length ? "英検 全級" : "英検" + sel.map(id => EIKEN_GRADES.find(g => g.id === id).name).join("・");
+}
 function paintSummary() {
   const label = (k, v) => { const o = OPTS.find(x => x.k === k), hit = o && o.vals.find(([x]) => String(x) === String(v)); return hit ? hit[1] : v; };
   const parts = [label("mode", CFG.mode)];
-  if (isMath()) parts.push(`範囲 ${mathRangeLabel()}`, fixedDiff() ? `難易度 ${DIFF_LABEL[fixedDiff()]}` : "難易度 航路どおり");
-  if (isEnglish()) parts.push(label("engAnswer", CFG.engAnswer));
+  const diffText = fixedDiff() ? `難易度 ${DIFF_LABEL[fixedDiff()]}` : "難易度 航路どおり";
+  if (isMath()) parts.push(`範囲 ${mathRangeLabel()}`, diffText);
+  if (isEnglish()) parts.push(label("engAnswer", CFG.engAnswer), `範囲 ${engRangeLabel()}`, diffText);
   parts.push(CFG.stage === "?" ? "航路 おまかせ" : `航路${CFG.stage} ${STAGES[CFG.stage].jp}`);
   parts.push(`${CFG.N}問・${label("mult", CFG.mult)}・${CFG.lives}人`);
   $("setupSummary").textContent = parts.join("　／　");
@@ -3650,34 +3744,54 @@ function labelStages() {
     : "基＝基礎、標＝標準、発＝発展、最＝最難関。表示比率で配分し、後半ほど難しく出題します。";
 }
 
-/* ---------- 数学の出題範囲と難易度 ---------- */
+/* ---------- 出題範囲と難易度（数学＝単元、英語＝英検の級） ---------- */
 const DIFF_OPTS = [["route", "航路どおり"], ["l1", "基礎"], ["l2", "標準"], ["l3", "発展"], ["final", "最難関"]];
-function buildMathOpts() {
-  const box = $("mathOpts");
+const tierCount = bank => ["l1", "l2", "l3", "final"].reduce((sum, lv) => sum + bank[lv].length, 0);
+function rangeSpec() {
+  if (isMath()) {
+    const byCh = ch => MATH_UNITS.filter(u => u.ch === ch).map(u => u.id);
+    return {
+      title: "出題範囲（複数選択できます）", word: "単元", per: "問",
+      groups: [1, 2].map(ch => ({ caption: MATH_CHAPTERS[ch], items: MATH_UNITS.filter(u => u.ch === ch) })),
+      quick: [["すべて", MATH_UNITS.map(u => u.id)], ["第1章のみ", byCh(1)], ["第2章のみ", byCh(2)]],
+      count: id => tierCount(MATH_BANK[id]),
+      selected: mathUnitsSelected, setSelected: ids => { CFG.units = ids; }, diffKey: "diff", set: mathSet
+    };
+  }
+  if (isEnglish()) {
+    return {
+      title: "出題範囲（英検の級・複数選択できます）", word: "級", per: "語",
+      groups: [{ caption: "各級で新しく覚える単語です。下の級もふくめるときは、あわせて選んでください。", items: EIKEN_GRADES }],
+      quick: [["すべて", EIKEN_GRADES.map(g => g.id)], ["5〜3級", ["g5", "g4", "g3"]], ["準2級〜2級", ["gp2", "gp2p", "g2"]]],
+      count: id => tierCount(EIKEN_BANK[id]),
+      selected: engGradesSelected, setSelected: ids => { CFG.grades = ids; }, diffKey: "engDiff", set: englishSet
+    };
+  }
+  return null;
+}
+function buildRangeOpts() {
+  const box = $("rangeOpts"), spec = rangeSpec();
   box.innerHTML = "";
-  box.hidden = !isMath();
-  if (!isMath()) return;
+  box.hidden = !spec;
+  if (!spec) return;
 
   const head = document.createElement("div"); head.className = "mrange-head";
-  head.innerHTML = `<span>出題範囲（複数選択できます）</span>`;
+  head.innerHTML = `<span>${spec.title}</span>`;
   const quick = document.createElement("div"); quick.className = "mrange-quick";
-  const all = MATH_UNITS.map(u => u.id);
-  const byCh = ch => MATH_UNITS.filter(u => u.ch === ch).map(u => u.id);
-  for (const [lb, ids] of [["すべて", all], ["第1章のみ", byCh(1)], ["第2章のみ", byCh(2)]]) {
+  for (const [lb, ids] of spec.quick) {
     const b = document.createElement("button"); b.type = "button"; b.textContent = lb;
-    b.onclick = () => { CFG.units = ids.slice(); Audio_.sfx.ui(); paintMathOpts(); settingsChanged(); };
+    b.onclick = () => { spec.setSelected(ids.slice()); Audio_.sfx.ui(); paintRangeOpts(); settingsChanged(); };
     quick.appendChild(b);
   }
   head.appendChild(quick); box.appendChild(head);
 
-  for (const ch of [1, 2]) {
-    const cap = document.createElement("div"); cap.className = "mrange-ch"; cap.textContent = MATH_CHAPTERS[ch];
+  for (const g of spec.groups) {
+    const cap = document.createElement("div"); cap.className = "mrange-ch"; cap.textContent = g.caption;
     const grid = document.createElement("div"); grid.className = "mrange";
-    for (const u of MATH_UNITS.filter(x => x.ch === ch)) {
-      const n = ["l1", "l2", "l3", "final"].reduce((sum, lv) => sum + MATH_BANK[u.id][lv].length, 0);
+    for (const u of g.items) {
       const b = document.createElement("button"); b.type = "button"; b.className = "unit-chip"; b.dataset.unit = u.id;
-      b.innerHTML = `<span class="nm">${u.name}</span><span class="ct">${n}問</span>`;
-      b.onclick = () => toggleMathUnit(u.id);
+      b.innerHTML = `<span class="nm">${u.name}</span><span class="ct">${spec.count(u.id)}${spec.per}</span>`;
+      b.onclick = () => toggleRangeItem(u.id);
       grid.appendChild(b);
     }
     box.appendChild(cap); box.appendChild(grid);
@@ -3688,35 +3802,35 @@ function buildMathOpts() {
   const seg = document.createElement("div"); seg.className = "seg";
   for (const [v, lb] of DIFF_OPTS) {
     const b = document.createElement("button"); b.type = "button"; b.textContent = lb; b.dataset.diff = v;
-    b.onclick = () => { CFG.diff = v; Audio_.sfx.ui(); paintMathOpts(); labelStages(); settingsChanged(); };
+    b.onclick = () => { CFG[spec.diffKey] = v; Audio_.sfx.ui(); paintRangeOpts(); labelStages(); settingsChanged(); };
     seg.appendChild(b);
   }
   d.appendChild(seg); box.appendChild(d);
-  const note = document.createElement("div"); note.className = "mrange-note"; note.id = "mathNote";
+  const note = document.createElement("div"); note.className = "mrange-note"; note.id = "rangeNote";
   box.appendChild(note);
-  paintMathOpts();
+  paintRangeOpts();
 }
-function toggleMathUnit(id) {
-  const on = mathUnitsSelected().includes(id);
-  if (on && mathUnitsSelected().length <= 1) {
+function toggleRangeItem(id) {
+  const spec = rangeSpec(), sel = spec.selected(), on = sel.includes(id);
+  if (on && sel.length <= 1) {
     Audio_.sfx.wrong();
-    $("mathNote").textContent = "出題範囲は1つ以上えらんでください。";
+    $("rangeNote").textContent = "出題範囲は1つ以上えらんでください。";
     return;
   }
-  CFG.units = on ? mathUnitsSelected().filter(x => x !== id) : [...mathUnitsSelected(), id];
-  Audio_.sfx.ui(); paintMathOpts(); settingsChanged();
+  spec.setSelected(on ? sel.filter(x => x !== id) : [...sel, id]);
+  Audio_.sfx.ui(); paintRangeOpts(); settingsChanged();
 }
-function paintMathOpts() {
-  const box = $("mathOpts");
-  if (box.hidden) return;
-  const sel = mathUnitsSelected();
+function paintRangeOpts() {
+  const box = $("rangeOpts"), spec = rangeSpec();
+  if (box.hidden || !spec) return;
+  const sel = spec.selected();
   box.querySelectorAll(".unit-chip").forEach(b => {
     const on = sel.includes(b.dataset.unit);
     b.classList.toggle("sel", on); b.setAttribute("aria-pressed", String(on));
   });
-  box.querySelectorAll("[data-diff]").forEach(b => b.classList.toggle("sel", b.dataset.diff === CFG.diff));
-  const set = mathSet();
-  $("mathNote").textContent = `${sel.length} 単元を選択中 ― 基礎 ${set.l1.length}・標準 ${set.l2.length}・発展 ${set.l3.length}・最難関 ${set.final.length} 問`;
+  box.querySelectorAll("[data-diff]").forEach(b => b.classList.toggle("sel", b.dataset.diff === CFG[spec.diffKey]));
+  const set = spec.set();
+  $("rangeNote").textContent = `${sel.length} ${spec.word}を選択中 ― 基礎 ${set.l1.length}・標準 ${set.l2.length}・発展 ${set.l3.length}・最難関 ${set.final.length} ${spec.per}`;
 }
 function paintStages() {
   [...$("stages").children].forEach((el, i) => {
@@ -4237,12 +4351,16 @@ function drawFromBag(key, len) {
 }
 function activeSetTag() {
   if (isMath()) return "M[" + mathUnitsSelected().join(",") + "]";
-  if (isEnglish()) return answersInEnglish() ? "E" : "EJ";
+  if (isEnglish()) return (answersInEnglish() ? "E[" : "EJ[") + engGradesSelected().join(",") + "]";
   if (isRadical()) return "R";
   return "K";
 }
+/* 選んだ範囲にその難易度の問題が1問もないときは、近い難易度から出す（止まらないように） */
+const NEAR_TIERS = { l1: ["l1", "l2", "l3", "final"], l2: ["l2", "l1", "l3", "final"], l3: ["l3", "l2", "final", "l1"], final: ["final", "l3", "l2", "l1"] };
 function pick(poolName) {
-  const full = activeSet()[poolName];
+  const set = activeSet();
+  if (NEAR_TIERS[poolName] && !set[poolName].length) poolName = NEAR_TIERS[poolName].find(k => set[k].length) || poolName;
+  const full = set[poolName];
   let pool = full, keySuffix = "";
   if ((poolName === "b1" || poolName === "b2") && full.length > 8) {
     const windowSize = Math.max(8, Math.ceil(full.length * .5));
