@@ -86,7 +86,12 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 
 /* ---------- 設定画面 ---------- */
 /* 項目が増えても画面に収まるよう、設定画面だけは縦にスクロールできる */
-#setup{max-width:940px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}
+#setup,#prefs{max-width:940px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent}
+/* 設定ページ（ヒント・ボーナス・音・画面）：スタート画面から開く別の画面 */
+#prefs{max-width:760px}
+#prefs .opts{margin-top:10px}
+.prefs-note{margin-top:10px;font-size:11px;letter-spacing:.06em;color:var(--haiiro);line-height:1.6}
+.setup-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 .title{text-align:center;margin-bottom:26px}
 .title h1{
   font-family:var(--latin);font-size:clamp(30px,6vw,58px);font-weight:200;
@@ -621,6 +626,10 @@ kbd.kk{
   .fs-label{display:none}
   .hud{padding-right:40px}
   #setupSummary{font-size:11px;letter-spacing:.03em}
+  /* スマホ：出発・設定などのボタンは横いっぱいに等分して並べる */
+  .setup-acts{width:100%;flex-wrap:nowrap}
+  .setup-acts .btn{flex:1 1 0;padding:12px 6px;letter-spacing:.08em;white-space:nowrap}
+  #prefsBack{flex:1 1 100%}
   .ctrls{gap:6px}
   .ctrls .btn{padding:10px 11px;font-size:12px;letter-spacing:.06em}
   .ctrls .fire{letter-spacing:.2em;text-indent:.2em}
@@ -707,10 +716,42 @@ kbd.kk{
         <div id="setupSummary"></div>
         <div class="saved-note"><span id="savedNote"></span><button type="button" id="resetBtn">初期設定に戻す</button></div>
       </div>
-      <div style="display:flex;gap:10px">
+      <div class="setup-acts">
         <button class="btn" id="editBtn">問題を編集</button>
+        <button class="btn" id="prefsBtn" type="button">⚙ 設定</button>
         <button class="btn primary" id="goBtn">出　発</button>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ 設定（ヒント・ボーナス・音・画面） ══════════ -->
+<section id="prefs" class="screen" aria-labelledby="prefsTitle">
+  <div class="title">
+    <h1 id="prefsTitle">SETTINGS</h1>
+    <div class="jp">設　定</div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">ゲーム</div>
+    <div class="opts" data-pref="game"></div>
+
+    <div class="rule"></div>
+
+    <div class="eyebrow">サウンド</div>
+    <div class="opts" data-pref="sound"></div>
+
+    <div class="rule"></div>
+
+    <div class="eyebrow">画面</div>
+    <div class="opts" data-pref="view"></div>
+    <div class="prefs-note">動きが重いときは「画質」を軽量に、点滅や揺れが気になるときは「画面演出」を控えめにしてください。</div>
+
+    <div class="setup-foot">
+      <div class="setup-summary">
+        <div class="saved-note"><span id="prefsNote"></span></div>
+      </div>
+      <button class="btn primary" id="prefsBack" type="button">戻　る</button>
     </div>
   </div>
 </section>
@@ -4850,7 +4891,9 @@ function normalizeQ(s) {
   };
 }
 
-/* ---------- 設定画面 ---------- */
+/* ---------- 設定画面 ----------
+   pref のある項目（ヒント・ボーナス・音・画面）はスタート画面に出さず、別の「設定」ページ（#prefs）に並べる。
+   pref の値はそのページ内の見出し（data-pref）。 */
 const OPTS = [
   { k: "mode", label: "モード", vals: [["kanji", "漢字の読み"], ["math", "数学"], ["english", "英語"], ["radical", "部首"]] },
   { k: "engAnswer", label: "英語の答え方", vals: [["en", "英単語を答える"], ["ja", "日本語訳を答える"]] },
@@ -4858,17 +4901,17 @@ const OPTS = [
   { k: "N", label: "問題数", vals: [[7, "7問"], [10, "10問"], [13, "13問"], [15, "15問"], [20, "20問"]] },
   { k: "mult", label: "1問の持ち時間", vals: [[0.5, "15秒"], [0.75, "20秒"], [1, "25秒"], [2, "45秒"]] },
   { k: "lives", label: "読み手の人数", vals: [[1, "1"], [2, "2"], [3, "3"], [4, "4"], [5, "5"]] },
-  { k: "hint", label: "ヒント", vals: [[0, "なし"], [1, "あり"]] },
-  { k: "bonus", label: "ボーナス", vals: [["0", "なし"], ["1", "部首"], ["2", "カタカナ語"], ["1・2", "両方"]] },
-  { k: "bgm", label: "BGM", vals: [[0, "切"], [1, "入"]] },
-  { k: "volume", label: "全体音量", vals: [] },
-  { k: "fx", label: "画面演出", vals: [[0, "控えめ"], [1, "標準"]] },
-  { k: "gfx", label: "画質（背景）", vals: [["low", "軽量"], ["normal", "標準"], ["high", "高画質"]] }
+  { k: "hint", label: "ヒント", pref: "game", vals: [[0, "なし"], [1, "あり"]] },
+  { k: "bonus", label: "ボーナス", pref: "game", vals: [["0", "なし"], ["1", "部首"], ["2", "カタカナ語"], ["1・2", "両方"]] },
+  { k: "bgm", label: "BGM", pref: "sound", vals: [[0, "切"], [1, "入"]] },
+  { k: "volume", label: "全体音量", pref: "sound", vals: [] },
+  { k: "fx", label: "画面演出", pref: "view", vals: [[0, "控えめ"], [1, "標準"]] },
+  { k: "gfx", label: "画質（背景）", pref: "view", vals: [["low", "軽量"], ["normal", "標準"], ["high", "高画質"]] }
 ];
 
 function syncVolumeControls() {
   const pct = Math.round(CFG.volume * 100);
-  for (const [sliderId, valueId] of [["setupVolumeSlider", "setupVolumeValue"], ["pauseVolumeSlider", "pauseVolumeValue"]]) {
+  for (const [sliderId, valueId] of [["prefsVolumeSlider", "prefsVolumeValue"], ["pauseVolumeSlider", "pauseVolumeValue"]]) {
     const slider = $(sliderId), value = $(valueId);
     if (slider) { slider.value = String(pct); slider.style.setProperty("--volume-pct", pct + "%"); }
     if (value) value.textContent = pct + "%";
@@ -4909,49 +4952,77 @@ function buildSetup() {
   r.onclick = () => { CFG.stage = "?"; Audio_.sfx.ui(); paintStages(); previewStage(1 + Math.floor(Math.random() * 7)); settingsChanged(); };
   wrap.appendChild(r);
 
-  const bonusLabels = isMath()
+  const o = $("opts"); o.innerHTML = "";
+  for (const opt of OPTS) {
+    if (opt.pref) continue;                          // 設定ページの項目
+    if (opt.k === "input" && isMath()) continue;   // 数学は専用キーパッド固定
+    if (opt.k === "engAnswer" && !isEnglish()) continue;
+    o.appendChild(buildOpt(opt));
+  }
+  buildPrefs();
+  const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
+  buildRangeOpts();
+  labelStages(); paintStages(); paintOpts(); paintSummary(); previewStage(1);
+  $("savedNote").textContent = savedNoteText();
+}
+const savedNoteText = () => STORE_OK ? "設定は自動で保存されます" : "この表示環境では設定を保存できません";
+/* ボーナスの選択肢名はモードで変わる（漢字の読みは OPTS の名前のまま） */
+function bonusLabel(v, lb) {
+  const labels = isMath()
     ? { "0": "なし", "1": "整数", "2": "平方根", "1・2": "両方" }
     : isEnglish()
       ? { "0": "なし", "1": "基本英語", "2": "発展英語", "1・2": "両方" }
       : isRadical()
         ? { "0": "なし", "1": "基本部首", "2": "発展部首", "1・2": "両方" }
         : null;
-  const o = $("opts"); o.innerHTML = "";
-  for (const opt of OPTS) {
-    if (opt.k === "input" && isMath()) continue;   // 数学は専用キーパッド固定
-    if (opt.k === "engAnswer" && !isEnglish()) continue;
-    const d = document.createElement("div"); d.className = "opt";
-    if (opt.k === "volume") {
-      d.innerHTML = `<span>${opt.label}</span>`;
-      d.appendChild(createVolumeGauge("setupVolumeSlider", "setupVolumeValue"));
-      o.appendChild(d); syncVolumeControls();
-      continue;
-    }
-    const seg = document.createElement("div"); seg.className = "seg";
-    for (const [v, lb] of opt.vals) {
-      const b = document.createElement("button");
-      b.textContent = (opt.k === "bonus" && bonusLabels) ? bonusLabels[String(v)] : lb;
-      b.dataset.k = opt.k; b.dataset.v = String(v);
-      b.onclick = () => {
-        CFG[opt.k] = (typeof opt.vals[0][0] === "number") ? Number(v) : v;
-        if (opt.k === "input") CFG.inputSet = 1;
-        if (opt.k === "volume") Audio_.setVolume(CFG.volume);
-        Audio_.sfx.ui();
-        if (opt.k === "fx") Art.setFx(motionOK());
-        if (opt.k === "gfx") Art.setQuality(CFG.gfx);
-        if (opt.k === "bgm") Audio_.setBgmEnabled(!!CFG.bgm);
-        if (opt.k === "mode") buildSetup(); else paintOpts();
-        settingsChanged();
-      };
-      seg.appendChild(b);
-    }
-    d.innerHTML = `<span>${opt.label}</span>`;
-    d.appendChild(seg); o.appendChild(d);
+  return labels ? labels[String(v)] : lb;
+}
+/* 設定項目1つ分（見出し＋選択ボタン。音量だけはゲージ） */
+function buildOpt(opt) {
+  const d = document.createElement("div"); d.className = "opt";
+  d.innerHTML = `<span>${opt.label}</span>`;
+  if (opt.k === "volume") { d.appendChild(createVolumeGauge("prefsVolumeSlider", "prefsVolumeValue")); return d; }
+  const seg = document.createElement("div"); seg.className = "seg";
+  for (const [v, lb] of opt.vals) {
+    const b = document.createElement("button");
+    b.textContent = opt.k === "bonus" ? bonusLabel(v, lb) : lb;
+    b.dataset.k = opt.k; b.dataset.v = String(v);
+    b.onclick = () => {
+      CFG[opt.k] = (typeof opt.vals[0][0] === "number") ? Number(v) : v;
+      if (opt.k === "input") CFG.inputSet = 1;
+      Audio_.sfx.ui();
+      if (opt.k === "fx") Art.setFx(motionOK());
+      if (opt.k === "gfx") Art.setQuality(CFG.gfx);
+      if (opt.k === "bgm") Audio_.setBgmEnabled(!!CFG.bgm);
+      if (opt.k === "mode") buildSetup(); else paintOpts();
+      settingsChanged();
+    };
+    seg.appendChild(b);
   }
-  const eb = $("editBtn"); if (eb) eb.style.display = CFG.mode === "kanji" ? "" : "none";
-  buildRangeOpts();
-  labelStages(); paintStages(); paintOpts(); paintSummary(); previewStage(1);
-  $("savedNote").textContent = STORE_OK ? "設定は自動で保存されます" : "この表示環境では設定を保存できません";
+  d.appendChild(seg);
+  return d;
+}
+/* 設定ページの中身。ボーナスの名前がモードで変わるので、スタート画面を作り直すたびに作り直す */
+function buildPrefs() {
+  $("prefs").querySelectorAll(".opts[data-pref]").forEach(box => {
+    box.innerHTML = "";
+    for (const opt of OPTS) if (opt.pref === box.dataset.pref) box.appendChild(buildOpt(opt));
+  });
+  syncVolumeControls();
+  $("prefsNote").textContent = savedNoteText();
+}
+function openPrefs() {
+  Audio_.sfx.ui();
+  paintOpts(); syncVolumeControls();
+  $("setup").classList.remove("on"); $("prefs").classList.add("on");
+  $("prefs").scrollTop = 0;
+  $("prefsBack").focus({ preventScroll: true });
+}
+function closePrefs() {
+  Audio_.sfx.ui();
+  $("prefs").classList.remove("on"); $("setup").classList.add("on");
+  paintSummary();
+  $("prefsBtn").focus({ preventScroll: true });
 }
 /* 出発ボタンの横に、いまの設定を1行でまとめる（スクロールしても確認できるように） */
 function mathRangeLabel() {
@@ -5087,7 +5158,7 @@ function paintStages() {
   });
 }
 function paintOpts() {
-  $("opts").querySelectorAll("button").forEach(b => {
+  document.querySelectorAll("#opts button[data-k], #prefs button[data-k]").forEach(b => {
     b.classList.toggle("sel", String(CFG[b.dataset.k]) === b.dataset.v);
   });
 }
@@ -6115,7 +6186,7 @@ function toSetup() {
   stopTimer(); Audio_.bgmStop(0.3); Art.vanish();
   G.state = "idle"; G.paused = false;
   $("pauseScreen").classList.remove("on"); $("quitConfirm").classList.remove("on"); hideOv();
-  $("setup").classList.add("on"); $("play").classList.remove("on"); $("launch").classList.remove("on");
+  $("setup").classList.add("on"); $("prefs").classList.remove("on"); $("play").classList.remove("on"); $("launch").classList.remove("on");
   buildSetup();
 }
 
@@ -6136,7 +6207,7 @@ async function start() {
   Art.setStage(G.stage, "l1", G.rooms[0]);
   Art.vanish();
 
-  $("setup").classList.remove("on");
+  $("setup").classList.remove("on"); $("prefs").classList.remove("on");
   $("play").classList.remove("on");
   $("launch").classList.add("on");
 
@@ -6191,6 +6262,8 @@ $("hintBtn").onclick = requestHint;
 $("resetBtn").onclick = resetSettings;
 $("swapBtn").onclick = swap;
 $("goBtn").onclick = () => start();
+$("prefsBtn").onclick = openPrefs;
+$("prefsBack").onclick = closePrefs;
 
 window.addEventListener("keydown", e => {
   if ($("quitConfirm").classList.contains("on")) {
@@ -6203,6 +6276,10 @@ window.addEventListener("keydown", e => {
   }
   if ($("edit").classList.contains("on")) return;
   if ($("ov").classList.contains("on")) return;
+  if ($("prefs").classList.contains("on")) {
+    if (e.code === "Escape") { e.preventDefault(); closePrefs(); }
+    return;
+  }
   if (!$("play").classList.contains("on")) return;
   if (e.code === "Escape") { e.preventDefault(); pauseGame(); return; }
   if (e.code === "Backspace") { e.preventDefault(); backspace(); return; }
