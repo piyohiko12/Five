@@ -5547,14 +5547,15 @@ function shrinkBlockText() {
     size *= 0.9;
     t.style.fontSize = size + "px";
   }
-  /* 意味の切れ目で折り返す問題文は、少し小さくすると（もとの7割まで）行数が減るなら、そのうち一番大きい文字にする */
+  /* 意味の切れ目で折り返す問題文が3行以上になるときは、少し小さくすると（もとの大きさの68%まで）行数が減るなら、そのうち一番大きい文字にする
+     （2行までは、意味の切れ目で分かれているので大きい文字のままにする） */
   if (t.classList.contains("jpq")) {
     const lines = () => new Set([...t.querySelectorAll(".jseg")].flatMap(e => [...e.getClientRects()].map(r => Math.round(r.top)))).size;
     let best = size, bestLines = lines();
-    for (let f = 0.95; f >= 0.69 && bestLines > 1; f -= 0.05) {
+    for (let f = 0.98; size * f >= base * 0.68 && bestLines > 2; f -= 0.02) {
       t.style.fontSize = size * f + "px";
       const n = lines();
-      if (n < bestLines && !tooBig() && size * f >= base * 0.7) { best = size * f; bestLines = n; }
+      if (n < bestLines && !tooBig()) { best = size * f; bestLines = n; }
     }
     t.style.fontSize = best + "px";
     size = best;
