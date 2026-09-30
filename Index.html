@@ -2806,8 +2806,23 @@ const Art = (() => {
   const motes = [];
   for (let i = 0; i < 60; i++) motes.push({ x: Math.random(), y: Math.random(), r: Math.random() * 2.2 + .6, v: Math.random() * .3 + .06, p: Math.random() * 6.28 });
 
+  /* 画質：背景キャンバスの解像度・描く回数・光のぼかし。問題や文字の表示には影響しない */
+  const QUALITY = {
+    high:   { dpr: 2,    fps: 60, shadow: true },
+    normal: { dpr: 1.25, fps: 30, shadow: true },
+    low:    { dpr: 1,    fps: 30, shadow: false }
+  };
+  let Q = QUALITY.normal;
+  /* 軽量では shadowBlur（光のぼかし）を効かせない。描画側のコードはそのまま */
+  const shadowDesc = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, "shadowBlur");
+  Object.defineProperty(c, "shadowBlur", {
+    get() { return shadowDesc.get.call(c); },
+    set(v) { shadowDesc.set.call(c, Q.shadow ? v : 0); }
+  });
+  function setQuality(name) { Q = QUALITY[name] || QUALITY.normal; resize(); }
+
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio || 1, Q.dpr);
     W = window.innerWidth; H = window.innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
     c.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2898,6 +2913,26 @@ const Art = (() => {
     if (fxOn) st.shake = Math.max(st.shake, .7);
   }
 
+  /* 描かずに破片・煙・衝撃波を1コマ進める（間引いたフレームの分） */
+  function fxAdvance() {
+    for (let i = smoke.length - 1; i >= 0; i--) {
+      const m = smoke[i];
+      m.x += m.vx; m.y += m.vy; m.r += m.gr; m.vy *= .985; m.life -= m.dec;
+      if (m.life <= 0) smoke.splice(i, 1);
+    }
+    if (rays > .01) rays -= .065;
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const w = waves[i];
+      w.r += w.v; w.v *= .96; w.life -= .028;
+      if (w.life <= 0) waves.splice(i, 1);
+    }
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.x += p.vx; p.y += p.vy; p.vy += .13; p.vx *= .985; p.vy *= .985;
+      p.rot += p.vr; p.life -= p.dec;
+      if (p.life <= 0) parts.splice(i, 1);
+    }
+  }
   function fxLayer() {
     const cx = bx, cy = by, R = st.burstR;
 
@@ -3266,22 +3301,36 @@ const Art = (() => {
     return `rgb(${f(n >> 16 & 255)},${f(n >> 8 & 255)},${f(n & 255)})`;
   }
 
-  function loop() {
-    raf = requestAnimationFrame(loop);
+  /* 動きは 1/60 秒きざみで進め、描く回数とは切り離す（120Hz の画面でも速さ・負荷が倍にならない）。
+     軽量（30fps）でも、撃破の破片などが出ているあいだは 60fps で描いて動きの速さをそろえる。 */
+  let lastNow = 0, acc = 0;
+  function step() {
     t += 1 / 60;
     st.show += (st.target - st.show) * (st.flare > .05 ? .22 : .09);
     st.hurt *= .90;
     st.shake *= .86;
     st.warp *= .965;
     st.flare *= .90;
+  }
+  function busy() { return parts.length || waves.length || smoke.length || rays > .01 || st.flare > .01 || st.hurt > .01 || st.warp > .01; }
+  function loop(now) {
+    raf = requestAnimationFrame(loop);
+    if (!lastNow) lastNow = now;
+    acc += Math.min(100, now - lastNow); lastNow = now;
+    const tick = 1000 / 60, fps = busy() ? 60 : Q.fps;
+    if (acc < 1000 / fps - 2) return;
+    let n = 0;
+    while (acc >= tick - 2 && n < 6) { step(); acc -= tick; n++; }
+    if (acc < 0) acc = 0;
     c.clearRect(0, 0, W, H);
     bg();
     guardian();
+    for (let k = 0; k < Math.max(1, n) - 1; k++) fxAdvance();
     fxLayer();
   }
-  loop();
+  raf = requestAnimationFrame(loop);
 
-  return { setStage, setLevel, appear, vanish, hurt, burst, spark, setGrow, setFx, warp };
+  return { setStage, setLevel, appear, vanish, hurt, burst, spark, setGrow, setFx, setQuality, warp };
 })();
 
 /* ===== js4_game.js ===== */
@@ -3292,7 +3341,7 @@ const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: redu
 const motionOK = () => !!CFG.fx && !RMQ.matches;
 
 const CFG = {
-  mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1,
+  mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "normal",
   units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
   diff: "route"                                               // 数学の難易度（route＝航路の配分どおり）
 };
@@ -3337,7 +3386,7 @@ function applySettings(src) {
 function resetSettings() {
   Object.assign(CFG, JSON.parse(JSON.stringify(CFG_DEFAULT)));
   if (STORE_OK) { try { localStorage.removeItem(CFG_STORE_KEY); } catch (_) {} }
-  Audio_.setVolume(CFG.volume); Audio_.setBgmEnabled(!!CFG.bgm); Art.setFx(motionOK());
+  Audio_.setVolume(CFG.volume); Audio_.setBgmEnabled(!!CFG.bgm); Art.setFx(motionOK()); Art.setQuality(CFG.gfx);
   Audio_.sfx.ui();
   buildSetup();
 }
@@ -3477,7 +3526,8 @@ const OPTS = [
   { k: "bonus", label: "ボーナス", vals: [["0", "なし"], ["1", "部首"], ["2", "カタカナ語"], ["1・2", "両方"]] },
   { k: "bgm", label: "BGM", vals: [[0, "切"], [1, "入"]] },
   { k: "volume", label: "全体音量", vals: [] },
-  { k: "fx", label: "画面演出", vals: [[0, "控えめ"], [1, "標準"]] }
+  { k: "fx", label: "画面演出", vals: [[0, "控えめ"], [1, "標準"]] },
+  { k: "gfx", label: "画質（背景）", vals: [["low", "軽量"], ["normal", "標準"], ["high", "高画質"]] }
 ];
 
 function syncVolumeControls() {
@@ -3551,6 +3601,7 @@ function buildSetup() {
         if (opt.k === "volume") Audio_.setVolume(CFG.volume);
         Audio_.sfx.ui();
         if (opt.k === "fx") Art.setFx(motionOK());
+        if (opt.k === "gfx") Art.setQuality(CFG.gfx);
         if (opt.k === "bgm") Audio_.setBgmEnabled(!!CFG.bgm);
         if (opt.k === "mode") buildSetup(); else paintOpts();
         settingsChanged();
@@ -4751,6 +4802,7 @@ $("editUp").onchange = async e => {
 loadSettings();
 Audio_.setVolume(CFG.volume);
 Art.setFx(motionOK());
+Art.setQuality(CFG.gfx);
 buildSetup();
 
 </script>
