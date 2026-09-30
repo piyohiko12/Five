@@ -4498,6 +4498,9 @@ async function toggleFullscreen() {
   try {
     if (document.fullscreenElement) {
       await document.exitFullscreen();
+    } else if (document.fullscreenEnabled === false) {
+      /* 埋め込み表示（GAS のウェブアプリなど）では全画面が許されていないので、先に案内だけ出す */
+      throw new Error("Fullscreen is not allowed here");
     } else if (document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen({ navigationUI: "hide" });
     } else {
