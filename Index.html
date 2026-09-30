@@ -423,6 +423,23 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .mfig.ckt text{fill:currentColor;stroke:none;font-size:11px;text-anchor:middle;font-family:"Georgia","Cambria",var(--mincho)}
 .mfig.ckt circle{fill:currentColor;stroke:none}
 .hintbox.math{max-width:min(44%,230px);white-space:pre-line;letter-spacing:.06em;line-height:1.6}
+/* 分数の回答タイル：入力中の側を光らせ、カーソルを点滅させる。タップでその側へ移れる */
+.inputarea{position:relative}
+.slot.frac-slot{padding:2px 6px;font-size:19px}
+.slot.frac-slot .fr{line-height:1}
+.slot.frac-slot .fr>span{padding:1px .3em;min-width:1.1em;cursor:pointer;border-radius:2px}
+.slot.frac-slot.editing{border-color:rgba(255,209,102,.75)}
+.fpart.on{background:rgba(255,209,102,.24);box-shadow:inset 0 0 0 1px var(--kin)}
+.fpart.on::after{content:"";display:inline-block;width:1.5px;height:.8em;margin-left:1px;vertical-align:-.05em;background:var(--kin);animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+.fracguide{
+  position:absolute;left:0;right:0;bottom:100%;margin-bottom:2px;text-align:center;pointer-events:none;
+  font-size:11px;letter-spacing:.08em;color:var(--kin);text-shadow:0 0 3px rgba(4,17,33,.95),0 0 8px rgba(4,17,33,.8);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.fracguide[hidden]{display:none}
+.keyonly-inline{display:none}
+@media (hover:hover) and (pointer:fine){.keyonly-inline{display:inline}}
 
 /* ---------- 問題の大きさ ----------
    封印円は、HUD と回答欄のあいだに使える高さ・幅いっぱいまで広げる（300〜460px。以前は 300px 固定）。
@@ -608,6 +625,8 @@ kbd.kk{
   .slots.english .slot{width:21px;font-size:16px}
   .slot.math{font-size:18px}
   .slot.math.wide{min-width:36px;height:42px;padding:1px 5px}
+  .slot.frac-slot{font-size:16px}
+  .fracguide{font-size:10px;letter-spacing:.02em}
   .slot.math.root{min-width:34px;padding:0 4px}
   .slot.math.power-unit{min-width:36px;padding:0 4px}
   .hud .stg{font-size:11px;letter-spacing:.2em}
@@ -728,7 +747,8 @@ kbd.kk{
     <div class="hintbox" id="hintBox" hidden></div>
   </div>
 
-  <div>
+  <div class="inputarea">
+    <div class="fracguide" id="fracGuide" hidden>分数キーで 分子⇄分母 ／ ＋・−で分数の外へ<span class="keyonly-inline">（↑分子 ↓分母 →外へ）</span></div>
     <div class="slots" id="slots"></div>
     <div id="kbdArea"></div>
     <div class="ctrls">
@@ -2376,7 +2396,7 @@ function canonRoot(s) {
    分数の線は mathUnits と同じく直前のまとまりと直後の数（か √数）を結ぶ。 */
 function evalVal(src) {
   const s = String(src).replace(/\s/g, "").replace(/[−ー]/g, "-");
-  if (s === "" || /[^0-9.+\-\/^√]/.test(s)) return null;
+  if (s === "" || /[^0-9.+\-\/^√()]/.test(s)) return null;
   let i = 0;
   const number = () => {
     const m = /^(\d+(\.\d+)?|\.\d+)/.exec(s.slice(i));
@@ -2385,6 +2405,13 @@ function evalVal(src) {
     return parseFloat(m[0]);
   };
   const atom = () => {
+    if (s[i] === "(") {   // 分数の分子・分母をまとめるかっこ
+      i++;
+      const v = expr();
+      if (v == null || s[i] !== ")") return null;
+      i++;
+      return v;
+    }
     if (s[i] !== "√") return number();
     i++;
     const n = number();
@@ -2408,21 +2435,25 @@ function evalVal(src) {
     }
     return v;
   };
-  let total = 0, terms = 0;
-  while (i < s.length) {
-    let sg = 1;
-    if (s[i] === "+" || s[i] === "-") { sg = s[i] === "-" ? -1 : 1; i++; }
-    else if (terms) return null;
-    let v = factor();
-    if (v == null) return null;
-    while (i < s.length && (s[i] === "√" || /\d/.test(s[i]))) {   // 2√3 のような係数のかけ算
-      const f = factor();
-      if (f == null) return null;
-      v *= f;
+  function expr() {
+    let total = 0, terms = 0;
+    while (i < s.length && s[i] !== ")") {
+      let sg = 1;
+      if (s[i] === "+" || s[i] === "-") { sg = s[i] === "-" ? -1 : 1; i++; }
+      else if (terms) return null;
+      let v = factor();
+      if (v == null) return null;
+      while (i < s.length && (s[i] === "√" || s[i] === "(" || /\d/.test(s[i]))) {   // 2√3 のような係数のかけ算
+        const f = factor();
+        if (f == null) return null;
+        v *= f;
+      }
+      total += sg * v; terms++;
     }
-    total += sg * v; terms++;
+    return terms ? total : null;
   }
-  return terms ? total : null;
+  const v = expr();
+  return v != null && i === s.length ? v : null;
 }
 
 function mathNorm(s, cat) {
@@ -3421,7 +3452,7 @@ const G = {
   paused: false, pauseElapsed: 0, pauseWasTiming: false, cancelled: false, quitWasPaused: false,
   tagKind: null, hintOn: false, bonusMode: null, pending: null
 };
-const IN = { kana: [], romaji: "" };
+const IN = { kana: [], romaji: "", cur: null };   // cur：数学で分数の中を入力中なら { i, part }
 
 function normalizeQ(s) {
   return {
@@ -3732,12 +3763,67 @@ function buildMathPad(area) {
   wrap.appendChild(num); wrap.appendChild(sym);
   area.appendChild(wrap);
 }
+/* ---- 数学の入力（分数は分子・分母を別々に持つ） ----
+   IN.kana には "3" "√" "x" などの文字と、分数 { num:[…], den:[…] } が並ぶ。
+   IN.cur が null なら末尾に、{ i, part } なら i 番目の分数の分子（num）か分母（den）に書き足す。
+   ・分数キー：直前に数（2√3 など）があればそれを分子にして分母へ。なければ空の分数を作って分子へ。
+              分数の中で押すと分子⇄分母を切り替える。
+   ・分数の分母を入力したあとに ＋・− を押すと、分数の外へ出る。 */
+const isFrac = it => it && typeof it === "object";
+function mathTokenCount() { return IN.kana.reduce((n, it) => n + (isFrac(it) ? it.num.length + it.den.length : 1), 0); }
+function mathTarget() { return IN.cur ? IN.kana[IN.cur.i][IN.cur.part] : IN.kana; }
 function pressMath(tok) {
   if (G.state !== "answer" || G.judging) return;
   Audio_.resume();
-  if (IN.kana.length >= 20) return;
-  IN.kana.push(tok);
+  if (tok === "/") { mathFractionKey(); Audio_.sfx.key(); renderSlots(); return; }
+  if (mathTokenCount() >= 20) return;
+  if (IN.cur && IN.cur.part === "den" && (tok === "+" || tok === "-") && mathTarget().length) IN.cur = null;
+  mathTarget().push(tok);
   Audio_.sfx.key(); renderSlots();
+}
+function mathFractionKey() {
+  if (IN.cur) { IN.cur = { i: IN.cur.i, part: IN.cur.part === "num" ? "den" : "num" }; return; }
+  /* 直前の数（小数・√・係数つきの√）を分子にする。3 → 分数 → 5 の順でも打てるように */
+  let k = IN.kana.length;
+  const numAt = j => typeof IN.kana[j] === "string" && /^[\d.]$/.test(IN.kana[j]);
+  while (k > 0 && numAt(k - 1)) k--;
+  if (k > 0 && IN.kana[k - 1] === "√") { k--; while (k > 0 && numAt(k - 1)) k--; }
+  const num = IN.kana.splice(k);
+  IN.kana.push({ num, den: [] });
+  IN.cur = { i: IN.kana.length - 1, part: num.length ? "den" : "num" };
+}
+/* 分子・分母へ移る（↑↓キー、分数の部分をタップ）。part が null なら分数の外へ */
+function mathMoveCursor(part, index) {
+  if (G.state !== "answer" || G.judging) return;
+  let i = index;
+  if (i == null) i = IN.cur ? IN.cur.i : (isFrac(IN.kana[IN.kana.length - 1]) ? IN.kana.length - 1 : -1);
+  const next = part && i >= 0 && isFrac(IN.kana[i]) ? { i, part } : null;
+  if (JSON.stringify(next) === JSON.stringify(IN.cur)) return;
+  IN.cur = next;
+  Audio_.sfx.key(); renderSlots();
+}
+function mathBackspace() {
+  if (IN.cur) {
+    const f = IN.kana[IN.cur.i], list = f[IN.cur.part];
+    if (list.length) list.pop();
+    else if (IN.cur.part === "den") IN.cur = { i: IN.cur.i, part: "num" };   // 空の分母で消す → 分子へ戻る
+    else { IN.kana.splice(IN.cur.i, 1); IN.cur = null; }                     // 空の分子で消す → 分数ごと消す
+    return true;
+  }
+  if (!IN.kana.length) return false;
+  if (isFrac(IN.kana[IN.kana.length - 1])) IN.cur = { i: IN.kana.length - 1, part: "den" };   // 分数の中へ入って消していく
+  else IN.kana.pop();
+  return true;
+}
+/* 判定用の文字列。分子・分母が数や √数だけなら 3/5・√3/2 の形、それ以外は (…)/(…) */
+function mathSerialize(items) {
+  const simpleNum = t => /^-?(\d+(\.\d+)?)?(√\d+(\.\d+)?)?$/.test(t) && /\d/.test(t);
+  const simpleDen = t => /^(\d+(\.\d+)?)?(√\d+(\.\d+)?)?$/.test(t) && /\d/.test(t);
+  return items.map(it => {
+    if (!isFrac(it)) return it;
+    const n = it.num.join(""), d = it.den.join("");
+    return simpleNum(n) && simpleDen(d) ? `${n}/${d}` : `(${n})/(${d})`;
+  }).join("");
 }
 function pressEnglish(ch) {
   if (!answersInEnglish() || G.state !== "answer" || G.judging || !/^[a-z]$/i.test(ch)) return;
@@ -3776,12 +3862,13 @@ function pressRomaji(ch) {
 }
 function backspace() {
   if (G.state !== "answer" || G.judging) return;
-  if (IN.romaji) IN.romaji = IN.romaji.slice(0, -1);
+  if (isMath()) { if (!mathBackspace()) return; }
+  else if (IN.romaji) IN.romaji = IN.romaji.slice(0, -1);
   else if (IN.kana.length) IN.kana.pop();
   else return;
   Audio_.sfx.del(); renderSlots();
 }
-function clearInput() { IN.kana = []; IN.romaji = ""; renderSlots(); }
+function clearInput() { IN.kana = []; IN.romaji = ""; IN.cur = null; renderSlots(); }
 /* 「全部消す」ボタン・Delete キー */
 function clearAnswer() {
   if (G.state !== "answer" || G.judging || (!IN.kana.length && !IN.romaji)) return;
@@ -3790,6 +3877,7 @@ function clearAnswer() {
 
 function renderSlots() {
   const s = $("slots");
+  $("fracGuide").hidden = !(isMath() && IN.cur);
   s.className = "slots";
   s.innerHTML = "";
   if (isMath()) {
@@ -3797,17 +3885,27 @@ function renderSlots() {
     if (pre) {
       const p = document.createElement("div"); p.className = "eqpre"; p.textContent = pre; s.appendChild(p);
     }
-    for (const u of mathUnits(IN.kana)) {
-      const d = document.createElement("div");
-      d.className = "slot math" + (u.k === "frac" ? " wide" : u.k === "root" ? " root" : "sup" in u ? " power-unit" : "");
-      d.innerHTML = `<span class="math-inline">${unitHTML(u)}</span>`;
-      s.appendChild(d);
-    }
+    let run = [];
+    const flush = () => {
+      for (const u of mathUnits(run)) {
+        const d = document.createElement("div");
+        d.className = "slot math" + (u.k === "frac" ? " wide" : u.k === "root" ? " root" : "sup" in u ? " power-unit" : "");
+        d.innerHTML = `<span class="math-inline">${unitHTML(u)}</span>`;
+        s.appendChild(d);
+      }
+      run = [];
+    };
+    IN.kana.forEach((it, i) => {
+      if (!isFrac(it)) { run.push(it); return; }
+      flush();
+      s.appendChild(fracSlot(it, i));
+    });
+    flush();
     if (!IN.kana.length) { const d = document.createElement("div"); d.className = "slot math ghost"; s.appendChild(d); }
     if (G.q && G.q.unit) {
       const u = document.createElement("div"); u.className = "equnit"; u.textContent = G.q.unit; s.appendChild(u);
     }
-    $("fireBtn").disabled = !(IN.kana.length && G.state === "answer" && !G.judging);
+    $("fireBtn").disabled = !(mathTokenCount() && G.state === "answer" && !G.judging);
     paintCtrls();
     return;
   }
@@ -3827,6 +3925,21 @@ function renderSlots() {
   paintCtrls();
 }
 /* ヒントは設定で「あり」のときだけ出す。表示中・解答中でないときは押せない */
+/* 分数の回答タイル。入力中の側（分子か分母）を光らせ、タップでその側へ移れる */
+function fracSlot(f, i) {
+  const d = document.createElement("div");
+  d.className = "slot math wide frac-slot" + (IN.cur && IN.cur.i === i ? " editing" : "");
+  const part = key => {
+    const on = IN.cur && IN.cur.i === i && IN.cur.part === key;
+    const body = f[key].length ? mathUnits(f[key]).map(unitHTML).join("") : MATH_PH;
+    return `<span class="fpart${on ? " on" : ""}" data-part="${key}">${body}</span>`;
+  };
+  d.innerHTML = `<span class="math-inline"><span class="fr">${part("num")}${part("den")}</span></span>`;
+  d.querySelectorAll(".fpart").forEach(el => {
+    el.addEventListener("click", e => { e.stopPropagation(); mathMoveCursor(el.dataset.part, i); });
+  });
+  return d;
+}
 function paintCtrls() {
   const answering = G.state === "answer" && !G.judging;
   $("hintBtn").hidden = !CFG.hint;
@@ -4166,7 +4279,7 @@ function levelOf(cor) {
 
 /* ---------- 判定 ---------- */
 function fire() {
-  if (G.state !== "answer" || G.judging || !IN.kana.length) return;
+  if (G.state !== "answer" || G.judging || !(isMath() ? mathTokenCount() : IN.kana.length)) return;
   Audio_.resume();
   G.judging = true; G.state = "judge";
   $("fireBtn").disabled = true;
@@ -4175,7 +4288,7 @@ function fire() {
   $("slots").classList.add("fly");
   flash("fire");
   setTimeout(() => {
-    const typed = IN.kana.join("");
+    const typed = isMath() ? mathSerialize(IN.kana) : IN.kana.join("");
     const ok = isMath()
       ? mathEqual(typed, G.q.a, G.q.cat)
       : G.q.a.split("|").map(s => answersInEnglish() ? s.trim().toLowerCase() : s.trim())
@@ -4584,6 +4697,9 @@ window.addEventListener("keydown", e => {
       else if ("xyab".includes(low)) tok = low;
       else if (low === "r") tok = "√";
       if (tok) { e.preventDefault(); pressMath(tok); }
+      else if (e.code === "ArrowUp") { e.preventDefault(); mathMoveCursor("num"); }
+      else if (e.code === "ArrowDown") { e.preventDefault(); mathMoveCursor("den"); }
+      else if (e.code === "ArrowRight") { e.preventDefault(); mathMoveCursor(null); }
     }
     return;
   }
