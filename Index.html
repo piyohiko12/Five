@@ -375,7 +375,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .alpha-kbd button:hover{background:rgba(74,143,208,.92);border-color:rgba(255,255,255,.65)}
 .alpha-kbd button:active{transform:scale(.93)}
 .slots.english{gap:3px}
-.slots.english .slot{width:30px;font-family:var(--latin);font-weight:700;text-transform:uppercase}
+.slots.english .slot{width:30px;font-family:var(--latin);font-weight:700}
 .seal .kanji.english-prompt{
   font-family:var(--latin);font-weight:700;letter-spacing:.07em;line-height:1.15;
   font-size:clamp(22px,5.2vh,40px);white-space:nowrap;
@@ -894,10 +894,10 @@ const ENGLISH_Q = {
     ["西","最初の文字：w","west"],
     ["南","最初の文字：s","south"],
     ["北","最初の文字：n","north"],
-    ["月曜日","最初の文字：m","monday"],
-    ["火曜日","最初の文字：t","tuesday"],
-    ["水曜日","最初の文字：w","wednesday"],
-    ["木曜日","最初の文字：t","thursday"]
+    ["月曜日","最初の文字：M","Monday"],
+    ["火曜日","最初の文字：T","Tuesday"],
+    ["水曜日","最初の文字：W","Wednesday"],
+    ["木曜日","最初の文字：T","Thursday"]
   ],
   b2: [
     ["美しい","beautiful","発展単語"],
@@ -918,32 +918,32 @@ const ENGLISH_Q = {
 /* 英語ボーナス（日本語訳で答える） */
 const ENGLISH_JA_Q = {
   b1: [
-    ["SPRING","季節","はる"],
-    ["SUMMER","季節","なつ"],
-    ["AUTUMN / FALL","季節","あき"],
-    ["WINTER","季節","ふゆ"],
-    ["EAST","方角","ひがし"],
-    ["WEST","方角","にし"],
-    ["SOUTH","方角","みなみ"],
-    ["NORTH","方角","きた"],
-    ["MONDAY","曜日","げつようび"],
-    ["TUESDAY","曜日","かようび"],
-    ["WEDNESDAY","曜日","すいようび"],
-    ["THURSDAY","曜日","もくようび"]
+    ["spring","季節","はる"],
+    ["summer","季節","なつ"],
+    ["autumn / fall","季節","あき"],
+    ["winter","季節","ふゆ"],
+    ["east","方角","ひがし"],
+    ["west","方角","にし"],
+    ["south","方角","みなみ"],
+    ["north","方角","きた"],
+    ["Monday","曜日","げつようび"],
+    ["Tuesday","曜日","かようび"],
+    ["Wednesday","曜日","すいようび"],
+    ["Thursday","曜日","もくようび"]
   ],
   b2: [
-    ["BEAUTIFUL","うつくしい","日本語訳・発展"],
-    ["IMPORTANT","じゅうような|じゅうよう","日本語訳・発展"],
-    ["INTERESTING","きょうみぶかい|おもしろい","日本語訳・発展"],
-    ["UNDERSTAND","りかいする|わかる","日本語訳・発展"],
-    ["EXPLAIN","せつめいする","日本語訳・発展"],
-    ["DECIDE","きめる|けっていする","日本語訳・発展"],
-    ["PREPARE","じゅんびする","日本語訳・発展"],
-    ["PROTECT","まもる|ほごする","日本語訳・発展"],
-    ["DISCOVER","はっけんする|みつける","日本語訳・発展"],
-    ["IMAGINE","そうぞうする","日本語訳・発展"],
-    ["COMPARE","くらべる|ひかくする","日本語訳・発展"],
-    ["COMPLETE","かんせいさせる|しあげる","日本語訳・発展"]
+    ["beautiful","うつくしい","日本語訳・発展"],
+    ["important","じゅうような|じゅうよう","日本語訳・発展"],
+    ["interesting","きょうみぶかい|おもしろい","日本語訳・発展"],
+    ["understand","りかいする|わかる","日本語訳・発展"],
+    ["explain","せつめいする","日本語訳・発展"],
+    ["decide","きめる|けっていする","日本語訳・発展"],
+    ["prepare","じゅんびする","日本語訳・発展"],
+    ["protect","まもる|ほごする","日本語訳・発展"],
+    ["discover","はっけんする|みつける","日本語訳・発展"],
+    ["imagine","そうぞうする","日本語訳・発展"],
+    ["compare","くらべる|ひかくする","日本語訳・発展"],
+    ["complete","かんせいさせる|しあげる","日本語訳・発展"]
   ]
 };
 
@@ -1056,18 +1056,18 @@ const KANJI_EXTRA_Q = {
 /* 英語ボーナスの追加分 [日本語, 英単語, ひらがな, 分類] */
 const ENGLISH_EXTRA = {
   b1: [
-    ["金曜日","friday","きんようび","曜日"],
-    ["土曜日","saturday","どようび","曜日"],
-    ["日曜日","sunday","にちようび","曜日"],
-    ["1月","january","いちがつ","月"],
-    ["2月","february","にがつ","月"],
-    ["3月","march","さんがつ","月"],
-    ["4月","april","しがつ","月"],
-    ["5月","may","ごがつ","月"],
-    ["6月","june","ろくがつ","月"],
-    ["7月","july","しちがつ","月"],
-    ["8月","august","はちがつ","月"],
-    ["9月","september","くがつ","月"]
+    ["金曜日","Friday","きんようび","曜日"],
+    ["土曜日","Saturday","どようび","曜日"],
+    ["日曜日","Sunday","にちようび","曜日"],
+    ["1月","January","いちがつ","月"],
+    ["2月","February","にがつ","月"],
+    ["3月","March","さんがつ","月"],
+    ["4月","April","しがつ","月"],
+    ["5月","May","ごがつ","月"],
+    ["6月","June","ろくがつ","月"],
+    ["7月","July","しちがつ","月"],
+    ["8月","August","はちがつ","月"],
+    ["9月","September","くがつ","月"]
   ],
   b2: [
     ["信頼性","reliability","しんらいせい","発展単語"],
@@ -4635,8 +4635,10 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
 const motionOK = () => !!CFG.fx && !RMQ.matches;
 
+/* PC（主な操作がマウス・トラックパッド）なら入力方法の初期値を「PCキーボード」にする */
+const IS_PC = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
 const CFG = {
-  mode: "math", engAnswer: "en", stage: "?", input: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "normal",
+  mode: "math", engAnswer: "en", stage: "?", input: IS_PC ? 1 : 0, inputSet: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "normal",
   units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
   diff: "route",                                              // 数学の難易度（route＝航路の配分どおり）
   grades: ["g5", "g4", "g3", "gp2", "gp2p", "g2"],            // 英語の出題範囲（英検の級。初期値は全級）
@@ -4665,6 +4667,7 @@ function loadSettings() {
 function applySettings(src) {
   for (const opt of OPTS) {
     if (!(opt.k in src)) continue;
+    if (opt.k === "input" && !src.inputSet) continue;
     if (opt.k === "volume") {
       const v = Number(src.volume);
       if (isFinite(v)) CFG.volume = Math.max(0, Math.min(1, v));
@@ -4684,6 +4687,7 @@ function applySettings(src) {
     if (ids.length) CFG.grades = ids;
   }
   if (DIFF_OPTS.some(([v]) => v === src.engDiff)) CFG.engDiff = src.engDiff;
+  CFG.inputSet = src.inputSet && "input" in src ? 1 : 0;
 }
 function resetSettings() {
   Object.assign(CFG, JSON.parse(JSON.stringify(CFG_DEFAULT)));
@@ -4706,7 +4710,7 @@ function mergeRawSets(base, extra) {
 function mergeObjectSets(base, extra) {
   return Object.fromEntries(QUESTION_KEYS.map(k => [k, [...base[k], ...(extra[k] || [])]]));
 }
-function englishWordDisplay(word) { return word.split("|").join(" / ").toUpperCase(); }
+function englishWordDisplay(word) { return word.split("|").join(" / "); }
 function englishExtraRaw(source, reverse) {
   return Object.fromEntries(QUESTION_KEYS.map(k => [k, (source[k] || []).map(row => {
     const [jp, en, ja, sub] = row;
@@ -4923,6 +4927,7 @@ function buildSetup() {
       b.dataset.k = opt.k; b.dataset.v = String(v);
       b.onclick = () => {
         CFG[opt.k] = (typeof opt.vals[0][0] === "number") ? Number(v) : v;
+        if (opt.k === "input") CFG.inputSet = 1;
         if (opt.k === "volume") Audio_.setVolume(CFG.volume);
         Audio_.sfx.ui();
         if (opt.k === "fx") Art.setFx(motionOK());
@@ -5127,7 +5132,7 @@ function buildEnglishPad(area) {
     const offset = ri === 1 ? 1 : ri === 2 ? 2 : 0;
     [...row].forEach((ch, ci) => {
       const b = document.createElement("button");
-      b.textContent = ch.toUpperCase();
+      b.textContent = ch;
       b.style.gridColumn = offset + ci + 1;
       b.style.gridRow = ri + 1;
       b.onclick = () => pressEnglish(ch);
@@ -5230,7 +5235,7 @@ function pressEnglish(ch) {
   if (!answersInEnglish() || G.state !== "answer" || G.judging || !/^[a-z]$/i.test(ch)) return;
   Audio_.resume();
   if (IN.kana.length >= 20) return;
-  IN.kana.push(ch.toLowerCase());
+  IN.kana.push(ch);
   Audio_.sfx.key(); renderSlots();
 }
 function disp(ch) { return G.kata ? toKata(ch) : ch; }
@@ -5487,7 +5492,7 @@ function escapeHtml(s) { return String(s).replace(/[&<>]/g, c => ({ "&": "&amp;"
 function answerDisplay() {
   if (isMath()) return answerHTML(G.q);
   const answer = G.q.a.split("|")[0];
-  return escapeHtml(answersInEnglish() ? answer.toUpperCase() : answer);
+  return escapeHtml(answer);
 }
 
 /* 数式は常に一行。円からはみ出す長い式は文字サイズを詰めて収める */
@@ -5543,7 +5548,7 @@ function showHint() {
   box.classList.remove("math");
   const a = G.q.a.split("|")[0];
   if (answersInEnglish()) {
-    box.innerHTML = `<b>${escapeHtml(a[0].toUpperCase())}</b>${a.length} LETTERS`;
+    box.innerHTML = `<b>${escapeHtml(a[0])}</b>${a.length} LETTERS`;
     return;
   }
   if (isEnglish()) {
@@ -6130,8 +6135,8 @@ window.addEventListener("keydown", e => {
   }
   if (answersInEnglish()) {
     if (CFG.input === 1 && G.state === "answer" && !G.judging && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      const ch = e.key.toLowerCase();
-      if (/^[a-z]$/.test(ch)) { e.preventDefault(); pressEnglish(ch); }
+      const ch = e.key;
+      if (/^[a-z]$/i.test(ch)) { e.preventDefault(); pressEnglish(ch); }
     }
     return;
   }
