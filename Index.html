@@ -201,8 +201,8 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .crew i.now{background:var(--kin);box-shadow:0 0 14px var(--kin)}
 
 /* 封印円（シグネチャ） */
-.stagearea{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0}
-.seal{position:relative;width:min(46vh,300px);aspect-ratio:1;display:grid;place-items:center;transition:transform .35s}
+.stagearea{flex:1;display:flex;align-items:center;justify-content:center;position:relative;min-height:0;container-type:size}
+.seal{--seal:min(46vh,300px);position:relative;width:var(--seal);aspect-ratio:1;display:grid;place-items:center;transition:transform .35s}
 .seal svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .seal .ring-bg{fill:none;stroke:rgba(240,236,225,.13);stroke-width:2}
 .seal .ring-fg{
@@ -423,6 +423,23 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .mfig.ckt text{fill:currentColor;stroke:none;font-size:11px;text-anchor:middle;font-family:"Georgia","Cambria",var(--mincho)}
 .mfig.ckt circle{fill:currentColor;stroke:none}
 .hintbox.math{max-width:min(44%,230px);white-space:pre-line;letter-spacing:.06em;line-height:1.6}
+
+/* ---------- 問題の大きさ ----------
+   封印円は、HUD と回答欄のあいだに使える高さ・幅いっぱいまで広げる（300〜460px。以前は 300px 固定）。
+   問題の文字は封印円に比例させるので、どの画面でも同じ割合で大きく見える。
+   コンテナクエリ単位（cqh/cqw）が使えない古いブラウザでは、上の固定サイズのまま。 */
+@supports (width:1cqh){
+  .seal{--seal:clamp(300px,min(100cqh + 40px,94cqw),460px)}
+  /* 2行になる4字熟語でも回答欄に重ならないよう、使える高さでも上限を決める */
+  .seal .kanji{font-size:min(calc(var(--seal) * .24),calc(46cqh + 10px))}
+  .seal .kanji.small{font-size:calc(var(--seal) * .112)}
+  .seal .kanji.english-prompt{font-size:calc(var(--seal) * .15)}
+  .seal .kanji.math{font-size:calc(var(--seal) * .16)}
+  .seal .kanji.math.wordq{font-size:calc(var(--seal) * .095)}
+  .seal .lead{font-size:max(12px,calc(var(--seal) * .045))}
+  .seal .qsub{font-size:max(12px,calc(var(--seal) * .042))}
+  .seal .reveal{font-size:calc(var(--seal) * .11)}
+}
 .mathpad{display:flex;gap:9px;justify-content:center;max-width:560px;margin:0 auto;flex-wrap:wrap}
 .mkeys{display:grid;gap:5px}
 .mkeys.num{grid-template-columns:repeat(3,minmax(52px,1fr))}
@@ -2426,10 +2443,11 @@ function mathEqual(typed, a, cat) {
 /* ===== js2_audio.js ===== */
 /* ========== 3. 音（すべてWeb Audioで合成／外部音源なし） ========== */
 const Audio_ = (() => {
-  let ctx = null, master = null, compressor = null, sfxG = null, bgmG = null;
+  let ctx = null, master = null, compressor = null, limiter = null, sfxG = null, bgmG = null;
   let bgmOn = true, timer = null, step = 0, nextT = 0, prof = null;
   let masterVolume = 0.75;
   const BGM_LEVEL = 0.46;
+  const OUTPUT_BOOST = 1.6;   // 全体の底上げ（リミッターの分と合わせて約+7dB）。リミッターで音割れを防ぐ
 
   function init() {
     if (ctx) return;
@@ -2439,7 +2457,11 @@ const Audio_ = (() => {
     compressor = ctx.createDynamicsCompressor();
     compressor.threshold.value = -18; compressor.knee.value = 12; compressor.ratio.value = 4;
     compressor.attack.value = .003; compressor.release.value = .25;
-    master.connect(compressor); compressor.connect(ctx.destination);
+    const boost = ctx.createGain(); boost.gain.value = OUTPUT_BOOST;
+    limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -6; limiter.knee.value = 0; limiter.ratio.value = 20;
+    limiter.attack.value = .001; limiter.release.value = .1;
+    master.connect(compressor); compressor.connect(boost); boost.connect(limiter); limiter.connect(ctx.destination);
     sfxG = ctx.createGain(); sfxG.gain.value = 0.85; sfxG.connect(master);
     bgmG = ctx.createGain(); bgmG.gain.value = 0.0; bgmG.connect(master);
   }
