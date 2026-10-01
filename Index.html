@@ -4155,7 +4155,7 @@ const Art = (() => {
     normal: { dpr: 1.25, fps: 30, shadow: true },
     low:    { dpr: 1,    fps: 30, shadow: false }
   };
-  let Q = QUALITY.normal;
+  let Q = QUALITY.low;
   /* 軽量では shadowBlur（光のぼかし）を効かせない。描画側のコードはそのまま */
   const shadowDesc = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, "shadowBlur");
   Object.defineProperty(c, "shadowBlur", {
@@ -4683,10 +4683,11 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const RMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
 const motionOK = () => !!CFG.fx && !RMQ.matches;
 
-/* PC（主な操作がマウス・トラックパッド）なら入力方法の初期値を「PCキーボード」にする */
+/* PC（主な操作がマウス・トラックパッド）なら入力方法の初期値を「PCキーボード」にする。
+   画質の初期値は、どの端末でも軽く動く「軽量」 */
 const IS_PC = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
 const CFG = {
-  mode: "math", engAnswer: "en", stage: "?", input: IS_PC ? 1 : 0, inputSet: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "normal",
+  mode: "math", engAnswer: "en", stage: "?", input: IS_PC ? 1 : 0, inputSet: 0, N: 10, mult: 0.75, lives: 5, hint: 1, bonus: "0", bgm: 1, volume: 0.75, fx: 1, gfx: "low", gfxSet: 0,
   units: MATH_UNITS.filter(u => u.ch === 1).map(u => u.id),   // 数学の出題範囲（初期値は第1章）
   diff: "route",                                              // 数学の難易度（route＝航路の配分どおり）
   grades: ["g5", "g4", "g3", "gp2", "gp2p", "g2"],            // 英語の出題範囲（英検の級。初期値は全級）
@@ -4716,6 +4717,7 @@ function applySettings(src) {
   for (const opt of OPTS) {
     if (!(opt.k in src)) continue;
     if (opt.k === "input" && !src.inputSet) continue;
+    if (opt.k === "gfx" && !src.gfxSet) continue;   // 自分で選んでいない画質は、新しい初期値（軽量）にする
     if (opt.k === "volume") {
       const v = Number(src.volume);
       if (isFinite(v)) CFG.volume = Math.max(0, Math.min(1, v));
@@ -4736,6 +4738,7 @@ function applySettings(src) {
   }
   if (DIFF_OPTS.some(([v]) => v === src.engDiff)) CFG.engDiff = src.engDiff;
   CFG.inputSet = src.inputSet && "input" in src ? 1 : 0;
+  CFG.gfxSet = src.gfxSet && "gfx" in src ? 1 : 0;
 }
 function resetSettings() {
   Object.assign(CFG, JSON.parse(JSON.stringify(CFG_DEFAULT)));
@@ -4990,6 +4993,7 @@ function buildOpt(opt) {
     b.onclick = () => {
       CFG[opt.k] = (typeof opt.vals[0][0] === "number") ? Number(v) : v;
       if (opt.k === "input") CFG.inputSet = 1;
+      if (opt.k === "gfx") CFG.gfxSet = 1;
       Audio_.sfx.ui();
       if (opt.k === "fx") Art.setFx(motionOK());
       if (opt.k === "gfx") Art.setQuality(CFG.gfx);
