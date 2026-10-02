@@ -4896,7 +4896,7 @@ const G = {
   timing: false, raf: 0, tStart: 0, tTotal: 0, lastSec: 99,
   paused: false, pauseElapsed: 0, pauseWasTiming: false, cancelled: false, quitWasPaused: false,
   tagKind: null, hintOn: false, bonusMode: null, pending: null,
-  st: null, qTier: "l1", lastPool: null, fireUsed: 0   // 得点とクリアタイムの記録
+  st: null, fireUsed: 0   // 得点とクリアタイムの記録
 };
 const IN = { kana: [], romaji: "", cur: null };   // cur：数学で分数の中を入力中なら { i, part }
 
@@ -5804,14 +5804,9 @@ function activeSetTag() {
 }
 /* 選んだ範囲にその難易度の問題が1問もないときは、近い難易度から出す（止まらないように） */
 const NEAR_TIERS = { l1: ["l1", "l2", "l3", "final"], l2: ["l2", "l1", "l3", "final"], l3: ["l3", "l2", "final", "l1"], final: ["final", "l3", "l2", "l1"] };
-/* 問題のない難度は、近い難度で代わりに出す */
-function nearTier(poolName, set) {
-  return NEAR_TIERS[poolName] && !set[poolName].length ? NEAR_TIERS[poolName].find(k => set[k].length) || poolName : poolName;
-}
 function pick(poolName) {
   const set = activeSet();
-  poolName = nearTier(poolName, set);
-  G.lastPool = poolName;
+  if (NEAR_TIERS[poolName] && !set[poolName].length) poolName = NEAR_TIERS[poolName].find(k => set[k].length) || poolName;
   const full = set[poolName];
   let pool = full, keySuffix = "";
   if ((poolName === "b1" || poolName === "b2") && full.length > 8) {
@@ -5885,7 +5880,7 @@ async function runQuestion() {
   if ((wantB1 || wantB2) && G.combo >= 1) G.tagKind = wantB1 ? "1" : "2";
   $("bonusTag").hidden = !G.tagKind;
 
-  renderQ(pickMain(), false, modeLead(G.level === "final"));
+  renderQ(pick(routePoolName()), false, modeLead(G.level === "final"));
   renderHud();
   Art.appear(); Audio_.sfx.encounter();
   await sleep(650);
@@ -6043,7 +6038,7 @@ function swap() {
   G.swaps--; G.combo = 0; G.tagKind = null; $("bonusTag").hidden = true;
   G.st.time += answerElapsed();   // 入れ替える前に考えていた時間もクリアタイムに入れる
   Audio_.sfx.swap();
-  renderQ(pickMain(), false, modeLead(G.level === "final"));
+  renderQ(pick(routePoolName()), false, modeLead(G.level === "final"));
   G.pending = null;
   G.state = "answer";
   renderHud(); renderSlots();
@@ -6114,14 +6109,12 @@ async function runBonus(kind) {
 
 /* ---------- 得点とクリアタイム ----------
    クリアタイム：本編の問題に答えていた時間の合計。正解の演出・ボーナス・一時停止・交代の画面の時間は入れない。
-   得点：正解点（難度別）＋スピード点（制限時間の残りの割合で、1問 最大100点）
-        − ミス（時間切れ）− 誤答 − ヒントボタンの使用。合計は0点より下にならない。
+   得点（100点満点）：正解点 70点（正解した問題の割合）＋ スピード点 30点（1問ごとの制限時間の残りの割合の平均）
+        − ミス（時間切れ）5点 − 誤答 2点 − ヒントボタンの使用 3点。0〜100点に収める。
    ボーナスの問題は得点にもクリアタイムにも入れない（まちがえても減点しない）。 */
-const SCORE_TIER = { l1: 100, l2: 120, l3: 140, final: 160 };
-const SCORE_MISS = 100, SCORE_WRONG = 20, SCORE_HINT = 30;
-function newStats() { return { time: 0, base: 0, speed: 0, miss: 0, wrong: 0, hints: 0 }; }
-/* 本編の問題を選び、実際に出した難度を覚えておく（空の難度は近い難度で代わりに出すため） */
-function pickMain() { const q = pick(routePoolName()); G.qTier = G.lastPool; return q; }
+const SCORE_CORRECT = 70, SCORE_SPEED = 30;
+const SCORE_MISS = 5, SCORE_WRONG = 2, SCORE_HINT = 3;
+function newStats() { return { time: 0, ratio: 0, miss: 0, wrong: 0, hints: 0 }; }
 /* いまの問題に使った秒数（一時停止していた時間は含まない） */
 function answerElapsed() {
   if (G.timing) return Math.min(G.tTotal, (performance.now() - G.tStart) / 1000);
@@ -6130,29 +6123,27 @@ function answerElapsed() {
 function scoreCorrect() {
   const used = Math.min(G.tTotal, G.fireUsed);
   G.st.time += used;
-  G.st.base += SCORE_TIER[G.qTier] || SCORE_TIER.l1;
-  G.st.speed += Math.round(100 * (G.tTotal - used) / G.tTotal);
+  G.st.ratio += (G.tTotal - used) / G.tTotal;   // 残り時間の割合（すぐ答えると1、時間ぎりぎりだと0）
 }
 function scoreRows() {
   const s = G.st;
   const rows = [
-    ["正解点", `${G.correct}問（難度別）`, s.base],
-    ["スピード点", "速く答えるほど高い", s.speed],
+    [`正解点（${SCORE_CORRECT}点）`, `${CFG.N}問中 ${G.correct}問`, Math.round(SCORE_CORRECT * G.correct / CFG.N)],
+    [`スピード点（${SCORE_SPEED}点）`, "速く答えるほど高い", Math.round(SCORE_SPEED * s.ratio / CFG.N)],
     ["ミス（時間切れ）", `${s.miss}回 × −${SCORE_MISS}`, -s.miss * SCORE_MISS],
     ["誤答", `${s.wrong}回 × −${SCORE_WRONG}`, -s.wrong * SCORE_WRONG]
   ];
   if (CFG.hint || s.hints) rows.push(["ヒント", `${s.hints}回 × −${SCORE_HINT}`, -s.hints * SCORE_HINT]);
   return rows;
 }
-function scoreTotal() { return Math.max(0, scoreRows().reduce((sum, r) => sum + r[2], 0)); }
+function scoreTotal() { return Math.max(0, Math.min(100, scoreRows().reduce((sum, r) => sum + r[2], 0))); }
 /* 83.4 → 1分23.4秒（大きい数字の横に小さく単位を添える） */
 function timeHTML(sec) {
   const t = Math.round(sec * 10) / 10, m = Math.floor(t / 60), x = (t - m * 60).toFixed(1);
   return m ? `${m}<small>分</small>${x.padStart(4, "0")}<small>秒</small>` : `${x}<small>秒</small>`;
 }
 function resultHTML(cleared) {
-  const num = v => v.toLocaleString("ja-JP");
-  const sign = v => v > 0 ? "+" + num(v) : v < 0 ? "−" + num(-v) : "0";
+  const sign = v => v > 0 ? "+" + v : v < 0 ? "−" + -v : "0";
   const rows = scoreRows().map(([label, detail, v]) =>
     `<tr class="${v < 0 ? "minus" : v ? "" : "zero"}"><td>${label}</td><td>${detail}</td><td class="n">${sign(v)}</td></tr>`).join("");
   const total = scoreTotal();
@@ -6162,14 +6153,9 @@ function resultHTML(cleared) {
     : `<div class="stat"><div class="lbl">CORRECT</div><div class="v">${G.correct}<small>／</small>${CFG.N}<small>問</small></div>
         <div class="s">クリアタイムはクリアしたときに出ます</div></div>`;
   return `<div class="result">${left}
-      <div class="stat score"><div class="lbl">SCORE</div><div class="v">${num(total)}<small>点</small></div>
-        <div class="s">満点 ${num(scoreMax())} 点</div></div></div>
-    <table class="breakdown">${rows}<tr class="total"><td>合計</td><td></td><td class="n">${num(total)}</td></tr></table>`;
-}
-/* 満点：航路の難度どおりの全問に、ミス・誤答・ヒントなしで一瞬で答えたときの点 */
-function scoreMax() {
-  const set = activeSet();
-  return G.routePlan.reduce((sum, k) => sum + (SCORE_TIER[nearTier(k, set)] || SCORE_TIER.l1) + 100, 0);
+      <div class="stat score"><div class="lbl">SCORE</div><div class="v">${total}<small>点</small></div>
+        <div class="s">100点満点</div></div></div>
+    <table class="breakdown">${rows}<tr class="total"><td>合計</td><td></td><td class="n">${total}</td></tr></table>`;
 }
 
 /* ---------- 交代・結末 ---------- */
@@ -6295,7 +6281,7 @@ async function start() {
   G.stage = CFG.stage === "?" ? 1 + Math.floor(Math.random() * 7) : Number(CFG.stage);
   G.level = "l1"; G.correct = 0; G.combo = 0; G.lives = CFG.lives; G.swaps = 0;
   G.used = {}; G.hintOn = false; G.tagKind = null; G.bonusMode = null; G.kata = false;
-  G.st = newStats(); G.qTier = "l1";
+  G.st = newStats();
   G.routePlan = buildRoutePlan(G.stage, CFG.N);
   G.rooms = [0, 1, 2].sort(() => Math.random() - .5).concat([0, 1, 2]);
 
